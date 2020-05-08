@@ -1,0 +1,23 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Iniciar Sesion</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script>
+</head>
+<body style="margin: 0px; background: #141414;">
+        <header style="max-height: 100px; background-color: #1c1c1f;">            
+            <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; padding-left: 10px;"> 
+        </header>    
+    <form method="POST" style="color:white;">
+        {% csrf_token %}
+        {{formulario.as_p}}
+        <input type="submit" value="Iniciar">
+    </form>
+    {{caso}}
+</body>
+</html>

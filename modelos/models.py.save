@@ -1,0 +1,43 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import models
+#ALTER TABLE modelos_perfil DROP PRIMARY KEY, ADD PRIMARY KEY(email_id,nombre_perfil);
+
+# Create your models here.
+
+class Usuario(models.Model):
+    clave = models.CharField(max_length = 20, blank = False,null=False)
+    email = models.EmailField(primary_key = True,max_length = 254)
+
+class Tarjeta(models.Model):
+    fecha_vencimiento = models.DateField(null=False)
+    dni_titular = models.CharField(max_length = 8,null=False)
+    tipo_tarjeta = models.CharField(max_length = 7,null=False)
+    codigo_seguridad = models.CharField(max_length = 3,null=False)
+    nro_tarjeta = models.CharField(primary_key = True, max_length = 18)
+
+class Tipo_Suscripcion(models.Model):
+    cantidad_maxima_perfiles = models.IntegerField(default = 0,null=False)
+    tipo_suscripcion = models.CharField(primary_key = True, max_length = 16)
+
+
+class Administrador(Usuario):
+    pass
+
+class Suscriptor (Usuario):
+    dni = models.CharField(max_length = 8, blank=False, null=False, unique=True)
+    nro_tarjeta = models.ForeignKey(Tarjeta, null=False)
+    tipo_suscripcion = models.ForeignKey(Tipo_Suscripcion, null=False)
+    nombre = models.CharField(max_length = 25, blank=False, null=False)
+    apellido = models.CharField(max_length = 25, blank=False, null=False)
+    fecha_suscripcion = models.DateField(null=False)
+
+class Perfil(models.Model):
+    email = models.ForeignKey(Suscriptor)
+    nombre_perfil = models.CharField(max_length = 25, primary_key = True, null = False)
+
+class Libro(models.Model):
+    titulo = models.CharField(max_length=100, blank=False, null=False, primary_key=True)
+    ISBN = models.axm  
+
