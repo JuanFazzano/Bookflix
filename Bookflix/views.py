@@ -4,8 +4,9 @@ from django.contrib.auth.models import User
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate,login
 from django.views.decorators.csrf import csrf_exempt
-from forms.forms import FormularioAtributosLibro,FormularioIniciarSesion,FormularioRegistro
-from modelos.models import Autor,Genero,Editorial,Usuario,Suscriptor,Administrador,Tarjeta,Tipo_Suscripcion
+from forms.forms import FormularioAtributosLibro,FormularioIniciarSesion,FormularioRegistro,FormularioLibro
+from modelos.models import Autor,Genero,Editorial,Usuario,Suscriptor,Administrador,Tarjeta,Tipo_Suscripcion,Libro
+from django.core.files.storage import FileSystemStorage
 
 class Vista_Carga_Atributo(View):
     def __init__(self,clase_model,clase_formulario,*args,**kwargs):
@@ -13,9 +14,6 @@ class Vista_Carga_Atributo(View):
         self.__clase_formulario = clase_formulario #Se recibe la clase que se va a instanciar. Ejemplo FormularioAtributoLibro, FormularioAutor
         self.__formulario = clase_formulario() #Creo una instancia de un formulario
         super(Vista_Carga_Atributo,self).__init__(*args,**kwargs)
-
-    def get_contexto(self):
-        pass
 
     def cargar_atributo(self):
         pass
@@ -25,8 +23,6 @@ class Vista_Carga_Atributo(View):
         self.contexto['formulario'] = self.__formulario
 
     def get(self,request):
-        print(request.session.keys())
-        print(request.session.values())
         self.__renderizar_formulario()
         return render(request,'cargar_atributo_libro.html',self.contexto)
 
@@ -34,10 +30,9 @@ class Vista_Carga_Atributo(View):
     def post(self,request):
         self.__formulario = self.__clase_formulario(request.POST)
         if self.__formulario.is_valid():
-            self.cargar_atributo(self.__formulario)
+            self.cargar_atributo()
         self.__renderizar_formulario()
         return render(request,'cargar_atributo_libro.html',self.contexto)
-
 
     def cargar_atributo(self,formulario=None):
         "clase puede ser la clase Editorial o Autor. formulario es None x defecto por si este metodo es sobreescrito"
@@ -47,21 +42,19 @@ class Vista_Carga_Atributo(View):
         tipo = self.contexto['error']
         if not existe_clase:
             #Si no existe, la agrega.
-            editorial = self.__clase_model(nombre=atributo_nombre)
-            editorial.save()
+            modelo = self.__clase_model(nombre=atributo_nombre)
+            modelo.save()
             tipo = 'Registrado exitosamente'
         self.contexto['caso'] = tipo
 
 class Vista_Carga_Editorial(Vista_Carga_Atributo):
     def __init__(self,*args,**kwargs):
-        self.__caso = ''
-        self.contexto = {'nombre':'Editorial','caso': self.__caso,'error':'Ya existe la editorial'}
+        self.contexto = {'nombre':'Editorial','caso': '','error':'Ya existe la editorial'}
         super(Vista_Carga_Editorial,self).__init__(Editorial,FormularioAtributosLibro,*args,**kwargs)
 
 class Vista_Carga_Genero(Vista_Carga_Atributo):
     def __init__(self,*args,**kwargs):
-        self.__caso = ''
-        self.contexto = {'nombre':'Genero','caso': self.__caso,'error':'Ya existe el genero'}
+        self.contexto = {'nombre':'Genero','caso': '','error':'Ya existe el genero'}
         super(Vista_Carga_Genero,self).__init__(Genero,FormularioAtributosLibro,*args,**kwargs)
 
 class Vista_Carga_Autor(Vista_Carga_Atributo):
@@ -98,7 +91,7 @@ class Vista_Registro(View):
             numero_tarjeta=  formulario.cleaned_data['Numero_de_tarjeta']
             fecha_de_vencimiento= formulario.cleaned_data['Fecha_de_vencimiento']
             Codigo_de_seguridad= formulario.cleaned_data['Codigo_de_seguridad']
-            
+
             tarjeta = Tarjeta(nro_tarjeta = numero_tarjeta,
                               codigo_seguridad = Codigo_de_seguridad,
                               empresa = empresa,
@@ -118,17 +111,17 @@ class Vista_Registro(View):
         apellido = formulario.cleaned_data['Apellido']
         nombre = formulario.cleaned_data['Nombre']
         suscripcion = formulario.cleaned_data['Suscripcion']
-        
+
         self.__cargar_tarjeta(formulario)
-      
+
         #Cargamos el modelos User de auth_user
         model_usuario = User.objects.create_user(username = email, password=contrasena ) #Se guarda en la tabla auth_user
         model_usuario.save()
-        
+
         #Cargamos al usuario trayendonos la pk de User
         usuario= Usuario(clave=contrasena,email=email,auth_id=(User.objects.values('id').get(username=email))['id'])
         usuario.save()
-        
+
         #Cargamos al suscriptor
         suscriptor=Suscriptor(email_id=email,
                               fecha_suscripcion=datetime.datetime.now().date(),
@@ -175,10 +168,10 @@ class Vista_Registro(View):
             error = self.cargar_atributos_usuario(formulario)
             if error == '': #Error es vacio si algun dato no estaba duplicado en la BD
                 return redirect('/iniciar_sesion/')
-        
+
         self.__actualizar_contexto(formulario)
         self.contexto['caso'] = error
-        
+
         return render(request,'registro.html',self.contexto)
 
 class Vista_Iniciar_Sesion(View):
@@ -230,7 +223,7 @@ class Vista_Iniciar_Sesion(View):
 class Vista_Datos_Usuario (View):
     def get(self,request,id=None,*args, **kwargs):
         datos_usuario = (Usuario.objects.filter(auth_id=id)).values()[0]
-        email = datos_usuario['email']        
+        email = datos_usuario['email']
         datos_suscriptor = Suscriptor.objects.filter(email_id=email).values()[0]
         datos_tarjeta = (Tarjeta.objects.filter(nro_tarjeta = datos_suscriptor['nro_tarjeta_id'])).values()[0]
         print(datos_tarjeta)
@@ -250,7 +243,32 @@ class Vista_Datos_Usuario (View):
 
 class Prueba(View):
     def get(self,request,id=None):
-        
+        print(generos)
         email = (Usuario.objects.values('email').get(auth_id = id))['email']
         return render(request,'n.html',{'usuario':email})
 
+
+class Vista_Carga_Libro(View):
+    def __init__(self,*args,**kwargs):
+        self.__contexto = dict()
+        super(Vista_Carga_Libro,self).__init__(*args,**kwargs)
+
+    #Agregar id a la url
+    def __renderizar_formulario(self,formulario):
+        self.__contexto['formulario'] = formulario
+
+    def get(self,request):
+        formulario = FormularioLibro()
+        self.__renderizar_formulario(formulario)
+        return render(request,'carga_libro.html',self.__contexto)
+
+
+    @csrf_exempt
+    def post(self,request):
+        formulario = FormularioLibro(request.POST ,request.FILES )
+        if formulario.is_valid():
+            archivo_cargado = request.FILES['Foto']
+            fs = FileSystemStorage()
+            fs.save(archivo_cargado.name,archivo_cargado)
+        self.__renderizar_formulario(formulario)
+        return render(request,'carga_libro.html',self.__contexto)

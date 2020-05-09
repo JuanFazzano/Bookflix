@@ -3,18 +3,18 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Carga {{nombre}}</title>
+    <title>Carga metadatos de libro</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
     <script src='main.js'></script>
 </head>
 <body>
     <div>
-        Cargar {{nombre}}
+        Carga de metadatos de libro
     </div>
     <br>
     <div>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data" >
             {% csrf_token %}
             {{formulario.as_p}}
             <input type="submit" value="Confirmar">
