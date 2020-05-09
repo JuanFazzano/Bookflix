@@ -4,9 +4,9 @@ from django.contrib.auth.models import User
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate,login
 from django.views.decorators.csrf import csrf_exempt
-from forms.forms import FormularioAtributosLibro,FormularioIniciarSesion,FormularioRegistro,FormularioLibro
-from modelos.models import Autor,Genero,Editorial,Usuario,Suscriptor,Administrador,Tarjeta,Tipo_Suscripcion,Libro
 from django.core.files.storage import FileSystemStorage
+from forms.forms import FormularioAtributosLibro,FormularioIniciarSesion,FormularioRegistro,FormularioLibro
+from modelos.models import Autor,Genero,Editorial,Usuario,Suscriptor,Administrador,Tarjeta,Tipo_Suscripcion,Libro,Perfil
 
 class Vista_Carga_Atributo(View):
     def __init__(self,clase_model,clase_formulario,*args,**kwargs):
@@ -91,7 +91,6 @@ class Vista_Registro(View):
             numero_tarjeta=  formulario.cleaned_data['Numero_de_tarjeta']
             fecha_de_vencimiento= formulario.cleaned_data['Fecha_de_vencimiento']
             Codigo_de_seguridad= formulario.cleaned_data['Codigo_de_seguridad']
-
             tarjeta = Tarjeta(nro_tarjeta = numero_tarjeta,
                               codigo_seguridad = Codigo_de_seguridad,
                               empresa = empresa,
@@ -132,6 +131,11 @@ class Vista_Registro(View):
                               tipo_suscripcion_id=suscripcion
                               )
         suscriptor.save()
+
+        #nombre_perfil = nombre_apellido
+        nombre_perfil = nombre+(apellido.capitalize())
+        perfil_usuario = Perfil(nombre_perfil = nombre_perfil,email_id = email)
+        perfil_usuario.save()
 
     def __verificarCampos(self,email,dni):
         """
@@ -226,7 +230,12 @@ class Vista_Datos_Usuario (View):
         email = datos_usuario['email']
         datos_suscriptor = Suscriptor.objects.filter(email_id=email).values()[0]
         datos_tarjeta = (Tarjeta.objects.filter(nro_tarjeta = datos_suscriptor['nro_tarjeta_id'])).values()[0]
-        print(datos_tarjeta)
+        email_usuario = (Usuario.objects.values('email').filter(auth_id = id))[0]['email']
+        print(email_usuario)
+        perfiles = Perfil.objects.values('nombre_perfil').filter(
+                        email_id = email_usuario
+                        )
+        print([str(clave['nombre_perfil']) for clave in list(perfiles)])
         contexto={
                 'nombre': datos_suscriptor['nombre'],
                 'apellido': datos_suscriptor['apellido'],
@@ -238,20 +247,51 @@ class Vista_Datos_Usuario (View):
                 'fecha_vencimiento': datos_tarjeta['fecha_vencimiento'],
                 'dni_titular': datos_tarjeta['dni_titular'],
                 'empresa': datos_tarjeta['empresa'],
+                'perfiles': [str(clave['nombre_perfil']) for clave in list(perfiles)]
+
         }
         return render(request,'datos_usuario.html',contexto)
 
 class Prueba(View):
     def get(self,request,id=None):
-        print(generos)
         email = (Usuario.objects.values('email').get(auth_id = id))['email']
         return render(request,'n.html',{'usuario':email})
-
 
 class Vista_Carga_Libro(View):
     def __init__(self,*args,**kwargs):
         self.__contexto = dict()
         super(Vista_Carga_Libro,self).__init__(*args,**kwargs)
+
+    def __cargar_libro(self,request,formulario):
+        autor = formulario.cleaned_data['Autores']
+        ISBN = formulario.cleaned_data['ISBN']
+        editorial = formulario.cleaned_data['Editoriales']
+        genero= formulario.cleaned_data['Generos']
+        descripcion = formulario.cleaned_data['Descripcion']
+        titulo = formulario.cleaned_data['Titulo']
+        foto = formulario.cleaned_data['Foto']
+        autor = Autor.objects.filter(nombre = autor)[0]
+        editorial = Editorial.objects.filter(nombre = editorial)[0]
+        genero = Genero.objects.filter(nombre = genero)[0]
+        libro = Libro(
+                    titulo = titulo,
+                    ISBN = ISBN,
+                    autor  = autor,
+                    editorial = editorial,
+                    genero = genero
+                    )
+
+        if(foto is not None):
+            #Si hay foto, agrega su nombre en la bd
+            archivo_cargado = request.FILES['Foto']
+            fs = FileSystemStorage()
+            fs.save(archivo_cargado.name,archivo_cargado)
+            libro.foto=archivo_cargado.name
+
+        if(descripcion != ''):
+            libro.descripcion = descripcion
+
+        libro.save()
 
     #Agregar id a la url
     def __renderizar_formulario(self,formulario):
@@ -262,13 +302,10 @@ class Vista_Carga_Libro(View):
         self.__renderizar_formulario(formulario)
         return render(request,'carga_libro.html',self.__contexto)
 
-
     @csrf_exempt
     def post(self,request):
-        formulario = FormularioLibro(request.POST ,request.FILES )
+        formulario = FormularioLibro(request.POST ,request.FILES)
         if formulario.is_valid():
-            archivo_cargado = request.FILES['Foto']
-            fs = FileSystemStorage()
-            fs.save(archivo_cargado.name,archivo_cargado)
+            self.__cargar_libro(request,formulario)
         self.__renderizar_formulario(formulario)
         return render(request,'carga_libro.html',self.__contexto)

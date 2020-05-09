@@ -24,7 +24,6 @@ class Tipo_Suscripcion(models.Model):
     cantidad_maxima_perfiles = models.IntegerField(default = 0,null=False)
     tipo_suscripcion = models.CharField(primary_key = True, max_length = 16)
 
-
 class Administrador(models.Model):
     email = models.OneToOneField(Usuario,primary_key = True,on_delete=models.CASCADE)
 
@@ -36,7 +35,6 @@ class Suscriptor(models.Model):
     dni = models.CharField(max_length = 8, blank=False, null=False, unique=True)
     nombre = models.CharField(max_length = 25, blank=False, null=False)
     apellido = models.CharField(max_length = 25, blank=False, null=False)
-
 
 class Perfil(models.Model):
     class Meta:
@@ -56,11 +54,11 @@ class Genero (models.Model):
 class Libro(models.Model):
     titulo = models.CharField(max_length = 255, primary_key=True)
     ISBN = models.CharField(max_length = 13, unique=True, blank=False, null=False)
-    foto = models.CharField(max_length = 255, blank=True, null=True)
-    descripcion = models.TextField(blank=True)
-    autor = models.ForeignKey(Autor,max_length=35,null=False,blank=False, on_delete=models.CASCADE)
-    editorial = models.ForeignKey(Editorial, max_length = 35, null = False, blank = False, on_delete=models.CASCADE)
-    genero = models.ForeignKey(Genero, max_length = 25, null = False, blank=False, on_delete=models.CASCADE)
+    foto = models.TextField(max_length=255,blank=True, null=True)
+    descripcion = models.TextField(blank=True,null=True)
+    autor = models.ForeignKey(Autor,max_length=35,null=False, on_delete=models.CASCADE)
+    editorial = models.ForeignKey(Editorial, max_length = 35, null = False, on_delete=models.CASCADE)
+    genero = models.ForeignKey(Genero, max_length = 25, null = False, on_delete=models.CASCADE)
     listado_favoritos = models.ManyToManyField(Perfil)
 
 class Calificacion(models.Model):

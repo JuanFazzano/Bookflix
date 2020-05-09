@@ -20,7 +20,6 @@ def obtener_lista_atributo(modelo):
         generos.append(tupla)
     return generos
 
-
 class FormularioRegistro(forms.Form):
 
     tipo_suscripcion=[
@@ -83,7 +82,6 @@ class FormularioLibro(forms.Form):
 
     def __init__(self,*args,**kwargs):
         super(FormularioLibro,self).__init__(*args,**kwargs)
-    #Refactorizar haciendo un replace temp with query
 
     Titulo = forms.CharField(max_length = 25)
     ISBN = forms.CharField(max_length = 13)
