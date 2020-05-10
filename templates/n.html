@@ -7,4 +7,11 @@
   <body>
       Logueado el usuario {{usuario}}
   </body>
+
+  <form method="POST">
+    {% csrf_token %}
+    {{formulario}}
+    <input type="submit" value="Enviar">
+  </form>
+
 </html>

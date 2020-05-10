@@ -1,6 +1,7 @@
 import datetime
 from django import forms
-from modelos.models import Autor,Genero,Editorial,Libro
+from django.contrib.auth.models import User
+from modelos.models import Autor,Genero,Editorial,Libro,Suscriptor
 
 
 def clean_campo(clase,atributo,longitud):
@@ -51,8 +52,17 @@ class FormularioRegistro(forms.Form):
             raise forms.ValidationError(" {} Debe ingresarse un campo numerico".format(atributo))
         return self.cleaned_data[atributo]
 
+    def clean_Email(self):
+        email = self.cleaned_data['Email']
+        if (User.objects.values('username').filter(username = email).exists()):
+            raise forms.ValidationError('El Email ya esta registrado en el sistema')
+        return email
+
     def clean_DNI(self):
-        return clean_campo(self,'DNI',8)
+        campo = clean_campo(self,'DNI',8)
+        if (Suscriptor.objects.values('dni').filter(dni = campo).exists()):
+            raise forms.ValidationError('El DNI ya esta registrado en el sistema')
+        return campo
 
     def clean_DNI_titular(self):
         return clean_campo(self,'DNI_titular',8)
@@ -75,39 +85,5 @@ class FormularioIniciarSesion(forms.Form):
     email = forms.EmailField(max_length=254)
     clave = forms.CharField(widget=forms.PasswordInput)
 
-class FormularioAtributosLibro(forms.Form):
-    nombre = forms.CharField(max_length = 25)
 
-class FormularioLibro(forms.Form):
-
-    def __init__(self,*args,**kwargs):
-        super(FormularioLibro,self).__init__(*args,**kwargs)
-
-    Titulo = forms.CharField(max_length = 25)
-    ISBN = forms.CharField(max_length = 13)
-    Descripcion = forms.CharField(required=False)
-    Generos=forms.CharField(widget=forms.Select(choices=obtener_lista_atributo(Genero)))
-    Autores=forms.CharField(widget=forms.Select(choices=obtener_lista_atributo(Autor)))
-    Editoriales=forms.CharField(widget=forms.Select(choices=obtener_lista_atributo(Editorial)))
-    Foto=forms.FileField(required=False)
-
-
-    def clean_Titulo(self):
-        if (Libro.objects.filter(titulo = self.cleaned_data['Titulo'])).exists():
-            raise forms.ValidationError('Existe el titulo')
-        return self.cleaned_data['Titulo']
-
-    def __clean_ISBN_auxiliar(self):
-        campo = self.cleaned_data['ISBN'] #Si no es un numero, esto levanta excepcion.
-        if campo.isdigit(): #verifica si un string tiene unicamente digitos
-            if (len(campo) != 13) and (len(campo)!= 10):
-                raise forms.ValidationError("Deben ingresarse 10 o 13 digitos en el campo ISBN")
-        else:
-            raise forms.ValidationError(" En ISBN solo debe ingresarse digitos numericos")
-        return True
-
-    def clean_ISBN(self):
-        if self.__clean_ISBN_auxiliar():
-            if (Libro.objects.filter(ISBN = self.cleaned_data['ISBN'])).exists():
-                raise forms.ValidationError('Existe el ISBN')
-        return self.cleaned_data['ISBN']
+    

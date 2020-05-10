@@ -16,21 +16,18 @@ Including another URLconf
 from Bookflix import views
 from django.conf.urls import url
 from django.contrib import admin
+from django.contrib.auth import views as auth_views 
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^carga_editorial/',views.Vista_Carga_Editorial.as_view()),
-    url(r'^carga_genero/',views.Vista_Carga_Genero.as_view()),
-    url(r'^carga_autor/',views.Vista_Carga_Autor.as_view()),
     url(r'^iniciar_sesion/',views.Vista_Iniciar_Sesion.as_view()),
     url(r'^registro/',views.Vista_Registro.as_view()),
     url(r'^prueba/id=(?P<id>\w+)/$',views.Prueba.as_view()),
     url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),
-    url(r'^carga_libro',views.Vista_Carga_Libro.as_view()),
+    url(r'^login/',auth_views.LoginView.as_view(template_name='login.html'),name='login'),
 ]
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
