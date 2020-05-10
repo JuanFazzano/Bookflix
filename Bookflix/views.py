@@ -1,14 +1,14 @@
 import datetime
-from django.views import View
-from django.contrib.auth.models import User
-from django.shortcuts import render,redirect
-from django.contrib.auth import authenticate,login
-from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import FileSystemStorage
-from forms.forms import FormularioIniciarSesion,FormularioRegistro
-from modelos.models import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil
+from django.views                   import View
+from django.core.paginator          import Paginator
+from django.contrib.auth.models     import User
+from django.shortcuts               import render,redirect
+from django.contrib.auth            import authenticate,login
+from django.views.decorators.csrf   import csrf_exempt
+from django.core.files.storage      import FileSystemStorage
+from forms.forms                    import FormularioIniciarSesion,FormularioRegistro
+from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil
 
-from django.core.paginator import Paginator
 
 
 class Vista_Registro(View):
