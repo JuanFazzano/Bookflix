@@ -7,7 +7,7 @@ from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad
 from django.core.exceptions import ValidationError
 
 
-admin.site.site_header = 'Panel de Administracion'
+admin.site.site_header = 'Panel de Administracion Bookflix'
 
 #Saca los modelos que no queremos que se interactúen
 admin.site.unregister(Group)

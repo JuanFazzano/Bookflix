@@ -1,23 +1,29 @@
+{% extends "header.html" %}
 {% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    {% block link %}
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    {% endblock%}
     <title>Iniciar Sesion</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
     <script src='main.js'></script>
 </head>
 <body style="margin: 0px; background: #white;">
-        <header style="max-height: 100px; background-color: #1c1c1f;">
-            <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; padding-left: 10px;">
-        </header>
-    <form method="POST" style="color:black;">
-        {% csrf_token %}
-        {{formulario.as_p}}
-        <input type="submit" value="Iniciar">
-    </form>
-    {{caso}}
+   
+    {% block contenido %}
+        <form method="POST" style="color:black;">
+            {% csrf_token %}
+            {{formulario.as_p}}
+            <input type="submit" value="Iniciar">
+        </form>
+        {{caso}}
+    {% endblock %}
+    
 </body>
 </html>
