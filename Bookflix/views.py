@@ -79,7 +79,12 @@ class Vista_Registro(View):
     def post(self,request):
         formulario=FormularioRegistro(request.POST)
         if formulario.is_valid():
-            self.__cargar_usuario_suscriptor(formulario)
+            print('Contrasena ',type(formulario.cleaned_data['Contrasena']))
+            print('DNI ',type(formulario.cleaned_data['DNI']))
+            print('email',type(formulario.cleaned_data['Email']))
+            print('Fecha',type(formulario.cleaned_data['Fecha_de_vencimiento']))
+
+            #self.__cargar_usuario_suscriptor(formulario)
             return redirect('/iniciar_sesion/')
         self.contexto['formulario'] =  formulario
 
@@ -105,10 +110,12 @@ class Vista_Iniciar_Sesion(View):
         error = ''
         self.formulario = FormularioIniciarSesion(request.POST)
         if self.formulario.is_valid():
+            print(type(self.formulario.cleaned_data['clave']))
             email = self.formulario.cleaned_data['email']
             clave = self.formulario.cleaned_data['clave']
             usuario = authenticate(username=email,password=clave)
             if usuario is not None: #El usuario se autentica
+                print('Entre')
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
                 url = str(id_usuario_logueado)+'/'
                 if not usuario.is_staff:
@@ -143,10 +150,6 @@ class Vista_Datos_Usuario (View):
         }
         return render(request,'datos_usuario.html',contexto)
 
-class Prueba(View):
-    def get(self,request,id=None):
-        email = (User.objects.values('username').get(id = id))['username']
-        return render(request,'n.html',{'usuario':email,'formulario':PruebaFormulario()})
 
     @csrf_exempt
     def post(self,request,id=None):
@@ -155,3 +158,10 @@ class Prueba(View):
         if formulario.is_valid():
             pass
         return render(request,'n.html',{'usuario':email,'formulario':PruebaFormulario()})
+
+class Vista_Home(View):
+    def get(self,request):
+        return render(request,'home.html',{})
+
+    def post(self,request):
+        pass

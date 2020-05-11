@@ -16,17 +16,18 @@ Including another URLconf
 from Bookflix import views
 from django.conf.urls import url
 from django.contrib import admin
-from django.contrib.auth import views as auth_views 
+from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    url(r'^$', views.Vista_Home.as_view()),
     url(r'^admin/', admin.site.urls),
     url(r'^iniciar_sesion/',views.Vista_Iniciar_Sesion.as_view()),
     url(r'^registro/',views.Vista_Registro.as_view()),
-    url(r'^prueba/id=(?P<id>\w+)/$',views.Prueba.as_view()),
     url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),
-    url(r'^login/',auth_views.LoginView.as_view(template_name='login.html'),name='login'),
+
+#    url(r'^prueba/id=(?P<id>\w+)/$',views.Prueba.as_view()),
 ]
 
 if settings.DEBUG:

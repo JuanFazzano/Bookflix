@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+
 
 class Tarjeta(models.Model):
     nro_tarjeta = models.CharField(unique = True, max_length = 16)
@@ -71,6 +73,16 @@ class Libro(models.Model):
     def __str__(self):
         return self.titulo
 
+    def clean(self):
+        #Se valida el ISBN
+        isbn = self.ISBN
+        if isbn.isdigit(): #verifica si un string tiene unicamente digitos
+            if len(isbn) != 16:
+                raise ValidationError("Deben ingresarse 16 díitos")
+        else:
+            raise ValidationError(" En ISBN solo debe ingresarse digitos numericos")
+
+
 class Perfil(models.Model):
     class Meta:
         unique_together = (('nombre_perfil','auth'),)
@@ -119,6 +131,9 @@ class Capitulo(models.Model):
     archivo_pdf = models.FileField(null = False)
 
 class Novedad(models.Model):
+    class Meta:
+        verbose_name = 'Novedad'
+        verbose_name_plural = 'Novedades'
     titulo=models.CharField(unique = True, max_length=255)
     foto= models.FileField(null = True)
     link = models.TextField(null = True)

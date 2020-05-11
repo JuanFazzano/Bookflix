@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group
-
 from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad
+from django.core.exceptions import ValidationError
 
 
-#class LibroAdmin(admin.ModelAdmin):
-    #exclude = ('titulo',) Para excluir elementos que no queremos que se completen
-
-#Pone el nombre del header
 admin.site.site_header = 'Panel de Administracion'
 
 #Saca los modelos que no queremos que se interactúen
