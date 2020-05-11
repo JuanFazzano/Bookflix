@@ -15,6 +15,7 @@ admin.site.site_header = 'Panel de Administracion'
 #Saca los modelos que no queremos que se interactúen
 admin.site.unregister(Group)
 
+
 #Registra que modelos se pueden interactuar
 #admin.site.register(Libro,LibroAdmin)
 admin.site.register(Novedad)

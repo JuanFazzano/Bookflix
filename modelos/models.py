@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Tarjeta(models.Model):
-    nro_tarjeta = models.CharField(unique = True, max_length = 18)
+    nro_tarjeta = models.CharField(unique = True, max_length = 16)
     fecha_vencimiento = models.DateField(null=False)
     dni_titular = models.CharField(max_length = 8,null=False)
     empresa = models.CharField(max_length = 254,null=False)
@@ -61,7 +61,7 @@ class Libro(models.Model):
         verbose_name_plural = 'Libros'
 
     titulo = models.CharField(max_length = 255, unique=True)
-    ISBN = models.IntegerField(unique=True)
+    ISBN = models.CharField(max_length = 13,unique=True)
     foto = models.FileField(blank=True, null=True)
     descripcion = models.TextField(blank=True,null=True)
     autor = models.ForeignKey(Autor,max_length=35,null=False, on_delete=models.CASCADE)

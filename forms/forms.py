@@ -13,14 +13,6 @@ def clean_campo(clase,atributo,longitud):
         raise forms.ValidationError(" En {} solo debe ingresarse digitos numericos".format(atributo))
     return clase.cleaned_data[atributo]
 
-def obtener_lista_atributo(modelo):
-    tuplas_modelo = modelo.objects.all().values()
-    generos = list()
-    for campo in tuplas_modelo:
-        tupla = (str(campo['nombre']),str(campo['nombre']).capitalize())
-        generos.append(tupla)
-    return generos
-
 class FormularioRegistro(forms.Form):
 
     tipo_suscripcion=[
@@ -42,15 +34,6 @@ class FormularioRegistro(forms.Form):
 
     def __init__(self,*args,**kwargs):
         super(FormularioRegistro,self).__init__(*args,**kwargs)
-
-    def clean_campo(self,atributo,longitud):
-        campo = self.cleaned_data[atributo] #Si no es un numero, esto levanta excepcion.
-        if campo.isdigit(): #verifica si un string tiene unicamente digitos
-            if len(campo) != longitud:
-                raise forms.ValidationError("Deben ingresarse {} digitos en el campo {}".format(str(longitud),atributo))
-        else:
-            raise forms.ValidationError(" {} Debe ingresarse un campo numerico".format(atributo))
-        return self.cleaned_data[atributo]
 
     def clean_Email(self):
         email = self.cleaned_data['Email']
@@ -84,6 +67,3 @@ class FormularioRegistro(forms.Form):
 class FormularioIniciarSesion(forms.Form):
     email = forms.EmailField(max_length=254)
     clave = forms.CharField(widget=forms.PasswordInput)
-
-
-    

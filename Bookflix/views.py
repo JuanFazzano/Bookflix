@@ -9,8 +9,6 @@ from django.core.files.storage      import FileSystemStorage
 from forms.forms                    import FormularioIniciarSesion,FormularioRegistro
 from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil
 
-
-
 class Vista_Registro(View):
     def __init__(self,*args,**kwargs):
         self.contexto = dict()
