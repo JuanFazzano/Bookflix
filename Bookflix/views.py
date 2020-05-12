@@ -6,12 +6,13 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login
 from django.views.decorators.csrf   import csrf_exempt
 from django.core.files.storage      import FileSystemStorage
-from forms.forms                    import FormularioIniciarSesion,FormularioRegistro
+from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales
 from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil
 
 class Vista_Registro(View):
     def __init__(self,*args,**kwargs):
         self.contexto = dict()
+        self.url = '/iniciar_sesion/'
         super(Vista_Registro,self).__init__(*args,**kwargs)
 
     def __cargar_tarjeta(self,formulario):
@@ -72,23 +73,16 @@ class Vista_Registro(View):
         perfil_usuario.save()
 
     def get(self,request):
-        self.contexto['formulario'] = FormularioRegistro()
+        formulario = FormularioRegistro()
+        self.contexto['formulario'] = formulario
         return render(request,'registro.html',self.contexto)
 
     @csrf_exempt
     def post(self,request):
-        formulario=FormularioRegistro(request.POST)
+        formulario = FormularioRegistro(request.POST)
         if formulario.is_valid():
-            print('Contrasena ',type(formulario.cleaned_data['Contrasena']))
-            print('DNI ',type(formulario.cleaned_data['DNI']))
-            print('email',type(formulario.cleaned_data['Email']))
-            print('Fecha',type(formulario.cleaned_data['Fecha_de_vencimiento']))
-
-            #self.__cargar_usuario_suscriptor(formulario)
-            return redirect('/iniciar_sesion/')
+            return redirect('/')
         self.contexto['formulario'] =  formulario
-
-
         return render(request,'registro.html',self.contexto)
 
 class Vista_Iniciar_Sesion(View):
@@ -131,17 +125,18 @@ class Vista_Iniciar_Sesion(View):
 class Vista_Datos_Usuario (View):
     def get(self,request,id=None,*args, **kwargs):
         datos_suscriptor = (Suscriptor.objects.filter(auth_id=id)).values()[0]
-        datos_tarjeta = (Tarjeta.objects.filter(nro_tarjeta = datos_suscriptor['nro_tarjeta_id'])).values()[0]
-        email_usuario = (Usuario.objects.values('email').filter(auth_id = id))[0]['email']
+        datos_tarjeta = Tarjeta.objects.filter(id = datos_suscriptor['nro_tarjeta_id']).values()[0]
+        email_usuario = (User.objects.values('username').filter(id = id)[0])['username']
         perfiles = Perfil.objects.values('nombre_perfil').filter(auth_id = id)
+        suscripcion = (Tipo_Suscripcion.objects.filter(id = datos_suscriptor['tipo_suscripcion_id']).values()[0])['tipo_suscripcion']
         contexto={
                 'nombre': datos_suscriptor['nombre'],
                 'apellido': datos_suscriptor['apellido'],
-                'email': datos_suscriptor['email_id'],
+                'email': email_usuario,
                 'dni': datos_suscriptor['dni'],
                 'fecha_suscripcion': datos_suscriptor['fecha_suscripcion'],
-                'tipo_suscripcion': datos_suscriptor['tipo_suscripcion_id'],
-                'numero_tarjeta': datos_suscriptor['nro_tarjeta_id'],
+                'tipo_suscripcion': suscripcion,
+                'numero_tarjeta': datos_tarjeta['nro_tarjeta'],
                 'fecha_vencimiento': datos_tarjeta['fecha_vencimiento'],
                 'dni_titular': datos_tarjeta['dni_titular'],
                 'empresa': datos_tarjeta['empresa'],
@@ -167,3 +162,45 @@ class Vista_Home(View):
         pass
 
 
+class Vista_Modificar_Datos_Personales(View):
+    def __init__(self,*args,**kwargs):
+        self.contexto = dict()
+        self.valores_por_defecto = dict()
+        super(Vista_Modificar_Datos_Personales,self).__init__(*args,**kwargs)
+
+    def __valores_por_defecto_formulario(self,id):
+        """
+            Setea los valores por defecto del formulario
+        """
+        email_usuario = (User.objects.values('username').filter(id = id)[0])['username']
+        datos_suscriptor = (Suscriptor.objects.filter(auth_id = id).values())[0]
+        datos_tarjeta = Tarjeta.objects.filter(id = datos_suscriptor['nro_tarjeta_id']).values()[0]
+        suscripcion = (Tipo_Suscripcion.objects.filter(id = datos_suscriptor['tipo_suscripcion_id']).values()[0])['tipo_suscripcion']
+        self.valores_por_defecto = {
+                'DNI': datos_suscriptor['dni'],
+                'Nombre': datos_suscriptor['nombre'],
+                'Apellido': datos_suscriptor['apellido'],
+                'Email': email_usuario,
+                'Numero_de_tarjeta': datos_tarjeta['nro_tarjeta'],
+                'Fecha_de_vencimiento': datos_tarjeta['fecha_vencimiento'],
+                'DNI_titular': datos_tarjeta['dni_titular'],
+                'Empresa': datos_tarjeta['empresa'],
+                'Codigo_de_seguridad': datos_tarjeta['codigo_seguridad'],
+                'Suscripcion': suscripcion
+        }
+
+    def comparar (valor_viejo, valor_nuevo):
+        return valor_viejo == valor_nuevo
+
+    def get(self,request,id = None):
+        self.__valores_por_defecto_formulario(id)
+        formulario = FormularioModificarDatosPersonales(id)
+        self.contexto['formulario'] = formulario
+        return render(request,'modificar_datos_personales.html',self.contexto)
+
+    def post(self,request,id = None):
+        formulario = FormularioModificarDatosPersonales(request.POST)
+        if formulario.is_valid():
+            pass
+        self.contexto['formulario'] = formulario
+        return render(request,'modificar_datos_personales.html',self.contexto)

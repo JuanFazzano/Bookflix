@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^iniciar_sesion/',views.Vista_Iniciar_Sesion.as_view()),
     url(r'^registro/',views.Vista_Registro.as_view()),
     url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),
+    url(r'^modificar_datos_personales/id=(?P<id>\w+)/$',views.Vista_Modificar_Datos_Personales.as_view()),
 
 #    url(r'^prueba/id=(?P<id>\w+)/$',views.Prueba.as_view()),
 ]
