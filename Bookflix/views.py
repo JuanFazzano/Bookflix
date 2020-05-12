@@ -161,26 +161,24 @@ class Vista_Home(View):
     def post(self,request):
         pass
 
-
 class Vista_Modificar_Datos_Personales(View):
     def __init__(self,*args,**kwargs):
         self.contexto = dict()
-        self.valores_por_defecto = dict()
         super(Vista_Modificar_Datos_Personales,self).__init__(*args,**kwargs)
 
-    def __valores_por_defecto_formulario(self,id):
+    def __valores_iniciales(self,id):
         """
-            Setea los valores por defecto del formulario
+            Setea los valores iniciales del formulario
         """
         email_usuario = (User.objects.values('username').filter(id = id)[0])['username']
         datos_suscriptor = (Suscriptor.objects.filter(auth_id = id).values())[0]
         datos_tarjeta = Tarjeta.objects.filter(id = datos_suscriptor['nro_tarjeta_id']).values()[0]
         suscripcion = (Tipo_Suscripcion.objects.filter(id = datos_suscriptor['tipo_suscripcion_id']).values()[0])['tipo_suscripcion']
-        self.valores_por_defecto = {
+        valores_por_defecto = {
+                'Email': email_usuario,
                 'DNI': datos_suscriptor['dni'],
                 'Nombre': datos_suscriptor['nombre'],
                 'Apellido': datos_suscriptor['apellido'],
-                'Email': email_usuario,
                 'Numero_de_tarjeta': datos_tarjeta['nro_tarjeta'],
                 'Fecha_de_vencimiento': datos_tarjeta['fecha_vencimiento'],
                 'DNI_titular': datos_tarjeta['dni_titular'],
@@ -188,18 +186,15 @@ class Vista_Modificar_Datos_Personales(View):
                 'Codigo_de_seguridad': datos_tarjeta['codigo_seguridad'],
                 'Suscripcion': suscripcion
         }
-
-    def comparar (valor_viejo, valor_nuevo):
-        return valor_viejo == valor_nuevo
+        return valores_por_defecto
 
     def get(self,request,id = None):
-        self.__valores_por_defecto_formulario(id)
-        formulario = FormularioModificarDatosPersonales(id)
+        formulario = FormularioModificarDatosPersonales(initial = self.__valores_iniciales(id))
         self.contexto['formulario'] = formulario
         return render(request,'modificar_datos_personales.html',self.contexto)
 
     def post(self,request,id = None):
-        formulario = FormularioModificarDatosPersonales(request.POST)
+        formulario = FormularioModificarDatosPersonales(initial = self.__valores_iniciales(id), data = request.POST)
         if formulario.is_valid():
             pass
         self.contexto['formulario'] = formulario

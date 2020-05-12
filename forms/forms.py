@@ -67,34 +67,45 @@ class FormularioIniciarSesion(forms.Form):
     clave = forms.CharField(widget=forms.PasswordInput)
 
 class FormularioModificarDatosPersonales(forms.Form):
-    datos_suscriptor={}
     def __init__(self,*args,**kwargs):
         super(FormularioModificarDatosPersonales,self).__init__(*args,**kwargs)
 
-    email_usuario = (User.objects.values('username').filter(id = 1)[0])['username']
-    Email = forms.EmailField(max_length = 254,initial = email_usuario)
-    DNI = forms.CharField(max_length = 8,initial = datos_suscriptor['dni'])
-    Nombre = forms.CharField(max_length = 25,initial = datos_suscriptor['nombre'])
-    Apellido =forms.CharField(max_length = 25,initial = datos_suscriptor['apellido'])
-    Numero_de_tarjeta = forms.CharField(max_length = 16,initial=    datos_tarjeta['nro_tarjeta'])
-    Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]))
-    DNI_titular = forms.CharField(max_length = 8,initial=datos_tarjeta['dni_titular'])
-    Empresa= forms.CharField(max_length = 7,initial=datos_tarjeta['empresa'])
-    Codigo_de_seguridad = forms.CharField(max_length = 3,initial=datos_tarjeta['codigo_seguridad'])
-    Suscripcion=forms.CharField(initial=suscripcion)
 
+    Email = forms.EmailField(max_length = 254,show_hidden_initial=True)
+    DNI = forms.CharField(max_length = 8,show_hidden_initial=True)
+    Nombre = forms.CharField(max_length = 25,show_hidden_initial=True)
+    Apellido =forms.CharField(max_length = 25,show_hidden_initial=True)
+    Numero_de_tarjeta = forms.CharField(max_length = 16,show_hidden_initial=True)
+    Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
+    DNI_titular = forms.CharField(max_length = 8,show_hidden_initial=True)
+    Empresa= forms.CharField(max_length = 7,show_hidden_initial=True)
+    Codigo_de_seguridad = forms.CharField(max_length = 3,show_hidden_initial=True)
+    Suscripcion=forms.CharField(disabled = True,show_hidden_initial=True)
+
+# [X] Validar DNI que no exista en otras tuplas
+# [X] Validar Email que no exista en otras tuplas
+# [] Que la tarjeta ingresada no exista en otras tuplas para no volver a crearla
+    def __cambio(self,valor_inicial,valor_nuevo):
+        return valor_inicial != valor_nuevo
 
     def clean_Email(self):
-        email = self.cleaned_data['Email']
-        if (User.objects.values('username').filter(username = email).exists()):
-            raise forms.ValidationError('El Email ya esta registrado en el sistema')
-        return email
+        field_email = self.visible_fields()[0] #Me devuelve una instancia del EmailField --> campo Email
+        valor_email_inicial = field_email.initial
+        valor_email_actual = self.cleaned_data['Email']
+        if  self.__cambio(valor_email_inicial,valor_email_actual):
+            if (User.objects.values('username').filter(username = valor_email_actual).exists()):
+                raise forms.ValidationError('El Email ya esta registrado en el sistema')
+        return valor_email_actual
 
     def clean_DNI(self):
-        campo = clean_campo(self,'DNI',8)
-        if (Suscriptor.objects.values('dni').filter(dni = campo).exists()):
-            raise forms.ValidationError('El DNI ya esta registrado en el sistema')
-        return campo
+        field_DNI = self.visible_fields()[1] #Me devuelve una instancia del CharField --> campo DNI
+        valor_dni_inicial = field_DNI.initial
+        valor_dni_actual = self.cleaned_data['DNI']
+        if self.__cambio(valor_dni_inicial,valor_dni_actual):
+            clean_campo(self,'DNI',8)
+            if (Suscriptor.objects.values('dni').filter(dni = valor_dni_actual).exists()):
+                raise forms.ValidationError('El DNI ya esta registrado en el sistema')
+        return valor_dni_actual
 
     def clean_DNI_titular(self):
         return clean_campo(self,'DNI_titular',8)
