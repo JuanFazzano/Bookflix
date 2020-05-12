@@ -68,6 +68,7 @@ class FormularioIniciarSesion(forms.Form):
 
 class FormularioModificarDatosPersonales(forms.Form):
     def __init__(self,*args,**kwargs):
+        self.datos_cambiados = {'Email': False, 'DNI': False, 'Numero_de_tarjeta': False}
         super(FormularioModificarDatosPersonales,self).__init__(*args,**kwargs)
 
 
@@ -85,6 +86,10 @@ class FormularioModificarDatosPersonales(forms.Form):
 # [X] Validar DNI que no exista en otras tuplas
 # [X] Validar Email que no exista en otras tuplas
 # [] Que la tarjeta ingresada no exista en otras tuplas para no volver a crearla
+
+    def get_datos_cambiados(self):
+        return self.datos_cambiados
+
     def __cambio(self,valor_inicial,valor_nuevo):
         return valor_inicial != valor_nuevo
 
@@ -95,6 +100,9 @@ class FormularioModificarDatosPersonales(forms.Form):
         if  self.__cambio(valor_email_inicial,valor_email_actual):
             if (User.objects.values('username').filter(username = valor_email_actual).exists()):
                 raise forms.ValidationError('El Email ya esta registrado en el sistema')
+            self.datos_cambiados['Email'] = True
+        else:
+            self.datos_cambiados['Email'] = False
         return valor_email_actual
 
     def clean_DNI(self):
@@ -105,6 +113,9 @@ class FormularioModificarDatosPersonales(forms.Form):
             clean_campo(self,'DNI',8)
             if (Suscriptor.objects.values('dni').filter(dni = valor_dni_actual).exists()):
                 raise forms.ValidationError('El DNI ya esta registrado en el sistema')
+            self.datos_cambiados['DNI'] = True
+        else:
+            self.datos_cambiados['DNI'] = False
         return valor_dni_actual
 
     def clean_DNI_titular(self):
@@ -114,7 +125,15 @@ class FormularioModificarDatosPersonales(forms.Form):
         return clean_campo(self,'Codigo_de_seguridad',3)
 
     def clean_Numero_de_tarjeta(self):
-        return clean_campo(self,'Numero_de_tarjeta',16)
+        field_Numero_de_tarjeta = self.visible_fields()[4] #Me devuelve una instancia del CharField --> campo Numero_de_tarjeta
+        valor_numero_inicial=field_Numero_de_tarjeta.initial
+        valor_Numero_actual=self.cleaned_data['Numero_de_tarjeta']
+        if self.__cambio(valor_numero_inicial,valor_Numero_actual):
+            clean_campo(self,'Numero_de_tarjeta',16)
+            self.datos_cambiados['Numero_de_tarjeta'] = True
+        else:
+            self.datos_cambiados['Numero_de_tarjeta'] = False
+        return valor_Numero_actual
 
     def clean_Fecha_de_vencimiento(self):
         fecha_vencimiento = (self.cleaned_data['Fecha_de_vencimiento'])
