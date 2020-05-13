@@ -7,6 +7,11 @@ from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad
 from django.core.exceptions import ValidationError
 
 
+class NovedadAdmin(admin.ModelAdmin):
+    list_display=('titulo',)
+    list_per_page = 2
+    view_only=True
+
 admin.site.site_header = 'Panel de Administracion Bookflix'
 
 #Saca los modelos que no queremos que se interactúen
@@ -15,7 +20,7 @@ admin.site.unregister(Group)
 
 #Registra que modelos se pueden interactuar
 #admin.site.register(Libro,LibroAdmin)
-admin.site.register(Novedad)
+admin.site.register(Novedad,NovedadAdmin)
 admin.site.register(Libro)
 admin.site.register(Genero)
 admin.site.register(Editorial)

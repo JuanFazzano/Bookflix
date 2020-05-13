@@ -134,9 +134,14 @@ class Novedad(models.Model):
     class Meta:
         verbose_name = 'Novedad'
         verbose_name_plural = 'Novedades'
+        ordering = ['titulo']
+        
     titulo=models.CharField(unique = True, max_length=255)
-    foto= models.FileField(null = True)
-    link = models.TextField(null = True)
+    foto= models.FileField(blank = True,null = True)
+    link = models.TextField(blank = True,null = True)
+
+    def __str__(self):
+        return self.titulo
 
 class Trailer(models.Model):
     pass

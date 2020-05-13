@@ -193,7 +193,7 @@ class Vista_Modificar_Datos_Personales(View):
         nombre = formulario.cleaned_data['Nombre']
         apellido = formulario.cleaned_data['Apellido']
 
-        #Aplicamos la estrategia. get_datos_cambiados es un diccionario donde para cada campo importante guarda un boolean si cambio o no con respecto a su valor inicial
+        #Aplicamos ell patron de estrategia. get_datos_cambiados es un diccionario donde para cada campo importante guarda un boolean si cambio o no con respecto a su valor inicial
         estrategia_email = Estrategia_Email(formulario.get_datos_cambiados()['Email'],formulario,self.__valores_iniciales(id))
         estrategia_dni = Estrategia_DNI(formulario.get_datos_cambiados()['DNI'],formulario,self.__valores_iniciales(id))
         estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(formulario.get_datos_cambiados()['Numero_de_tarjeta'],formulario,self.__valores_iniciales(id))
@@ -205,7 +205,6 @@ class Vista_Modificar_Datos_Personales(View):
         suscriptor = Suscriptor.objects.get(auth_id = id)
         suscriptor.nombre = nombre
         suscriptor.apellido = apellido
-
         suscriptor.save()
 
     def get(self,request,id = None):
@@ -229,7 +228,6 @@ class Estrategia:
         self.formulario = formulario_nuevo
         self.valores_iniciales = valores_iniciales
         self.auth_id = 1
-
 
 class Estrategia_Email(Estrategia):
     def validar(self):

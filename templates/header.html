@@ -9,15 +9,9 @@
         <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; margin-right:2px;">
 
       </div>
+      {% block listado_opciones %} {% endblock %}
 
-      <div class="col-sm-4">
-        <ul style="list-style:none; padding-top: 20px;">
-          <li style="padding-left:10px; display:inline;"> <a href="/iniciar_sesion/" style="text-decoration: none;">   Loguearse  </a>   </li>
-          <li style="padding-left:10px; display:inline;"> <a href="/registro/" style="text-decoration: none;">         Registrarse </a>  </li>
-          <li style="padding-left:10px; display:inline; ">> <a href="#" style="text-decoration: none;">                Ayuda       </a>  </li>
-        </ul>
-      </div>
-  </div>        
+  </div>
 </div>
 
 {% block contenido %}
