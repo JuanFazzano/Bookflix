@@ -76,9 +76,10 @@ class Libro(models.Model):
     def clean(self):
         #Se valida el ISBN
         isbn = self.ISBN
+        print(len(isbn))
         if isbn.isdigit(): #verifica si un string tiene unicamente digitos
-            if len(isbn) != 16:
-                raise ValidationError("Deben ingresarse 16 díitos")
+            if ((len(isbn) != 10) and (len(isbn) != 13)):
+                raise ValidationError("Deben ingresarse 10 o 13 dígitos")
         else:
             raise ValidationError(" En ISBN solo debe ingresarse digitos numericos")
 
