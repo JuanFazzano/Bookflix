@@ -79,13 +79,10 @@ class FormularioModificarDatosPersonales(forms.Form):
     Numero_de_tarjeta = forms.CharField(max_length = 16,show_hidden_initial=True)
     Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
     DNI_titular = forms.CharField(max_length = 8,show_hidden_initial=True)
-    Empresa= forms.CharField(max_length = 7,show_hidden_initial=True)
+    Empresa= forms.CharField(max_length = 254,show_hidden_initial=True)
     Codigo_de_seguridad = forms.CharField(max_length = 3,show_hidden_initial=True)
     Suscripcion=forms.CharField(disabled = True,show_hidden_initial=True)
 
-# [X] Validar DNI que no exista en otras tuplas
-# [X] Validar Email que no exista en otras tuplas
-# [] Que la tarjeta ingresada no exista en otras tuplas para no volver a crearla
 
     def get_datos_cambiados(self):
         return self.datos_cambiados

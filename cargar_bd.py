@@ -10,9 +10,9 @@ if __name__ == '__main__':
     from modelos.models import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil
 
     #-------------------- Guarda en la tabla auth_user ---------------------#
-    usuario_marcos = User.objects.create_user(username=unicode('marcos123@gmail.com'),password=unicode('123'))
-    usuario_cristian = User.objects.create_user(username=unicode('cristian123@gmail.com'),password=unicode('123'))
-    usuario_juan = User.objects.create_user(username=unicode('juan123@gmail.com'),password=unicode('123'))
+    usuario_marcos = User.objects.create_user(username= 'marcos123@gmail.com',password='123')
+    usuario_cristian = User.objects.create_user(username='cristian123@gmail.com',password='123')
+    usuario_juan = User.objects.create_user(username='juan123@gmail.com',password='123')
 
     usuario_marcos.save()
     usuario_cristian.save()
@@ -22,11 +22,11 @@ if __name__ == '__main__':
     #---------------Guardamos los tipos de suscripcion--------------------#
     suscripcion_regular = Tipo_Suscripcion(
                             cantidad_maxima_perfiles = 2,
-                            tipo_suscripcion = unicode('Regular')
+                            tipo_suscripcion = 'Regular'
                           )
     suscripcion_premium = Tipo_Suscripcion(
                             cantidad_maxima_perfiles = 4,
-                            tipo_suscripcion = unicode('Premium')
+                            tipo_suscripcion = 'Premium'
                          )
     suscripcion_regular.save()
     suscripcion_premium.save()
@@ -38,19 +38,19 @@ if __name__ == '__main__':
 
     #--------------Guardamos las tarjeta----------------------------------#
     tarjeta_1 = Tarjeta(
-                    nro_tarjeta = unicode('3456789876543212'),
+                    nro_tarjeta = '3456789876543212',
                     fecha_vencimiento = '2025-12-06',
-                    dni_titular = unicode('12345678'),
-                    empresa = unicode('apple'),
+                    dni_titular = '12345678',
+                    empresa = 'apple',
                     codigo_seguridad = '123'
                 )
 
     tarjeta_2 = Tarjeta(
-                    nro_tarjeta = unicode('2222222222222222'),
+                    nro_tarjeta = '2222222222222222',
                     fecha_vencimiento = '2025-10-06',
-                    dni_titular = unicode('87654321'),
-                    empresa = unicode('microsoft'),
-                    codigo_seguridad = unicode('234')
+                    dni_titular = '87654321',
+                    empresa = 'microsoft',
+                    codigo_seguridad = '234'
                 )
     tarjeta_1.save()
     tarjeta_2.save()
@@ -67,9 +67,9 @@ if __name__ == '__main__':
     suscriptor_marcos = Suscriptor(
                             auth_id = id_usuario_marcos,
                             fecha_suscripcion = '2020-05-10',
-                            dni = unicode('42395304'),
-                            nombre = unicode('Marcos'),
-                            apellido = unicode('Azcona'),
+                            dni = '42395304',
+                            nombre = 'Marcos',
+                            apellido = 'Azcona',
                             nro_tarjeta_id = id_tarjeta1,
                             tipo_suscripcion_id = id_suscripcion_regular,
                         )
@@ -77,18 +77,18 @@ if __name__ == '__main__':
     suscriptor_juan = Suscriptor(
                             auth_id = id_usuario_juan,
                             fecha_suscripcion = '2020-04-09',
-                            dni = unicode('11111111'),
-                            nombre = unicode('Juan Manuel'),
-                            apellido = unicode('Fazzano'),
+                            dni = '11111111',
+                            nombre = 'Juan Manuel',
+                            apellido = 'Fazzano',
                             nro_tarjeta_id = id_tarjeta2,
                             tipo_suscripcion_id = id_suscripcion_premium,
                         )
     suscriptor_cristian = Suscriptor(
                             auth_id = id_usuario_cristian,
                             fecha_suscripcion = '2020-04-09',
-                            dni = unicode('22222222'),
-                            nombre = unicode('Cristian Gabriel'),
-                            apellido = unicode('Alvarez'),
+                            dni = '22222222',
+                            nombre = 'Cristian Gabriel',
+                            apellido = 'Alvarez',
                             nro_tarjeta_id = id_tarjeta2,
                             tipo_suscripcion_id = id_suscripcion_premium,
                         )
@@ -98,15 +98,15 @@ if __name__ == '__main__':
 
     #--------------------GUARDA EN LA TABLA Perfil------------------------------------#
     perfil_marcos = Perfil(
-                        nombre_perfil=unicode('MarcosAzcona'),
+                        nombre_perfil='MarcosAzcona',
                         auth_id = id_usuario_marcos
                     )
     perfil_cristian = Perfil(
-                        nombre_perfil=unicode('CristianAlvarez'),
+                        nombre_perfil=unicode'CristianAlvarez',
                         auth_id = id_usuario_cristian
                     )
     perfil_juan = Perfil(
-                        nombre_perfil=unicode('JuanFazzano'),
+                        nombre_perfil=unicode'JuanFazzano',
                         auth_id = id_usuario_juan
                     )
     perfil_juan.save()
@@ -115,8 +115,8 @@ if __name__ == '__main__':
     #---------------------------------------------------------------------------------#
 
     #--------------------GUARDA EN LA TABLA AUTOR------------------------------------#
-    autor_dardo=Autor(nombre=unicode('Dardo'))
-    autor_pepe=Autor(nombre=unicode('Pepe'))
+    autor_dardo=Autor(nombre='Dardo')
+    autor_pepe=Autor(nombre='Pepe')
     autor_pepe.save()
     autor_dardo.save()
 
@@ -125,8 +125,8 @@ if __name__ == '__main__':
 
 
     #--------------------------GUARDA EN LA TABLA EDITORIAL--------------------------------#
-    editorial_dunken=Editorial(nombre=unicode('dunken'))
-    editorial_casita=Editorial(nombre=unicode('casita'))
+    editorial_dunken=Editorial(nombre='dunken')
+    editorial_casita=Editorial(nombre='casita')
     editorial_dunken.save()
     editorial_casita.save()
 
@@ -136,8 +136,8 @@ if __name__ == '__main__':
 
 
     #----------------------------GUARDA EN LA TABLA GENERO-----------------------------------------#
-    genero_terror=Genero(nombre=unicode('terror'))
-    genero_fantasia=Genero(nombre=unicode('fantasia'))
+    genero_terror=Genero(nombre='terror')
+    genero_fantasia=Genero(nombre='fantasia')
     genero_terror.save()
     genero_fantasia.save()
     id_terror = Genero.objects.values('id').filter(nombre = 'terror')[0]['id']
@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
 
     #----------------------------GUARDA EN LA TABLA LIBRO-----------------------------------------#
-    libro_harry=Libro(foto=unicode('portada1.jpeg'),titulo=unicode('harry'),ISBN=unicode('1111111111'),descripcion=unicode('una gran mago'),autor_id=id_dardo,editorial_id=id_dunken,genero_id=id_fantasia)
-    libro_anabelle=Libro(foto=unicode('portada3.jpeg'),titulo=unicode('anabelle'),ISBN=unicode('2222222222222'),descripcion=unicode('la munieca maldita'),autor_id=id_pepe,editorial_id=id_casita,genero_id=id_terror)
+    libro_harry=Libro(foto='portada1.jpeg',titulo='harry',ISBN='1111111111',descripcion='una gran mago',autor_id=id_dardo,editorial_id=id_dunken,genero_id=id_fantasia)
+    libro_anabelle=Libro(foto='portada3.jpeg',titulo='anabelle',ISBN='2222222222222',descripcion='la munieca maldita',autor_id=id_pepe,editorial_id=id_casita,genero_id=id_terror)
     libro_harry.save()
     libro_anabelle.save()

@@ -16,7 +16,6 @@ def cerrar_sesion(request):
     logout(request)
     return HttpResponseRedirect('/')
 
-
 class Vista_Registro(View):
     def __init__(self,*args,**kwargs):
         self.contexto = dict()
@@ -89,6 +88,7 @@ class Vista_Registro(View):
     def post(self,request):
         formulario = FormularioRegistro(request.POST)
         if formulario.is_valid():
+            self.__cargar_usuario_suscriptor(formulario)
             return redirect('/')
         self.contexto['formulario'] =  formulario
         return render(request,'registro.html',self.contexto)
@@ -128,9 +128,10 @@ class Vista_Iniciar_Sesion(View):
         self.__contextualizar_formulario(error or '')
         return render(request,self.__vista_html,self.__contexto)
 
-
 class Vista_Datos_Usuario(View):
     def get(self,request,*args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
         id = request.session['_auth_user_id']
         datos_suscriptor = (Suscriptor.objects.filter(auth_id=id)).values()[0]
         datos_tarjeta = Tarjeta.objects.filter(id = datos_suscriptor['nro_tarjeta_id']).values()[0]
@@ -153,20 +154,9 @@ class Vista_Datos_Usuario(View):
         }
         return render(request,'datos_usuario.html',contexto)
 
-    @csrf_exempt
-    def post(self,request):
-        email = (Usuario.objects.values('email').get(auth_id = request.session['_auth_user_id']))['email']
-        formulario = PruebaFormulario(request.POST)
-        if formulario.is_valid():
-            pass
-        return render(request,'n.html',{'usuario':email,'formulario':PruebaFormulario()})
-
 class Vista_Visitante(View):
     def get(self,request):
         return render(request,'visitante.html',{})
-
-    def post(self,request):
-        pass
 
 class Vista_Modificar_Datos_Personales(View):
     def __init__(self,*args,**kwargs):
@@ -196,14 +186,13 @@ class Vista_Modificar_Datos_Personales(View):
         return valores_por_defecto
 
     def __cambiar_datos_usuario(self,formulario,id):
-        print(formulario.get_datos_cambiados())
         nombre = formulario.cleaned_data['Nombre']
         apellido = formulario.cleaned_data['Apellido']
 
         #Aplicamos ell patron de estrategia. get_datos_cambiados es un diccionario donde para cada campo importante guarda un boolean si cambio o no con respecto a su valor inicial
         estrategia_email = Estrategia_Email(formulario.get_datos_cambiados()['Email'],formulario,self.__valores_iniciales(id))
         estrategia_dni = Estrategia_DNI(formulario.get_datos_cambiados()['DNI'],formulario,self.__valores_iniciales(id))
-        estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(formulario.get_datos_cambiados()['Numero_de_tarjeta'],formulario,self.__valores_iniciales(id))
+        estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(id,formulario.get_datos_cambiados()['Numero_de_tarjeta'],formulario,self.__valores_iniciales(id))
 
         estrategia_email.validar()
         estrategia_dni.validar()
@@ -229,38 +218,33 @@ class Vista_Modificar_Datos_Personales(View):
         return render(request,'modificar_datos_personales.html',self.contexto)
 
 class Estrategia:
-    def __init__(self,estado,formulario_nuevo,valores_iniciales,*args,**kwargs):
+    def __init__(self,estado,formulario_nuevo,valores_iniciales):
         #Estado es un boolean que indica si cambio o no
         self.estado = estado
         self.formulario = formulario_nuevo
         self.valores_iniciales = valores_iniciales
-        self.auth_id = 1
 
 class Estrategia_Email(Estrategia):
     def validar(self):
         if self.estado:
-            print('entre')
             #Como cambio, actualizamos la BD
-            print(self.valores_iniciales)
             auth_usuario = User.objects.get(username = self.valores_iniciales['Email'])
             auth_usuario.username = str(self.formulario.cleaned_data['Email'])
             auth_usuario.save()
-            print('guarde')
 
 class Estrategia_DNI(Estrategia):
     def validar(self):
         if self.estado:
             #cambio
             suscriptor = Suscriptor.objects.get(dni = self.valores_iniciales['DNI'])
-            print('HOLA DNI')
             suscriptor.dni = self.formulario.cleaned_data['DNI']
             suscriptor.save()
 
 #TODO arreglar el super para mandar el id del usuario logueado que esta por parametro
 class Estrategia_Numero_de_tarjeta(Estrategia):
-#    def __init__(self,auth_id,estado,formulario_nuevo,valores_iniciales):
-#        self.auth_id = 1
-#        super(Estrategia_Numero_de_tarjeta,self).__init__(estado,formulario_nuevo,valores_iniciales,*args,**kwargs)
+    def __init__(self,auth_id,estado,formulario_nuevo,valores_iniciales):
+        self.auth_id = auth_id
+        super(Estrategia_Numero_de_tarjeta,self).__init__(estado,formulario_nuevo,valores_iniciales)
 
     def __cargar_tarjeta(self):
         "Este metodo carga la tarjeta en caso de no existir"
@@ -286,26 +270,24 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
             id_tarjeta = (Tarjeta.objects.values('id').filter(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])[0])['id']
             suscriptor.nro_tarjeta_id = id_tarjeta
             suscriptor.save()
-        else:
-            tarjeta=Tarjeta.objects.get(nro_tarjeta = self.valores_iniciales['Numero_de_tarjeta'])
-            tarjeta.dni_titular=self.formulario.cleaned_data['DNI_titular']
-            tarjeta.codigo_seguridad = self.formulario.cleaned_data['Codigo_de_seguridad']
-            tarjeta.fecha_de_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
-            tarjeta.empresa = self.formulario.cleaned_data['Empresa']
-            tarjeta.save()
+        tarjeta=Tarjeta.objects.get(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])
+        tarjeta.dni_titular=self.formulario.cleaned_data['DNI_titular']
+        tarjeta.codigo_seguridad = self.formulario.cleaned_data['Codigo_de_seguridad']
+        tarjeta.fecha_de_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
+        tarjeta.empresa = self.formulario.cleaned_data['Empresa']
+        tarjeta.save()
 
 class Vista_Detalle_Novedad(View):
     def get(self,request,id_novedad = None):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         novedad = Novedad.objects.values('titulo','link','descripcion').filter(id = id_novedad)[0]
-        print(novedad
-        )
         return render(request,'detalle_novedad.html',novedad)
-
 
 class Vista_Listado_Novedades(View):
     def get(self,request):
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
         novedades = Novedad.objects.all()
         paginador = Paginator(novedades,2) #Pagina cada 10
 
