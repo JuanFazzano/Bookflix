@@ -102,11 +102,11 @@ if __name__ == '__main__':
                         auth_id = id_usuario_marcos
                     )
     perfil_cristian = Perfil(
-                        nombre_perfil=unicode'CristianAlvarez',
+                        nombre_perfil='CristianAlvarez',
                         auth_id = id_usuario_cristian
                     )
     perfil_juan = Perfil(
-                        nombre_perfil=unicode'JuanFazzano',
+                        nombre_perfil='JuanFazzano',
                         auth_id = id_usuario_juan
                     )
     perfil_juan.save()
