@@ -1,0 +1,25 @@
+{% extends "header.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    {% block link %}
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    {% endblock%}
+    <title>Pagina Principal</title>
+  
+  </head>
+  <body style="margin:0px;">
+      {% block contenido %}
+      <div>
+          Libros randoms
+          <!--
+
+            SE VAN A MOSTRAR 6 LIBROS RANDOM
+         -->
+      </div>
+      {% endblock %}
+  </body>
+</html>

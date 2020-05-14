@@ -67,7 +67,6 @@ if __name__ == '__main__':
     suscriptor_marcos = Suscriptor(
                             auth_id = id_usuario_marcos,
                             fecha_suscripcion = '2020-05-10',
-                            dni = '42395304',
                             nombre = 'Marcos',
                             apellido = 'Azcona',
                             nro_tarjeta_id = id_tarjeta1,
@@ -77,7 +76,6 @@ if __name__ == '__main__':
     suscriptor_juan = Suscriptor(
                             auth_id = id_usuario_juan,
                             fecha_suscripcion = '2020-04-09',
-                            dni = '11111111',
                             nombre = 'Juan Manuel',
                             apellido = 'Fazzano',
                             nro_tarjeta_id = id_tarjeta2,
@@ -86,7 +84,6 @@ if __name__ == '__main__':
     suscriptor_cristian = Suscriptor(
                             auth_id = id_usuario_cristian,
                             fecha_suscripcion = '2020-04-09',
-                            dni = '22222222',
                             nombre = 'Cristian Gabriel',
                             apellido = 'Alvarez',
                             nro_tarjeta_id = id_tarjeta2,

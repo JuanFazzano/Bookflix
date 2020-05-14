@@ -21,7 +21,6 @@ class FormularioRegistro(forms.Form):
         ('premium','Premium(4 perfiles maximo)')
     ]
 
-    DNI = forms.CharField(max_length = 8)
     Nombre = forms.CharField(max_length = 25)
     Apellido =forms.CharField(max_length = 25)
     Email = forms.EmailField(max_length = 254)
@@ -39,14 +38,11 @@ class FormularioRegistro(forms.Form):
             raise forms.ValidationError('El Email ya esta registrado en el sistema')
         return email
 
-    def clean_DNI(self):
-        campo = clean_campo(self,'DNI',8)
-        if (Suscriptor.objects.values('dni').filter(dni = campo).exists()):
+    def clean_DNI_titular(self):
+        campo = clean_campo(self,'DNI_titular',8)
+        if (Tarjeta.objects.values('dni_titular').filter(dni_titular = campo).exists()):
             raise forms.ValidationError('El DNI ya esta registrado en el sistema')
         return campo
-
-    def clean_DNI_titular(self):
-        return clean_campo(self,'DNI_titular',8)
 
     def clean_Codigo_de_seguridad(self):
         return clean_campo(self,'Codigo_de_seguridad',3)
@@ -73,7 +69,6 @@ class FormularioModificarDatosPersonales(forms.Form):
 
 
     Email = forms.EmailField(max_length = 254,show_hidden_initial=True)
-    DNI = forms.CharField(max_length = 8,show_hidden_initial=True)
     Nombre = forms.CharField(max_length = 25,show_hidden_initial=True)
     Apellido =forms.CharField(max_length = 25,show_hidden_initial=True)
     Numero_de_tarjeta = forms.CharField(max_length = 16,show_hidden_initial=True)
@@ -102,21 +97,19 @@ class FormularioModificarDatosPersonales(forms.Form):
             self.datos_cambiados['Email'] = False
         return valor_email_actual
 
-    def clean_DNI(self):
-        field_DNI = self.visible_fields()[1] #Me devuelve una instancia del CharField --> campo DNI
-        valor_dni_inicial = field_DNI.initial
-        valor_dni_actual = self.cleaned_data['DNI']
+    def clean_DNI_titular(self):
+        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
+        valor_dni_inicial = field_DNI_titular.initial
+        valor_dni_actual = self.cleaned_data['DNI_titular']
+        clean_campo(self,'DNI_titular',8)
+        if (Tarjeta.objects.values('dni_titular').filter(dni_titular = valor_dni_actual).exists()):
+            raise forms.ValidationError('El DNI ya esta registrado en el sistema')
+
         if self.__cambio(valor_dni_inicial,valor_dni_actual):
-            clean_campo(self,'DNI',8)
-            if (Suscriptor.objects.values('dni').filter(dni = valor_dni_actual).exists()):
-                raise forms.ValidationError('El DNI ya esta registrado en el sistema')
             self.datos_cambiados['DNI'] = True
         else:
             self.datos_cambiados['DNI'] = False
         return valor_dni_actual
-
-    def clean_DNI_titular(self):
-        return clean_campo(self,'DNI_titular',8)
 
     def clean_Codigo_de_seguridad(self):
         return clean_campo(self,'Codigo_de_seguridad',3)

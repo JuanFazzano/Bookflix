@@ -39,19 +39,21 @@ class Vista_Registro(View):
                               )
             tarjeta.save()
 
-    def __cargar_usuario_suscriptor(self,formulario):
+    def __cargar_usuario_suscriptor(self,formulario,id):
         """
             Carga los datos del suscriptor en la tabla modelos_suscriptor, modelos_usuario y auth_user
         """
         email = formulario.cleaned_data['Email']
-        dni = formulario.cleaned_data['DNI']
+        dni_titular = formulario.cleaned_data['DNI_titular']
         numero_tarjeta = formulario.cleaned_data['Numero_de_tarjeta']
         contrasena = formulario.cleaned_data['Contrasena']
         apellido = formulario.cleaned_data['Apellido']
         nombre = formulario.cleaned_data['Nombre']
         suscripcion = formulario.cleaned_data['Suscripcion']
 
-        self.__cargar_tarjeta(formulario)
+        estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(auth_id = id,formulario_nuevo = formulario)
+        estrategia_numero_de_tarjeta.cargar_tarjeta()
+        #self.__cargar_tarjeta(formulario)
 
         #Cargamos el modelos User de auth_user
         model_usuario = User.objects.create_user(username = email, password=contrasena ) #Se guarda en la tabla auth_user
@@ -66,7 +68,6 @@ class Vista_Registro(View):
         #Cargamos al suscriptor
         suscriptor=Suscriptor(auth_id=auth_id,
                               fecha_suscripcion=datetime.datetime.now().date(),
-                              dni=dni,
                               nombre=nombre ,
                               nro_tarjeta_id=id_tarjeta,
                               apellido=apellido,
@@ -88,7 +89,7 @@ class Vista_Registro(View):
     def post(self,request):
         formulario = FormularioRegistro(request.POST)
         if formulario.is_valid():
-            self.__cargar_usuario_suscriptor(formulario)
+            self.__cargar_usuario_suscriptor(formulario,request.session['_auth_user_id'])
             return redirect('/')
         self.contexto['formulario'] =  formulario
         return render(request,'registro.html',self.contexto)
@@ -142,7 +143,6 @@ class Vista_Datos_Usuario(View):
                 'nombre': datos_suscriptor['nombre'],
                 'apellido': datos_suscriptor['apellido'],
                 'email': email_usuario,
-                'dni': datos_suscriptor['dni'],
                 'fecha_suscripcion': datos_suscriptor['fecha_suscripcion'],
                 'tipo_suscripcion': suscripcion,
                 'numero_tarjeta': datos_tarjeta['nro_tarjeta'],
@@ -173,7 +173,6 @@ class Vista_Modificar_Datos_Personales(View):
         suscripcion = (Tipo_Suscripcion.objects.filter(id = datos_suscriptor['tipo_suscripcion_id']).values()[0])['tipo_suscripcion']
         valores_por_defecto = {
                 'Email': email_usuario,
-                'DNI': datos_suscriptor['dni'],
                 'Nombre': datos_suscriptor['nombre'],
                 'Apellido': datos_suscriptor['apellido'],
                 'Numero_de_tarjeta': datos_tarjeta['nro_tarjeta'],
@@ -189,13 +188,11 @@ class Vista_Modificar_Datos_Personales(View):
         nombre = formulario.cleaned_data['Nombre']
         apellido = formulario.cleaned_data['Apellido']
 
-        #Aplicamos ell patron de estrategia. get_datos_cambiados es un diccionario donde para cada campo importante guarda un boolean si cambio o no con respecto a su valor inicial
+        #Aplicamos el patron de estrategia. get_datos_cambiados es un diccionario donde para cada campo importante guarda un boolean si cambio o no con respecto a su valor inicial
         estrategia_email = Estrategia_Email(formulario.get_datos_cambiados()['Email'],formulario,self.__valores_iniciales(id))
-        estrategia_dni = Estrategia_DNI(formulario.get_datos_cambiados()['DNI'],formulario,self.__valores_iniciales(id))
-        estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(id,formulario.get_datos_cambiados()['Numero_de_tarjeta'],formulario,self.__valores_iniciales(id))
+        estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(auth_id = id, estado = formulario.get_datos_cambiados()['Numero_de_tarjeta'],formulario_nuevo = formulario,valores_iniciales = self.__valores_iniciales(id))
 
         estrategia_email.validar()
-        estrategia_dni.validar()
         estrategia_numero_de_tarjeta.validar()
 
         suscriptor = Suscriptor.objects.get(auth_id = id)
@@ -232,21 +229,12 @@ class Estrategia_Email(Estrategia):
             auth_usuario.username = str(self.formulario.cleaned_data['Email'])
             auth_usuario.save()
 
-class Estrategia_DNI(Estrategia):
-    def validar(self):
-        if self.estado:
-            #cambio
-            suscriptor = Suscriptor.objects.get(dni = self.valores_iniciales['DNI'])
-            suscriptor.dni = self.formulario.cleaned_data['DNI']
-            suscriptor.save()
-
-#TODO arreglar el super para mandar el id del usuario logueado que esta por parametro
 class Estrategia_Numero_de_tarjeta(Estrategia):
-    def __init__(self,auth_id,estado,formulario_nuevo,valores_iniciales):
+    def __init__(self,auth_id,formulario_nuevo,estado=None,valores_iniciales=None):
         self.auth_id = auth_id
         super(Estrategia_Numero_de_tarjeta,self).__init__(estado,formulario_nuevo,valores_iniciales)
 
-    def __cargar_tarjeta(self):
+    def cargar_tarjeta(self):
         "Este metodo carga la tarjeta en caso de no existir"
         numero_tarjeta=  self.formulario.cleaned_data['Numero_de_tarjeta']
         if not Tarjeta.objects.filter(nro_tarjeta = numero_tarjeta).exists():
@@ -265,13 +253,12 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
 
     def validar(self):
         if self.estado:
-            self.__cargar_tarjeta()
+            self.cargar_tarjeta()
             suscriptor = Suscriptor.objects.get(auth_id = self.auth_id)
             id_tarjeta = (Tarjeta.objects.values('id').filter(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])[0])['id']
             suscriptor.nro_tarjeta_id = id_tarjeta
             suscriptor.save()
         tarjeta=Tarjeta.objects.get(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])
-        tarjeta.dni_titular=self.formulario.cleaned_data['DNI_titular']
         tarjeta.codigo_seguridad = self.formulario.cleaned_data['Codigo_de_seguridad']
         tarjeta.fecha_de_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
         tarjeta.empresa = self.formulario.cleaned_data['Empresa']
