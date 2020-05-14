@@ -1,13 +1,21 @@
 import datetime
+from django.contrib.auth.models     import User
 from django.views                   import View
 from django.core.paginator          import Paginator
-from django.contrib.auth.models     import User
-from django.shortcuts               import render,redirect
-from django.contrib.auth            import authenticate,login
 from django.views.decorators.csrf   import csrf_exempt
+from django.http                    import HttpResponse
+from django.shortcuts               import render,redirect
+from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
+from django.http                    import HttpResponseRedirect
 from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales
-from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil
+from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil,Novedad
+
+def cerrar_sesion(request):
+    #Cierra la sesion del usuario, y lo redireccion al /
+    logout(request)
+    return HttpResponseRedirect('/')
+
 
 class Vista_Registro(View):
     def __init__(self,*args,**kwargs):
@@ -104,26 +112,26 @@ class Vista_Iniciar_Sesion(View):
         error = ''
         self.formulario = FormularioIniciarSesion(request.POST)
         if self.formulario.is_valid():
-            print(type(self.formulario.cleaned_data['clave']))
             email = self.formulario.cleaned_data['email']
             clave = self.formulario.cleaned_data['clave']
             usuario = authenticate(username=email,password=clave)
             if usuario is not None: #El usuario se autentica
-                print('Entre')
+                login(request,usuario)
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
                 url = str(id_usuario_logueado)+'/'
                 if not usuario.is_staff:
-                    return redirect('/prueba/id='+url)
+                    return redirect('/listado_novedades/')
                 else:
-                    login(request,usuario) #Carga la sesion del administrador
                     return redirect('/admin/')
             else:
                error = 'Los datos ingresados no son validos'
         self.__contextualizar_formulario(error or '')
         return render(request,self.__vista_html,self.__contexto)
 
-class Vista_Datos_Usuario (View):
-    def get(self,request,id=None,*args, **kwargs):
+
+class Vista_Datos_Usuario(View):
+    def get(self,request,*args, **kwargs):
+        id = request.session['_auth_user_id']
         datos_suscriptor = (Suscriptor.objects.filter(auth_id=id)).values()[0]
         datos_tarjeta = Tarjeta.objects.filter(id = datos_suscriptor['nro_tarjeta_id']).values()[0]
         email_usuario = (User.objects.values('username').filter(id = id)[0])['username']
@@ -145,18 +153,17 @@ class Vista_Datos_Usuario (View):
         }
         return render(request,'datos_usuario.html',contexto)
 
-
     @csrf_exempt
-    def post(self,request,id=None):
-        email = (Usuario.objects.values('email').get(auth_id = id))['email']
+    def post(self,request):
+        email = (Usuario.objects.values('email').get(auth_id = request.session['_auth_user_id']))['email']
         formulario = PruebaFormulario(request.POST)
         if formulario.is_valid():
             pass
         return render(request,'n.html',{'usuario':email,'formulario':PruebaFormulario()})
 
-class Vista_Home(View):
+class Vista_Visitante(View):
     def get(self,request):
-        return render(request,'home.html',{})
+        return render(request,'visitante.html',{})
 
     def post(self,request):
         pass
@@ -207,17 +214,17 @@ class Vista_Modificar_Datos_Personales(View):
         suscriptor.apellido = apellido
         suscriptor.save()
 
-    def get(self,request,id = None):
-        formulario = FormularioModificarDatosPersonales(initial = self.__valores_iniciales(id))
+    def get(self,request):
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
+        formulario = FormularioModificarDatosPersonales(initial = self.__valores_iniciales(request.session['_auth_user_id']))
         self.contexto['formulario'] = formulario
         return render(request,'modificar_datos_personales.html',self.contexto)
 
-    def post(self,request,id = None):
-        formulario = FormularioModificarDatosPersonales(initial = self.__valores_iniciales(id), data = request.POST)
+    def post(self,request):
+        formulario = FormularioModificarDatosPersonales(initial = self.__valores_iniciales(request.session['_auth_user_id']), data = request.POST)
         if formulario.is_valid():
-            #print(formulario.cleaned_data)
-            self.__cambiar_datos_usuario(formulario,id)
-            pass
+            self.__cambiar_datos_usuario(formulario,request.session['_auth_user_id'])
         self.contexto['formulario'] = formulario
         return render(request,'modificar_datos_personales.html',self.contexto)
 
@@ -286,3 +293,23 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
             tarjeta.fecha_de_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
             tarjeta.empresa = self.formulario.cleaned_data['Empresa']
             tarjeta.save()
+
+class Vista_Detalle_Novedad(View):
+    def get(self,request,id_novedad = None):
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
+        novedad = Novedad.objects.values('titulo','link','descripcion').filter(id = id_novedad)[0]
+        print(novedad
+        )
+        return render(request,'detalle_novedad.html',novedad)
+
+
+class Vista_Listado_Novedades(View):
+    def get(self,request):
+        novedades = Novedad.objects.all()
+        paginador = Paginator(novedades,2) #Pagina cada 10
+
+        numero_de_pagina = request.GET.get('page')
+        pagina = paginador.get_page(numero_de_pagina) #Me devuelve el objeto de la pagina actualizamos
+
+        return render(request,'listado_novedades.html',{'objeto_pagina': pagina})

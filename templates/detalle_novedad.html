@@ -1,0 +1,39 @@
+{% extends "header.html" %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    {% block link %}
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    {% endblock%}
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% block listado_opciones %}
+    <div class="col-sm-4">
+      <ul style="list-style:none; padding-top: 20px;">
+        <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
+        <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none;">                                           Ver Perfil     </a>  </li>
+      </ul>
+    </div>
+    {% endblock %}
+    {% block contenido %}
+
+    <ul style="list-style:none;">
+        <li> <h1> Novedad {{titulo}} </h1> </li>
+
+        {% if descripcion %}
+          <li>
+            {{ descripcion }}
+          </li>
+        {% endif %}
+        {% if link %}
+          <li>
+            <a href="{{ link }}"> Archivo de Novedad </a>
+          </li>
+        {% endif %}
+        {% endblock %}
+    </ul>
+  </body>
+</html>

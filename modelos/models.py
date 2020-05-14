@@ -135,9 +135,9 @@ class Novedad(models.Model):
         verbose_name = 'Novedad'
         verbose_name_plural = 'Novedades'
         ordering = ['titulo']
-        
+
     titulo=models.CharField(unique = True, max_length=255)
-    foto= models.FileField(blank = True,null = True)
+    descripcion = models.TextField(blank = True,null = True)
     link = models.TextField(blank = True,null = True)
 
     def __str__(self):

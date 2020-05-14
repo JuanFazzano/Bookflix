@@ -21,13 +21,19 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    url(r'^$', views.Vista_Home.as_view()),
+    url(r'^$', views.Vista_Visitante.as_view()),
     url(r'^admin/', admin.site.urls),
     url(r'^iniciar_sesion/',views.Vista_Iniciar_Sesion.as_view()),
+    url(r'^datos_suscriptor/',views.Vista_Datos_Usuario.as_view()),
     url(r'^registro/',views.Vista_Registro.as_view()),
-    url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),
-    url(r'^modificar_datos_personales/id=(?P<id>\w+)/$',views.Vista_Modificar_Datos_Personales.as_view()),
-#    url(r'^prueba/id=(?P<id>\w+)/$',views.Prueba.as_view()),
+    url(r'^modificar_datos_personales/',views.Vista_Modificar_Datos_Personales.as_view()),
+    url(r'^detalle_novedad/id_novedad=(?P<id_novedad>\w+)/$',views.Vista_Detalle_Novedad.as_view()),
+    url(r'^listado_novedades/',views.Vista_Listado_Novedades.as_view()),
+    url(r'^logout/',views.cerrar_sesion,name="logout"),
+
+    #url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),
+    #    url(r'^detalle_novedad/id=(?P<id>\w+)/$',views.Vista_Detalle_Novedad.as_view()),
+    #url(r'^prueba/id=(?P<id>\w+)/$',views.Prueba.as_view()),
 ]
 
 if settings.DEBUG:
