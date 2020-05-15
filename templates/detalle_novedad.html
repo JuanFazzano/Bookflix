@@ -1,4 +1,5 @@
 {% extends "header.html" %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
@@ -28,9 +29,10 @@
             {{ descripcion }}
           </li>
         {% endif %}
-        {% if link %}
+        {% if foto %}
           <li>
-            <a href="{{ link }}"> Archivo de Novedad </a>
+            <!-- /static/%7B%7Bfoto%7D%7D -->
+            <img src="{% static foto %}">
           </li>
         {% endif %}
         {% endblock %}

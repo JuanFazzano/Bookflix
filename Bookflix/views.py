@@ -268,7 +268,8 @@ class Vista_Detalle_Novedad(View):
     def get(self,request,id_novedad = None):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        novedad = Novedad.objects.values('titulo','link','descripcion').filter(id = id_novedad)[0]
+        novedad = Novedad.objects.values('titulo','foto','descripcion').filter(id = id_novedad)[0]
+        novedad['foto']=str(novedad['foto'])
         return render(request,'detalle_novedad.html',novedad)
 
 class Vista_Listado_Novedades(View):

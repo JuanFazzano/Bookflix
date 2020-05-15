@@ -137,7 +137,7 @@ class Novedad(models.Model):
 
     titulo=models.CharField(unique = True, max_length=255)
     descripcion = models.TextField(blank = True,null = True)
-    foto = models.FileField(blank = True,null = True)
+    foto = models.ImageField(blank = True,null = True)
 
     def __str__(self):
         return self.titulo
