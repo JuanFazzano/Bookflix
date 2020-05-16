@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from Bookflix import views
+
 from django import forms
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad
-from django.shortcuts import redirect
-from django.urls import reverse
-
-
 
 class NovedadAdmin(admin.ModelAdmin):
     list_display=('titulo',)
-    list_per_page = 2
+    list_per_page = 10
     view_only=True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
@@ -22,6 +19,56 @@ class NovedadAdmin(admin.ModelAdmin):
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_novedades/')
 
+class GeneroAdmin(admin.ModelAdmin):
+    list_per_page = 10
+    view_only=True
+    #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect('/listado_generos/')
+    
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect('/listado_generos/')
+
+class AutorAdmin(admin.ModelAdmin):
+    list_per_page = 10
+    view_only=True
+    #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect('/listado_autores/')
+    
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect('/listado_autores/')
+
+class EditorialAdmin(admin.ModelAdmin):
+    list_per_page = 10
+    view_only=True
+    #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect('/listado_editoriales/')
+    
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect('/listado_editoriales/')
+
+class LibroAdmin(admin.ModelAdmin):
+    list_per_page = 10
+    view_only=True
+    #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect('/listado_libros/')
+    
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect('/listado_libros/')      
+
+
+class EditorialAdmin(admin.ModelAdmin):
+    list_per_page = 2
+    view_only=True
+    #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect('/listado_editoriales/')
+    
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect('/listado_editoriales/')
 
 admin.site.site_header = 'Panel de Administracion Bookflix'
 
@@ -33,7 +80,7 @@ admin.site.unregister(Group)
 #admin.site.register(Libro,LibroAdmin)
 admin.site.register(Novedad,NovedadAdmin)
 admin.site.register(Libro)
-admin.site.register(Genero)
-admin.site.register(Editorial)
-admin.site.register(Autor)
-admin.site.register(Suscriptor)
+admin.site.register(Genero,GeneroAdmin)
+admin.site.register(Editorial,EditorialAdmin)
+admin.site.register(Autor,AutorAdmin)
+
