@@ -1,15 +1,15 @@
 {% extends "listado.html" %}
-{% block contenido%}
-  {% for novedad in objeto_pagina %}
+{% block listado %}
+{% for novedad in objeto_pagina %}
   <li style="margin-top: 10px">
           {% if request.user.is_staff %}
             {{novedad.titulo}}
-              <button> <a href="/detalle_novedad/id={{novedad.id}}"> Ver </a> </button>
-              <button> <a href="/admin/modelos/novedad/{{novedad.id}}/change/"> Modificar </a> </button>
-              <button> <a href="/admin/modelos/novedad/{{novedad.id}}/delete/"> Eliminar </a> </button>
+            <button> <a href="/detalle_novedad/id={{novedad.id}}"> Ver </a> </button>
+            <button> <a href="/admin/modelos/novedad/{{novedad.id}}/change/"> Modificar </a> </button>
+            <button> <a href="#"> Eliminar </a> </button>
           {% else %}
             <a href="/detalle_novedad/id={{novedad.id}}"> {{novedad.titulo}}</a>
           {% endif %}
   </li>
-  {% endfor %}
+{% endfor %}
 {% endblock %}

@@ -1,0 +1,8 @@
+{% extends "listado.html "%}
+{% block listado %}
+      {% for genero in objeto_pagina %}
+        {{genero.nombre}}
+        <button> <a href="/admin/modelos/genero/{{genero.pk}}/change/"> Modificar </a> </button>
+        <button> <a href="#"> Eliminar </a> </button>
+      {% endfor %}
+{% endblock %}

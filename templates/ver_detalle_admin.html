@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html"%}
+{% load static %}
+{% block contenido %}
+  <h1> Detalle de la novedad </h1>
+  <li>
+      <h2> {titulo}} </h2>
+      {% if foto %}
+        <img src="{% static foto %}">
+      {% endif %}
+      {% if descripcion %}
+        <h2>{{descripcion}}</h2>
+      {% endif %}
+
+      <button> <a href="/{{id_novedad}}/change"> Modificar </a> </button>
+      <button> <a href="/{{id_novedad}}/delete"> Eliminar </a> </button>
+  </li>
+
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "listado.html "%}
+{% block listado %}
+      {% for editorial in objeto_pagina %}
+        {{editorial.nombre}}
+        <button> <a href="/admin/modelos/editorial/{{editorial.pk}}/change/"> Modificar </a> </button>
+        <button> <a href="#"> Eliminar </a> </button>
+      {% endfor %}
+{% endblock %}

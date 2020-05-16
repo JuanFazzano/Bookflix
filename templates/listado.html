@@ -17,7 +17,7 @@
       <ul style="list-style:none; padding-top: 20px;">
           <li style="padding-left:10px; display:inline;"> <a href="{% url 'logout' %}" style="text-decoration: none;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
           {% if not request.user.is_staff%}
-            <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none;">  Ver Perfil     </a>  </li> 
+            <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none;">  Ver Perfil     </a>  </li>
           {% endif %}
       </ul>
     </div>
@@ -29,11 +29,11 @@
       <ul style="list-style:none; margin-left:500px">
         <li>
           {% if objeto_pagina.has_previous %}
-          <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
+            <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
           {% endif %}
           <span>  {{ objeto_pagina.number }}  </span>
           {% if objeto_pagina.has_next %}
-          <a href="?page={{objeto_pagina.next_page_number}}">  {{objeto_pagina.next_page_number}}  </a>
+            <a href="?page={{objeto_pagina.next_page_number}}">  {{objeto_pagina.next_page_number}}  </a>
           {% endif%}
         </li>
       </ul>
@@ -45,7 +45,7 @@
       <ul style="list-style:none; margin-left:500px">
         <li>
           {% if objeto_pagina.has_previous %}
-          <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
+            <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
           {% endif%}
           <span>  {{ objeto_pagina.number }}  </span>
           {% if objeto_pagina.has_next %}
@@ -54,7 +54,7 @@
         </li>
       </ul>
     {% else %}
-      <h1> No hay {{modelo}}es para mostrar </h1>
+      <h1> No hay ningun/a {{modelo}} </h1>
     {% endif %}
     {% endblock %}
 
