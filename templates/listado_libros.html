@@ -1,0 +1,26 @@
+{% extends "listado.html" %}
+
+  {% block nuevo_modelo%}
+    {% if request.user.is_staff %}
+      <button> <a href="/admin/modelos/libro/add/"> Agregar Libro </a> </button>
+    {% endif %}
+  {% endblock %}
+
+{% block listado %}
+{% for libro in objeto_pagina %}
+  <li style="margin-top: 10px">
+          {% if request.user.is_staff %}
+            Titulo: {{libro.titulo}}
+            Genero: {{libro.genero}}
+            Autor: {{libro.autor}}
+            Editorial: {{libro.editorial}}
+            <button> <a href="#"> Ver </a> </button>
+            <button> <a href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a> </button>
+            <button> <a href="#"> Eliminar </a> </button>
+            <button> <a href="#"> Subir Archivo </a> </button>
+          {% else %}
+            <a href="/detalle_libro/id={{libro.id}}"> {{libro.titulo}}</a>
+          {% endif %}
+  </li>
+{% endfor %}
+{% endblock %}

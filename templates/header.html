@@ -6,8 +6,13 @@
   <div class="row" style=" height: 70px; background-color: #1c1c1f;">
 
       <div class="col-sm-8">
-        <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; margin-right:2px;">
-
+         {% if request.user.is_staff%}
+            <a href="/home_admin/">
+         {% else %}
+            <a href="/listado_novedades/" >
+          {% endif %}
+              <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; margin-right:2px;">
+          </a>
       </div>
       {% block listado_opciones %} {% endblock %}
 

@@ -15,7 +15,7 @@ class NovedadAdmin(admin.ModelAdmin):
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
         return redirect('/listado_novedades/')
-    
+
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_novedades/')
 
@@ -25,7 +25,7 @@ class GeneroAdmin(admin.ModelAdmin):
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
         return redirect('/listado_generos/')
-    
+
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_generos/')
 
@@ -35,7 +35,7 @@ class AutorAdmin(admin.ModelAdmin):
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
         return redirect('/listado_autores/')
-    
+
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_autores/')
 
@@ -45,7 +45,7 @@ class EditorialAdmin(admin.ModelAdmin):
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
         return redirect('/listado_editoriales/')
-    
+
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_editoriales/')
 
@@ -55,9 +55,9 @@ class LibroAdmin(admin.ModelAdmin):
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
         return redirect('/listado_libros/')
-    
+
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_libros/')      
+        return redirect('/listado_libros/')
 
 
 class EditorialAdmin(admin.ModelAdmin):
@@ -66,7 +66,7 @@ class EditorialAdmin(admin.ModelAdmin):
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
         return redirect('/listado_editoriales/')
-    
+
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_editoriales/')
 
@@ -79,8 +79,7 @@ admin.site.unregister(Group)
 #Registra que modelos se pueden interactuar
 #admin.site.register(Libro,LibroAdmin)
 admin.site.register(Novedad,NovedadAdmin)
-admin.site.register(Libro)
+admin.site.register(Libro,LibroAdmin)
 admin.site.register(Genero,GeneroAdmin)
 admin.site.register(Editorial,EditorialAdmin)
 admin.site.register(Autor,AutorAdmin)
-

@@ -1,6 +1,8 @@
 {% extends "listado.html" %}
-{% block nuevo_modelo%} 
+{% block nuevo_modelo%}
+{% if request.user.is_staff %}
   <button> <a href="/admin/modelos/genero/add/"> Nuevo Genero </a> </button>
+{% endif %}
 {% endblock %}
 {% block listado %}
       {% for genero in objeto_pagina %}

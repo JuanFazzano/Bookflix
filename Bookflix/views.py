@@ -281,6 +281,7 @@ class Vista_Detalle(View):
 
 class Vista_Listado(View):
     def get(self,request):
+        contexto = dict()
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         tuplas = self.modelo.objects.all()
@@ -288,7 +289,18 @@ class Vista_Listado(View):
 
         numero_de_pagina = request.GET.get('page')
         pagina = paginador.get_page(numero_de_pagina) #Me devuelve el objeto de la pagina actualizamos
-        return render(request,self.url, {'objeto_pagina': pagina,'modelo': self.modelo_string})
+        contexto = {'objeto_pagina': pagina,'modelo': self.modelo_string}
+
+        #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
+        return render(request,self.url,contexto)
+
+class Vista_Listado_Libro(Vista_Listado):
+    def __init__(self,*args,**kwargs):
+        self.url = 'listado_libros.html'
+        self.modelo = Libro
+        self.modelo_string = 'libro'
+        super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
+
 
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -317,7 +329,7 @@ class Vista_Listado_Autor(Vista_Listado):
         self.modelo = Autor
         self.modelo_string = 'autor'
         super(Vista_Listado_Autor,self).__init__(*args,**kwargs)
-        
+
 class Vista_Listado_Editorial(Vista_Listado):
     def __init__(self,*args,**kwargs):
         self.url = 'listado_editoriales.html'

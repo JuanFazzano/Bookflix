@@ -1,6 +1,8 @@
 {% extends "listado.html" %}
-{% block nuevo_modelo%} 
+{% block nuevo_modelo%}
+{% if request.user.is_staff %}
   <button> <a href="/admin/modelos/editorial/add/"> Nueva Editorial </a> </button>
+{% endif %}
 {% endblock %}
 {% block listado %}
       {% for editorial in objeto_pagina %}

@@ -1,13 +1,17 @@
 {% extends "listado.html" %}
-{% block nuevo_modelo%} 
-  <button> <a href="/admin/modelos/autor/add/"> Nuevo Autor </a> </button>
+
+{% block nuevo_modelo%}
+  {% if request.user.is_staff %}
+    <button> <a href="/admin/modelos/autor/add/"> Nuevo Autor </a> </button>
+  {% endif %}
 {% endblock %}
+
 {% block listado %}
         {% for autor in objeto_pagina %}
           <li>
             {{autor.nombre}}
             <button> <a href="/admin/modelos/autor/{{autor.pk}}/change/"> Modificar </a> </button>
-            <button> <a href="#"> Eliminar </a> </button>  
-          </li>  
+            <button> <a href="#"> Eliminar </a> </button>
+          </li>
         {% endfor %}
 {% endblock %}
