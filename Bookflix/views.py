@@ -123,7 +123,7 @@ class Vista_Iniciar_Sesion(View):
                 if not usuario.is_staff:
                     return redirect('/listado_novedades/')
                 else:
-                    return redirect('/admin/')
+                    return redirect('/home_admin/')
             else:
                error = 'Los datos ingresados no son validos'
         self.__contextualizar_formulario(error or '')
@@ -157,6 +157,12 @@ class Vista_Datos_Usuario(View):
 class Vista_Visitante(View):
     def get(self,request):
         return render(request,'visitante.html',{})
+
+class Home_Admin(View):
+    def get(self,request):
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
+        return render(request,'home_admin.html',{})
 
 class Vista_Modificar_Datos_Personales(View):
     def __init__(self,*args,**kwargs):
@@ -264,22 +270,59 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
         tarjeta.empresa = self.formulario.cleaned_data['Empresa']
         tarjeta.save()
 
-class Vista_Detalle_Novedad(View):
-    def get(self,request,id_novedad = None):
+class Vista_Detalle(View):
+    def get(self,request,id = None):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        novedad = Novedad.objects.values('titulo','foto','descripcion').filter(id = id_novedad)[0]
-        novedad['foto']=str(novedad['foto'])
-        return render(request,'detalle_novedad.html',novedad)
+        tuplas = self.modelo.objects.values('titulo','foto','descripcion').filter(id = id)[0]
+        tuplas['id'] = id
+        tuplas['modelo'] = self.modelo_string
+        return render(request,self.url,tuplas)
 
-class Vista_Listado_Novedades(View):
+class Vista_Listado(View):
     def get(self,request):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        novedades = Novedad.objects.all()
-        paginador = Paginator(novedades,2) #Pagina cada 10
+        tuplas = self.modelo.objects.all()
+        paginador = Paginator(tuplas,10) #Pagina cada 10
 
         numero_de_pagina = request.GET.get('page')
         pagina = paginador.get_page(numero_de_pagina) #Me devuelve el objeto de la pagina actualizamos
+        return render(request,self.url, {'objeto_pagina': pagina,'modelo': self.modelo_string})
 
-        return render(request,'listado_novedades.html',{'objeto_pagina': pagina})
+class Vista_Listado_Novedad(Vista_Listado):
+    def __init__(self,*args,**kwargs):
+        self.url = 'listado_novedades.html'
+        self.modelo = Novedad
+        self.modelo_string = 'novedad'
+        super(Vista_Listado_Novedad,self).__init__(*args,**kwargs)
+
+class Vista_Detalle_Novedad(Vista_Detalle):
+    def __init__(self,*args,**kwargs):
+        self.url = 'detalle_novedad.html'
+        self.modelo = Novedad
+        self.modelo_string = 'novedad'
+        super(Vista_Detalle_Novedad,self).__init__(*args,**kwargs)
+
+class Vista_Listado_Genero(Vista_Listado):
+    def __init__(self,*args,**kwargs):
+        self.url = 'listado_genero.html'
+        self.modelo = Genero
+        self.modelo_string = 'genero'
+        super(Vista_Listado_Genero,self).__init__(*args,**kwargs)
+
+
+class Vista_Listado_Autor(Vista_Listado):
+    def __init__(self,*args,**kwargs):
+        self.url = 'listado_autor.html'
+        self.modelo = Autor
+        self.modelo_string = 'autor'
+        super(Vista_Listado_Autor,self).__init__(*args,**kwargs)
+
+
+class Vista_Listado_Editorial(Vista_Listado):
+    def __init__(self,*args,**kwargs):
+        self.url = 'listado_editorial.html'
+        self.modelo = Editoria
+        self.modelo_string = 'editorial'
+        super(Vista_Listado_Editorial,self).__init__(*args,**kwargs)

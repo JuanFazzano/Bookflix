@@ -1,0 +1,38 @@
+{% extends "header.html" %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    {% block link %}
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    {% endblock%}
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    {% block listado_opciones %}
+    <div class="col-sm-4">
+      <ul style="list-style:none; padding-top: 20px;">
+        <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
+        {% if not request.user.is_staff  %}
+          <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none;">                                           Ver Perfil     </a>  </li>
+        {% endif%}
+      </ul>
+    </div>
+    {% endblock %}
+    {% block contenido %}
+
+    {% block detalle %} {% endblock %}
+    {% if request.user.is_staff %}
+      <button> <a href="/admin/modelos/{{modelo}}/{{id}}/change/"> Modificar </a> </button>
+      <button> <a href="#"> Eliminar </a> </button>
+      <!--
+      <button> <a href="/admin/modelos/novedad/{{id}}/delete/"> Eliminar </a> </button>
+        -->
+    {% endif %}
+
+    {% endblock %}
+
+    </ul>
+  </body>
+</html>

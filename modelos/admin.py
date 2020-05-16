@@ -11,6 +11,7 @@ class NovedadAdmin(admin.ModelAdmin):
     list_display=('titulo',)
     list_per_page = 2
     view_only=True
+    
 
 admin.site.site_header = 'Panel de Administracion Bookflix'
 
