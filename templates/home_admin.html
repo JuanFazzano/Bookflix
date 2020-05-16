@@ -11,9 +11,10 @@
   </head>
   <body>
       {% block listado_opciones %}
-      <div class="col-sm-4">
-        <ul style="list-style:none; padding-top: 20px;">
-          <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
+      <div class="col-sm-5">
+        <ul style="list-style:none;  padding-top: 20px;">
+          <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.user}} </li>
+          <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none; color: white;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
         </ul>
       </div>
       {% endblock %}

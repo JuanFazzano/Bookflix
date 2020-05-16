@@ -16,10 +16,11 @@
 <body >
 
   {% block listado_opciones %}
-  <div class="col-sm-4">
+  <div class="col-sm-5">
     <ul style="list-style:none; padding-top: 20px;">
-      <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none;" onclick="return confirm('Estás seguro?')">                  Cerrar Sesión  </a>   </li>
-      <li style="padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;">                  Ver Perfil     </a>  </li>
+      <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;">                                                            {{request.user}}          </a>  </li>
+      <li style="padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none; color:white;">                                                            Ver datos suscripcion     </a>  </li>
+      <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none; color:white;" onclick="return confirm('Estás seguro?')">                  Cerrar Sesión             </a>  </li>
     </ul>
   </div>
 

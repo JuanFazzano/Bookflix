@@ -72,10 +72,10 @@ class FormularioModificarDatosPersonales(forms.Form):
     Nombre = forms.CharField(max_length = 25,show_hidden_initial=True)
     Apellido =forms.CharField(max_length = 25,show_hidden_initial=True)
     Numero_de_tarjeta = forms.CharField(max_length = 16,show_hidden_initial=True)
-    Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
-    DNI_titular = forms.CharField(max_length = 8,show_hidden_initial=True)
-    Empresa= forms.CharField(max_length = 254,show_hidden_initial=True)
-    Codigo_de_seguridad = forms.CharField(max_length = 3,show_hidden_initial=True)
+    Fecha_de_vencimiento = forms.DateField(disabled = True,widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
+    DNI_titular = forms.CharField(disabled = True,show_hidden_initial=True)
+    Empresa= forms.CharField(disabled = True,show_hidden_initial=True)
+    Codigo_de_seguridad = forms.CharField(disabled = True,show_hidden_initial=True)
     Suscripcion=forms.CharField(disabled = True,show_hidden_initial=True)
 
 
