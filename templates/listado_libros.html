@@ -1,5 +1,4 @@
 {% extends "listado.html" %}
-
   {% block nuevo_modelo%}
     {% if request.user.is_staff %}
       <button> <a href="/admin/modelos/libro/add/"> Agregar Libro </a> </button>
@@ -7,20 +6,66 @@
   {% endblock %}
 
 {% block listado %}
+<head>
+  <style>
+        table {
+                width:100%;
+              }
+        table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        }
+        th, td {
+        padding: 15px;
+        text-align: left;
+          }
+        table#t01 tr:nth-child(even) {
+        background-color: #fff;
+        }
+        table#t01 tr:nth-child(odd) {
+        background-color: #fff;
+        }
+        table#t01 th {
+        background-color: black;
+        color: red;
+      }
+    </style>
+</head>
+<table id="t01">
+  <thead>
+    <tr>
+      <th>Titulo</th>
+      {% if request.user.is_staff %}
+      <th>Genero</th>
+      <th>Autor</th>
+      <th>Editorial</th>
+      <th>Opciones</th>
+      {% endif %}
+    </tr>
+  </thead>
+
 {% for libro in objeto_pagina %}
   <li style="margin-top: 10px">
           {% if request.user.is_staff %}
-            Titulo: {{libro.titulo}}
-            Genero: {{libro.genero}}
-            Autor: {{libro.autor}}
-            Editorial: {{libro.editorial}}
-            <button> <a href="#"> Ver </a> </button>
-            <button> <a href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a> </button>
-            <button> <a href="#"> Eliminar </a> </button>
-            <button> <a href="#"> Subir Archivo </a> </button>
+            <tbody>
+            <tr>
+              <td>{{libro.titulo}}</td>
+              <td>{{libro.genero}}</td>
+              <td>{{libro.autor}}</td>
+              <td>{{libro.editorial}}</td>
+              <td><button> <a href="#"> Ver </a> </button>
+              <button> <a href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a> </button>
+              <button> <a href="#"> Eliminar </a> </button>
+              <button> <a href="#"> Subir Archivo </a> </button>
+              </td>
+            </tr>
+            </tbody>
           {% else %}
-            <a href="/detalle_libro/id={{libro.id}}"> {{libro.titulo}}</a>
+          <tbody>
+            <td><a href="/detalle_libro/id={{libro.id}}"> {{libro.titulo}}</a></td>
+          </tbody>
           {% endif %}
   </li>
 {% endfor %}
+</table>
 {% endblock %}
