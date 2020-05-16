@@ -13,11 +13,10 @@
             {{novedad.titulo}}
             <button> <a href="/detalle_novedad/id={{novedad.id}}"> Ver </a> </button>
             <button> <a href="/admin/modelos/novedad/{{novedad.id}}/change/"> Modificar </a> </button>
-            <button> <a href="#"> Eliminar </a> </button>
+            <button> <a href="/admin/modelos/novedad/{{novedad.id}}/delete/"> Eliminar </a> </button>
           {% else %}
             <a href="/detalle_novedad/id={{novedad.id}}"> {{novedad.titulo}}</a>
           {% endif %}
   </li>
 {% endfor %}
 {% endblock %}
- 

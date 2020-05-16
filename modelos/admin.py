@@ -19,6 +19,10 @@ class NovedadAdmin(admin.ModelAdmin):
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_novedades/')
 
+    def response_delete(self, request, obj, post_url_continue=None):
+        return redirect('/listado_novedades/')
+
+
 class GeneroAdmin(admin.ModelAdmin):
     list_per_page = 10
     view_only=True

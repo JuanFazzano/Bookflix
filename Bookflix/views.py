@@ -257,6 +257,7 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
                               )
             tarjeta.save()
 
+
     def validar(self):
         if self.estado:
             self.cargar_tarjeta()
@@ -266,7 +267,7 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
             suscriptor.save()
         tarjeta=Tarjeta.objects.get(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])
         tarjeta.codigo_seguridad = self.formulario.cleaned_data['Codigo_de_seguridad']
-        tarjeta.fecha_de_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
+        tarjeta.fecha_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
         tarjeta.empresa = self.formulario.cleaned_data['Empresa']
         tarjeta.save()
 
