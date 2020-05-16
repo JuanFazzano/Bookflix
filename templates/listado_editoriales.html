@@ -1,8 +1,13 @@
-{% extends "listado.html "%}
+{% extends "listado.html" %}
+{% block nuevo_modelo%} 
+  <button> <a href="/admin/modelos/editorial/add/"> Nueva Editorial </a> </button>
+{% endblock %}
 {% block listado %}
       {% for editorial in objeto_pagina %}
+      <li>
         {{editorial.nombre}}
         <button> <a href="/admin/modelos/editorial/{{editorial.pk}}/change/"> Modificar </a> </button>
         <button> <a href="#"> Eliminar </a> </button>
+      </li>
       {% endfor %}
 {% endblock %}
