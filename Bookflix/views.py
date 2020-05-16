@@ -302,7 +302,6 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
 
-
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
         self.url = 'listado_novedades.html'

@@ -64,14 +64,20 @@
 
         <hr>
 
-        <!-- Seccion de perfiles -------------------------->
+    <!-- Seccion de perfiles -------------------------->
     <section>
       <h2> Perfiles </h2>
       <br>
       <table style="width:50%">
         {% for perfil in perfiles %}
-          <tr>
-          <td> {{perfil}} </td>
+        <tr>
+            <td> {{perfil}} </td>
+            <button>
+                <a href="#"> Modificar </a>
+            </button>
+            <button>
+               <a href="#"> Eliminar </a>
+            </button>
         </tr>
         {%endfor %}
       </table>

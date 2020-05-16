@@ -14,7 +14,22 @@
               <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; margin-right:2px;">
           </a>
       </div>
-      {% block listado_opciones %} {% endblock %}
+      <div class="col-sm-5">
+        <ul style="list-style:none; padding-top: 20px;">
+            {% if not user.is_authenticated %}
+              <li style="padding-left:10px; display:inline;"> <a href="/iniciar_sesion/" style="text-decoration: none; color: white;">   Loguearse  </a>   </li>
+              <li style="padding-left:10px; display:inline;"> <a href="/registro/" style="text-decoration: none; color: white;">         Registrarse </a>  </li>
+              <li style="padding-left:10px; display:inline; ">> <a href="#" style="text-decoration: none; color: white;">                Ayuda       </a>  </li>
+            {% else %}
+            <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.user}} </li>
+            {% if not request.user.is_staff%}
+              <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none; color: white;">  Ver datos suscripcion     </a>  </li>
+            {% endif %}
+            <li style="padding-left:10px; display:inline;"> <a href="{% url 'logout' %}" style="text-decoration: none; color: white;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
+        </ul>
+      </div>
+      {% endif %}
+        
 
   </div>
 </div>

@@ -71,7 +71,7 @@ class FormularioModificarDatosPersonales(forms.Form):
     Email = forms.EmailField(max_length = 254,show_hidden_initial=True)
     Nombre = forms.CharField(max_length = 25,show_hidden_initial=True)
     Apellido =forms.CharField(max_length = 25,show_hidden_initial=True)
-    Numero_de_tarjeta = forms.CharField(max_length = 16,show_hidden_initial=True)
+    Numero_de_tarjeta = forms.CharField(disabled = True,max_length = 16,show_hidden_initial=True)
     Fecha_de_vencimiento = forms.DateField(disabled = True,widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
     DNI_titular = forms.CharField(disabled = True,show_hidden_initial=True)
     Empresa= forms.CharField(disabled = True,show_hidden_initial=True)
@@ -97,38 +97,38 @@ class FormularioModificarDatosPersonales(forms.Form):
             self.datos_cambiados['Email'] = False
         return valor_email_actual
 
-    def clean_DNI_titular(self):
-        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
-        valor_dni_inicial = field_DNI_titular.initial
-        valor_dni_actual = self.cleaned_data['DNI_titular']
-        clean_campo(self,'DNI_titular',8)
-        if (Tarjeta.objects.values('dni_titular').filter(dni_titular = valor_dni_actual).exists()):
-            raise forms.ValidationError('El DNI ya esta registrado en el sistema')
+#    def clean_DNI_titular(self):
+#        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
+#        valor_dni_inicial = field_DNI_titular.initial
+#        valor_dni_actual = self.cleaned_data['DNI_titular']
+#        clean_campo(self,'DNI_titular',8)
+#        if (Tarjeta.objects.values('dni_titular').filter(dni_titular = valor_dni_actual).exists()):
+#            raise forms.ValidationError('El DNI ya esta registrado en el sistema')
+#
+#        if self.__cambio(valor_dni_inicial,valor_dni_actual):
+#            self.datos_cambiados['DNI'] = True
+#        else:
+#            self.datos_cambiados['DNI'] = False
+#        return valor_dni_actual
 
-        if self.__cambio(valor_dni_inicial,valor_dni_actual):
-            self.datos_cambiados['DNI'] = True
-        else:
-            self.datos_cambiados['DNI'] = False
-        return valor_dni_actual
+#    def clean_Codigo_de_seguridad(self):
+#        return clean_campo(self,'Codigo_de_seguridad',3)
 
-    def clean_Codigo_de_seguridad(self):
-        return clean_campo(self,'Codigo_de_seguridad',3)
+#    def clean_Numero_de_tarjeta(self):
+#        field_Numero_de_tarjeta = self.visible_fields()[4] #Me devuelve una instancia del CharField --> campo Numero_de_tarjeta
+#        valor_numero_inicial=field_Numero_de_tarjeta.initial
+#        valor_Numero_actual=self.cleaned_data['Numero_de_tarjeta']
+#        if self.__cambio(valor_numero_inicial,valor_Numero_actual):
+#            clean_campo(self,'Numero_de_tarjeta',16)
+#            self.datos_cambiados['Numero_de_tarjeta'] = True
+#        else:
+#            self.datos_cambiados['Numero_de_tarjeta'] = False
+#        return valor_Numero_actual
 
-    def clean_Numero_de_tarjeta(self):
-        field_Numero_de_tarjeta = self.visible_fields()[4] #Me devuelve una instancia del CharField --> campo Numero_de_tarjeta
-        valor_numero_inicial=field_Numero_de_tarjeta.initial
-        valor_Numero_actual=self.cleaned_data['Numero_de_tarjeta']
-        if self.__cambio(valor_numero_inicial,valor_Numero_actual):
-            clean_campo(self,'Numero_de_tarjeta',16)
-            self.datos_cambiados['Numero_de_tarjeta'] = True
-        else:
-            self.datos_cambiados['Numero_de_tarjeta'] = False
-        return valor_Numero_actual
-
-    def clean_Fecha_de_vencimiento(self):
-        fecha_vencimiento = (self.cleaned_data['Fecha_de_vencimiento'])
-        fecha_hoy = ((datetime.datetime.now()).date())
-        vencida = (fecha_hoy >= fecha_vencimiento)
-        if vencida:
-            raise forms.ValidationError('Tarjeta vencida')
-        return self.cleaned_data['Fecha_de_vencimiento']
+#    def clean_Fecha_de_vencimiento(self):
+#        fecha_vencimiento = (self.cleaned_data['Fecha_de_vencimiento'])
+#        fecha_hoy = ((datetime.datetime.now()).date())
+#        vencida = (fecha_hoy >= fecha_vencimiento)
+#        if vencida:
+#            raise forms.ValidationError('Tarjeta vencida')
+#        return self.cleaned_data['Fecha_de_vencimiento']

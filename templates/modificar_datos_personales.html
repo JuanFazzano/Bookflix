@@ -15,17 +15,6 @@
     <script src='main.js'></script>
 </head>
   <body>
-
-    {% block listado_opciones %}
-    <div class="col-sm-5">
-      <ul style="list-style:none; padding-top: 20px;">
-        <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.user}} </li>
-        <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none; color: white;">                  Ver datos suscripcion     </a>  </li>
-        <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none; color: white;" onclick="return confirm('Estás seguro?')">                  Cerrar Sesión  </a>   </li>
-      </ul>
-    </div>
-    {% endblock %}
-
     {% block contenido %}
       <br> <h2> Modificar datos personales </h2> <br>
       <form method="POST">
