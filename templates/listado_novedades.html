@@ -1,4 +1,7 @@
 {% extends "listado.html" %}
+{% block nuevo_modelo%} 
+  <button> <a href="/admin/modelos/novedad/add/"> Nuevo Novedad </a> </button>
+{% endblock %}
 {% block listado %}
 {% for novedad in objeto_pagina %}
   <li style="margin-top: 10px">
