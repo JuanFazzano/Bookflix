@@ -1,6 +1,5 @@
 {% extends "listado.html" %}
 {% block estilos %}
-      <style>
       #boton_personalizado{
         text-decoration: none;
         top:50px;
@@ -13,7 +12,6 @@
         font-family: "Roboto";
         margin-left: 5px;
       }
-      </style>
 {% endblock %}
 {% block listado %}
     <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/genero/add/"> Agregar Genero </a></p>
@@ -21,7 +19,7 @@
     {% for genero in objeto_pagina %}
       <tr>
         <td style="padding-top: 10px">
-          {{genero.nombre}}    
+          {{genero.nombre}}
         </td>
         <td>
             <a id="boton_personalizado" href="/admin/modelos/genero/{{genero.id}}/change/"> Modificar </a>
