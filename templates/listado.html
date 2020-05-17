@@ -13,27 +13,29 @@
 
   <body>
     {% block contenido %}
-    
-    
-    {% if objeto_pagina %}
-      <ul style="list-style:none; margin-left:500px">
-        <li>
-          {% if objeto_pagina.has_previous %}
-            <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
-          {% endif %}
-          <span>  {{ objeto_pagina.number }}  </span>
-          {% if objeto_pagina.has_next %}
-            <a href="?page={{objeto_pagina.next_page_number}}">  {{objeto_pagina.next_page_number}}  </a>
-          {% endif%}
-        </li>
-      </ul>
-      <ul style="list-style:none;">
-        {% block listado %} {% endblock %}
-      </ul>
+      {% if request.user.is_staff %}
+        {% block agregar_atributo %} {% endblock %}
+      {% endif %}
 
-    {% else %}
-      <h1> No hay {{modelo}} </h1>
-    {% endif %}
+      {% if objeto_pagina %}
+        <ul style="list-style:none; margin-left:500px">
+          <li>
+            {% if objeto_pagina.has_previous %}
+              <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
+            {% endif %}
+            <span>  {{ objeto_pagina.number }}  </span>
+            {% if objeto_pagina.has_next %}
+              <a href="?page={{objeto_pagina.next_page_number}}">  {{objeto_pagina.next_page_number}}  </a>
+            {% endif%}
+          </li>
+        </ul>
+        <ul style="list-style:none;">
+          {% block listado %} {% endblock %}
+        </ul>
+
+      {% else %}
+        <h1> No hay {{modelo}} </h1>
+      {% endif %}
     {% endblock %}
 
   </body>
