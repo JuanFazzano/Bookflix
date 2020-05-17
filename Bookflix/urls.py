@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^listado_editoriales/',views.Vista_Listado_Editorial.as_view()),
     url(r'^listado_autores/',views.Vista_Listado_Autor.as_view()),
     url(r'^listado_libros/',views.Vista_Listado_Libro.as_view()),
+    url(r'^listado_perfiles/',views.Vista_Listado_Perfiles.as_view()),
     url(r'^logout/',views.cerrar_sesion,name="logout"),
 
     #url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),

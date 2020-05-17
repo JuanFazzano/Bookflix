@@ -1,6 +1,16 @@
 {% load static %}
-<head> {% block link %} {% endblock %} {% block estilos %} {% endblock %}</head>
+<head>
+  {% block link %} {% endblock %}
 
+  <style>
+    body {
+      background-color: white;
+    }
+    {% block estilos %} {% endblock %}
+
+  </style>
+
+</head>
 <div class="container-fluid" style="margin: 0px;" >
 
   <div class="row" style=" height: 70px; background-color: #1c1c1f;">
@@ -29,7 +39,7 @@
         </ul>
       </div>
       {% endif %}
-        
+
 
   </div>
 </div>

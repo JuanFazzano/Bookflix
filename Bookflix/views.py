@@ -172,7 +172,7 @@ class Vista_Iniciar_Sesion(View):
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
                 url = str(id_usuario_logueado)+'/'
                 if not usuario.is_staff:
-                    return redirect('/listado_novedades/')
+                    return redirect('/listado_perfiles/')
                 else:
                     return redirect('/home_admin/')
             else:
@@ -336,3 +336,14 @@ class Vista_Listado_Editorial(Vista_Listado):
         self.modelo = Editorial
         self.modelo_string = 'editorial'
         super(Vista_Listado_Editorial,self).__init__(*args,**kwargs)
+
+class Vista_Listado_Perfiles(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
+        return render(request,'listado_perfiles.html',{'perfiles': self.__obtener_perfiles(request.session['_auth_user_id'])})
+
+    def __obtener_perfiles(self,id):
+        lista_nombre_perfiles=list()
+        lista_perfiles=Perfil.objects.values('nombre_perfil','id').filter(auth_id = id)
+        return [diccionario for diccionario in lista_perfiles]

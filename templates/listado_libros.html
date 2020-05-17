@@ -1,6 +1,5 @@
 {% extends "listado.html" %}
 {% block estilos %}
-  <style>
       #boton_personalizado{
         text-decoration: none;
         top:50px;
@@ -34,17 +33,18 @@
         background-color: black;
         color: white;
       }
-  </style>
 {% endblock %}
 
 
+{% block agregar_atributo %}
+  <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/libro/add/"> Agregar Libro </a></p>
+{% endblock %}
 {% block listado %}
   <table id="t01">
     <thead>
       <tr>
         <th>Titulo</th>
         {% if request.user.is_staff %}
-        <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/libro/add/"> Agregar Libro </a></p>
         <th>Genero</th>
         <th>Autor</th>
         <th>Editorial</th>
@@ -65,7 +65,7 @@
                 <td>{{libro.autor}}</td>
                 <td>{{libro.editorial}}</td>
                 <td> - </td>
-                <td>{{libro.ISBN}}</td> 
+                <td>{{libro.ISBN}}</td>
                 <td> <a id="boton_personalizado" href="#"> Ver </a>
                 <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a>
                 <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Eliminar </a>

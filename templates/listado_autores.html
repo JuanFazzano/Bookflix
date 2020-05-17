@@ -22,7 +22,7 @@
     {% for autor in objeto_pagina %}
       <tr>
         <td style="padding-top: 10px">
-          Autor: {{autor.nombre}}    
+        {{autor.nombre}}    
         </td>
         <td>
             <a id="boton_personalizado" href="/admin/modelos/autor/{{autor.id}}/change/"> Modificar </a>
@@ -32,4 +32,3 @@
       {% endfor %}
     </table>
 {% endblock %}
-        
