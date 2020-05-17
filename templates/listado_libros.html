@@ -1,5 +1,33 @@
 {% extends "listado.html" %}
+<<<<<<< HEAD
 {% block estilos %}
+=======
+
+{% block nuevo_modelo%}
+  {% if request.user.is_staff %}
+  <head>
+    <style>
+    #boton_personalizado{
+      text-decoration: none;
+      top:50px;
+      padding: 5px;
+      font-weight: 400;
+      font-size: 12px;
+      color: #ffffff;
+      background-color: black;
+      border-radius: 4px;
+      font-family: "Roboto";
+    }
+    </style>
+  </head>
+    <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/libro/add/"> Agregar Libro </a></p>
+  {% endif %}
+{% endblock %}
+
+
+{% block listado %}
+<head>
+>>>>>>> c84a67962fec631d9850b688dbaabdf14e367cd1
   <style>
       #boton_personalizado{
         text-decoration: none;
@@ -34,6 +62,7 @@
         background-color: black;
         color: white;
       }
+<<<<<<< HEAD
   </style>
 {% endblock %}
 
@@ -57,6 +86,26 @@
     {% for libro in objeto_pagina %}
     <li style="margin-top: 10px">
             {% if request.user.is_staff %}
+=======
+    </style>
+</head>
+
+<table id="t01">
+  <thead>
+    <tr>
+      <th>Titulo</th>
+      {% if request.user.is_staff %}
+      <th>Genero</th>
+      <th>Autor</th>
+      <th>Editorial</th>
+      <th>Opciones</th>
+      {% endif %}
+    </tr>
+  </thead>
+  {% for libro in objeto_pagina %}
+  <li style="margin-top: 10px">
+          {% if request.user.is_staff %}
+>>>>>>> c84a67962fec631d9850b688dbaabdf14e367cd1
 
               <tbody>
               <tr>
@@ -75,7 +124,21 @@
               </tbody>
             {% else %}
             <tbody>
+<<<<<<< HEAD
               <td><a href="/detalle_libro/id={{libro.id}}"> {{libro.titulo}}</a></td>
+=======
+            <tr>
+              <td>{{libro.titulo}}</td>
+              <td>{{libro.genero}}</td>
+              <td>{{libro.autor}}</td>
+              <td>{{libro.editorial}}</td>
+              <td> <a id="boton_personalizado" href="#"> Ver </a>
+              <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a>
+              <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Eliminar </a>
+              <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Subir Archivo </a>
+              </td>
+            </tr>
+>>>>>>> c84a67962fec631d9850b688dbaabdf14e367cd1
             </tbody>
             {% endif %}
     </li>

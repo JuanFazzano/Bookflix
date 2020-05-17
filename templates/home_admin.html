@@ -27,12 +27,35 @@
   </head>
   <body style="background-color:rgba(255,0,0,0.5);">
       {% block contenido %}
+<<<<<<< HEAD
         <ul style="margin-top: 10px">
             <li style="margin-top: 10px; margin-left:120px; display:inline;"> <a id="boton_personalizado"   href="/listado_novedades/">   Ver listado Novedades        </a> </li>
             <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado"   href="/listado_libros/">      Ver listado Libros           </a> </li>
             <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_autores/">     Ver listado Autores          </a> </li>
             <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_generos/">     Ver listado Generos          </a> </li>
             <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_editoriales/"> Ver listado Editoriales      </a> </li>
+=======
+        <ul>
+          <head>
+            <style>
+            #boton_personalizado{
+              text-decoration: none;
+              padding: 5px;
+              font-weight: 400;
+              font-size: 12px;
+              color: #ffffff;
+              background-color: black;
+              border-radius: 4px;
+              font-family: "Roboto";
+            }
+            </style>
+          </head>
+            <li style="margin-top: 10px"> <a id="boton_personalizado"   href="/listado_novedades/">   Ver listado Novedades        </a> </li>
+            <li style="margin-top: 10px"> <a id="boton_personalizado"   href="/listado_libros/">      Ver listado Libros           </a> </li>
+            <li style="margin-top: 10px"> <a id="boton_personalizado" href="/listado_autores/">     Ver listado Autores          </a> </li>
+            <li style="margin-top: 10px"> <a id="boton_personalizado" href="/listado_generos/">     Ver listado Generos          </a> </li>
+            <li style="margin-top: 10px"> <a id="boton_personalizado" href="/listado_editoriales/"> Ver listado Editoriales      </a> </li>
+>>>>>>> c84a67962fec631d9850b688dbaabdf14e367cd1
         </ul>
       {% endblock %}
   </body>
