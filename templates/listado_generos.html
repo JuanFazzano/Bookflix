@@ -1,15 +1,33 @@
 {% extends "listado.html" %}
-{% block nuevo_modelo%}
-{% if request.user.is_staff %}
-  <button> <a href="/admin/modelos/genero/add/"> Nuevo Genero </a> </button>
-{% endif %}
+{% block estilos %}
+      <style>
+      #boton_personalizado{
+        text-decoration: none;
+        top:50px;
+        padding: 5px;
+        font-weight: 400;
+        font-size: 12px;
+        color: #ffffff;
+        background-color: black;
+        border-radius: 4px;
+        font-family: "Roboto";
+        margin-left: 5px;
+      }
+      </style>
 {% endblock %}
 {% block listado %}
-      {% for genero in objeto_pagina %}
-      <li>
-        {{genero.nombre}}
-        <button> <a href="/admin/modelos/genero/{{genero.pk}}/change/"> Modificar </a> </button>
-        <button> <a href="#"> Eliminar </a> </button>
-      </li>
+    <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/genero/add/"> Agregar Genero </a></p>
+    <table>
+    {% for genero in objeto_pagina %}
+      <tr>
+        <td style="padding-top: 10px">
+          Autor: {{genero.nombre}}    
+        </td>
+        <td>
+            <a id="boton_personalizado" href="/admin/modelos/genero/{{genero.id}}/change/"> Modificar </a>
+            <a id="boton_personalizado" href="#"> Eliminar </a>
+        </td>
+      </tr>
       {% endfor %}
+    </table>
 {% endblock %}

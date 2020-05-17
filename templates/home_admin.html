@@ -6,17 +6,33 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     {% endblock%}
+    {% block estilos %}
+        <style>
+            #boton_personalizado{
+              text-decoration: none;
+              padding: 10px;
+              font-weight: 400;
+              font-size: 12px;
+              color: #ffffff;
+              background-color: black;
+              border-radius: 4px;
+              font-family: "Roboto";
+            }
+        </style>
+    {% endblock %}
     <meta charset="utf-8">
     <title></title>
+
+
   </head>
-  <body>
+  <body style="background-color:rgba(255,0,0,0.5);">
       {% block contenido %}
-        <ul>
-            <li> <a href="/listado_novedades/">   Ver listado Novedades        </a> </li>
-            <li> <a href="/listado_libros/">      Ver listado Libros           </a> </li>
-            <li> <a href="/listado_autores/">     Ver listado Autores          </a> </li>
-            <li> <a href="/listado_generos/">     Ver listado Generos          </a> </li>
-            <li> <a href="/listado_editoriales/"> Ver listado Editoriales      </a> </li>
+        <ul style="margin-top: 10px">
+            <li style="margin-top: 10px; margin-left:120px; display:inline;"> <a id="boton_personalizado"   href="/listado_novedades/">   Ver listado Novedades        </a> </li>
+            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado"   href="/listado_libros/">      Ver listado Libros           </a> </li>
+            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_autores/">     Ver listado Autores          </a> </li>
+            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_generos/">     Ver listado Generos          </a> </li>
+            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_editoriales/"> Ver listado Editoriales      </a> </li>
         </ul>
       {% endblock %}
   </body>

@@ -90,7 +90,7 @@ class Vista_Registro(View):
                               )
             tarjeta.save()
 
-    def __cargar_usuario_suscriptor(self,formulario,id):
+    def __cargar_usuario_suscriptor(self,formulario):
         """
             Carga los datos del suscriptor en la tabla modelos_suscriptor, modelos_usuario y auth_user
         """
@@ -102,9 +102,9 @@ class Vista_Registro(View):
         nombre = formulario.cleaned_data['Nombre']
         suscripcion = formulario.cleaned_data['Suscripcion']
 
-        estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(auth_id = id,formulario_nuevo = formulario)
+        #el auth_id que se pasa por parámetro no se usa. Pusimos 0 para que no se rompa. TODO sacarlo y poser el parámetro como opcional
+        estrategia_numero_de_tarjeta = Estrategia_Numero_de_tarjeta(auth_id = 0,formulario_nuevo = formulario)
         estrategia_numero_de_tarjeta.cargar_tarjeta()
-        #self.__cargar_tarjeta(formulario)
 
         #Cargamos el modelos User de auth_user
         model_usuario = User.objects.create_user(username = email, password=contrasena ) #Se guarda en la tabla auth_user
@@ -140,7 +140,7 @@ class Vista_Registro(View):
     def post(self,request):
         formulario = FormularioRegistro(request.POST)
         if formulario.is_valid():
-            self.__cargar_usuario_suscriptor(formulario,request.session['_auth_user_id'])
+            self.__cargar_usuario_suscriptor(formulario)
             return redirect('/')
         self.contexto['formulario'] =  formulario
         return render(request,'registro.html',self.contexto)

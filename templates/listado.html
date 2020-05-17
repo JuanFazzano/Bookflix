@@ -13,7 +13,8 @@
 
   <body>
     {% block contenido %}
-    {% block nuevo_modelo %} {% endblock %}
+    
+    
     {% if objeto_pagina %}
       <ul style="list-style:none; margin-left:500px">
         <li>
@@ -26,22 +27,10 @@
           {% endif%}
         </li>
       </ul>
-
       <ul style="list-style:none;">
         {% block listado %} {% endblock %}
       </ul>
 
-      <ul style="list-style:none; margin-left:500px">
-        <li>
-          {% if objeto_pagina.has_previous %}
-            <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
-          {% endif%}
-          <span>  {{ objeto_pagina.number }}  </span>
-          {% if objeto_pagina.has_next %}
-          <a href="?page={{objeto_pagina.next_page_number}}">  {{objeto_pagina.next_page_number}}  </a>
-          {% endif%}
-        </li>
-      </ul>
     {% else %}
       <h1> No hay {{modelo}} </h1>
     {% endif %}

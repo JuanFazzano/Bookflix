@@ -28,7 +28,7 @@ class FormularioRegistro(forms.Form):
     Numero_de_tarjeta = forms.CharField(max_length = 16)
     Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]))
     DNI_titular = forms.CharField(max_length = 8)
-    Empresa= forms.CharField(max_length = 7)
+    Empresa= forms.CharField(max_length = 254)
     Codigo_de_seguridad = forms.CharField(max_length = 3)
     Suscripcion=forms.CharField(widget=forms.Select(choices=tipo_suscripcion))
 
