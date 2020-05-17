@@ -1,7 +1,6 @@
 {% extends "listado.html" %}
 
 {% block estilos %}
-      <style>
       #boton_personalizado{
         text-decoration: none;
         top:50px;
@@ -14,13 +13,14 @@
         font-family: "Roboto";
         margin-left: 5px;
       }
-      </style>
+{% endblock %}
+{% block agregar_atributo %}
+  <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/novedad/add/"> Agregar Novedad </a></p>
 {% endblock %}
 {% block listado %}
   {% for novedad in objeto_pagina %}
     <li style="margin-top: 10px">
         {% if request.user.is_staff %}
-          <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/novedad/add/"> Agregar Novedad </a></p>
             {{novedad.titulo}}
             <a id="boton_personalizado" href="/detalle_novedad/id={{novedad.id}}"> Ver </a>
             <a id="boton_personalizado" href="/admin/modelos/novedad/{{novedad.id}}/change/"> Modificar </a>
