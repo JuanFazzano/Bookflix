@@ -1,12 +1,6 @@
 {% extends "listado.html" %}
 
-<<<<<<< HEAD
 {% block estilos %}
-=======
-  {% block nuevo_modelo%}
-    {% if request.user.is_staff %}
-    <head>
->>>>>>> c84a67962fec631d9850b688dbaabdf14e367cd1
       <style>
       #boton_personalizado{
         text-decoration: none;
@@ -18,20 +12,10 @@
         background-color: black;
         border-radius: 4px;
         font-family: "Roboto";
-<<<<<<< HEAD
         margin-left: 5px;
       }
       </style>
 {% endblock %}
-=======
-      }
-      </style>
-    </head>
-      <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/novedad/add/"> Agregar Novedad </a></p>
-    {% endif %}
-  {% endblock %}
-
->>>>>>> c84a67962fec631d9850b688dbaabdf14e367cd1
 {% block listado %}
   {% for novedad in objeto_pagina %}
     <li style="margin-top: 10px">
