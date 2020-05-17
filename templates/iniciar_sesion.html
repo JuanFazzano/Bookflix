@@ -37,13 +37,15 @@
     <script src='main.js'></script>
 </head>
 <body style="margin: 0px;">
-   {% block contenido %}
-        <form method="POST" style="margin-top:20px; margin-left: 400px; color:black;">
+    {% block contenido %}
+    <div style="margin-left: 400px;">
+        <form method="POST" style="margin-top:20px; color:black;">
             {% csrf_token %}
             {{formulario.as_p}}
             <input id="boton_personalizado" style="width:400px;" type="submit" value= "Iniciar">
         </form>
         {{caso}}
+    </div>
     {% endblock %}
     
 </body>
