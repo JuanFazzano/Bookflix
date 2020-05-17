@@ -21,7 +21,7 @@
     {% for editorial in objeto_pagina %}
       <tr>
         <td style="padding-top: 10px">
-          Autor: {{editorial.nombre}}    
+        {{editorial.nombre}}    
         </td>
         <td>
             <a id="boton_personalizado" href="/admin/modelos/editorial/{{editorial.id}}/change/"> Modificar </a>
@@ -31,4 +31,3 @@
       {% endfor %}
     </table>
 {% endblock %}
-
