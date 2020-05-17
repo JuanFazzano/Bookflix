@@ -21,8 +21,8 @@
     {% block detalle %} {% endblock %}
     {% if request.user.is_staff %}
       <br>
-       <a id="boton_personalizado" href="/admin/modelos/{{modelo}}/{{id}}/change/"> Modificar </a> 
-       <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Eliminar </a> 
+       <a id="boton_personalizado" href="/admin/modelos/{{modelo}}/{{id}}/change/"> Modificar </a>
+       <a style="margin-left: 5px" id="boton_personalizado" href="/admin/modelos/{{modelo}}/{{id}}/delete/"> Eliminar </a>
       <!--
       <button> <a href="/admin/modelos/novedad/{{id}}/delete/"> Eliminar </a> </button>
         -->
@@ -30,6 +30,5 @@
 
     {% endblock %}
 
-    </ul>
   </body>
 </html>
