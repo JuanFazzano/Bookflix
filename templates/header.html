@@ -19,7 +19,7 @@
          {% if request.user.is_staff%}
             <a href="/home_admin/">
          {% else %}
-            <a href="/listado_novedades/" >
+            <a href="/listado_perfiles/" >
           {% endif %}
               <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; margin-right:2px;">
           </a>
@@ -27,7 +27,7 @@
       <div class="col-sm-5">
         <ul style="list-style:none; padding-top: 20px;">
             {% if not user.is_authenticated %}
-              <li style="padding-left:10px; display:inline;"> <a href="/iniciar_sesion/" style="text-decoration: none; color: white;">   Loguearse  </a>   </li>
+              <li style="padding-left:10px; display:inline;"> <a href="/iniciar_sesion/" style="text-decoration: none; color: white;">   Iniciar Sesión  </a>   </li>
               <li style="padding-left:10px; display:inline;"> <a href="/registro/" style="text-decoration: none; color: white;">         Registrarse </a>  </li>
               <li style="padding-left:10px; display:inline; ">> <a href="#" style="text-decoration: none; color: white;">                Ayuda       </a>  </li>
             {% else %}
