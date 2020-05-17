@@ -1,9 +1,4 @@
 {% extends "listado.html" %}
-  {% block nuevo_modelo%}
-    {% if request.user.is_staff %}
-      <button> <a href="/admin/modelos/libro/add/"> Agregar Libro </a> </button>
-    {% endif %}
-  {% endblock %}
 
 {% block listado %}
 <head>
@@ -27,8 +22,18 @@
         }
         table#t01 th {
         background-color: black;
-        color: red;
+        color: white;
       }
+      #boton_personalizado{
+            text-decoration: none;
+            padding: 10px;
+            font-weight: 400;
+            font-size: 12px;
+            color: #ffffff;
+            background-color: black;
+            border-radius: 4px;
+            font-family: "Roboto";
+        }
     </style>
 </head>
 
@@ -45,19 +50,21 @@
     </tr>
   </thead>
 
-{% for libro in objeto_pagina %}
+  <a id="boton_personalizado" style="margin-right: 20px;" href="/admin/modelos/libro/add/"> Agregar Libro </a>
+  {% for libro in objeto_pagina %}
   <li style="margin-top: 10px">
           {% if request.user.is_staff %}
+
             <tbody>
             <tr>
               <td>{{libro.titulo}}</td>
               <td>{{libro.genero}}</td>
               <td>{{libro.autor}}</td>
               <td>{{libro.editorial}}</td>
-              <td><button> <a href="#"> Ver </a> </button>
-              <button> <a href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a> </button>
-              <button> <a href="#"> Eliminar </a> </button>
-              <button> <a href="#"> Subir Archivo </a> </button>
+              <td> <a id="boton_personalizado" href="#"> Ver </a> 
+              <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a> 
+              <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Eliminar </a> 
+              <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Subir Archivo </a>
               </td>
             </tr>
             </tbody>
