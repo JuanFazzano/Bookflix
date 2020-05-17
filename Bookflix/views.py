@@ -207,6 +207,10 @@ class Vista_Datos_Usuario(View):
 
 class Vista_Visitante(View):
     def get(self,request):
+        if request.user.is_authenticated:
+            if request.user.is_staff:
+                return redirect('/home_admin/')
+            return redirect('/listado_perfiles/')
         return render(request,'visitante.html',{})
 
 class Home_Admin(View):
