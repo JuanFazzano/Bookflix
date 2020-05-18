@@ -36,7 +36,7 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
         self.auth_id = auth_id
         super(Estrategia_Numero_de_tarjeta,self).__init__(estado,formulario_nuevo,valores_iniciales)
 
-    def cargar_tarjeta(self):
+    def __cargar_tarjeta(self):
         "Este metodo carga la tarjeta en caso de no existir"
         numero_tarjeta=  self.formulario.cleaned_data['Numero_de_tarjeta']
         if not Tarjeta.objects.filter(nro_tarjeta = numero_tarjeta).exists():
@@ -53,6 +53,22 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
                               )
             tarjeta.save()
 
+    def cargar_tarjeta(self):
+        "Este metodo carga la tarjeta en caso de no existir"
+        numero_tarjeta=  self.formulario.cleaned_data['Numero_de_tarjeta']
+
+        #Como no existe la tarjeta, la cargamos en la Base de datos
+        empresa= self.formulario.cleaned_data['Empresa']
+        DNI_titular=self.formulario.cleaned_data['DNI_titular']
+        fecha_de_vencimiento= self.formulario.cleaned_data['Fecha_de_vencimiento']
+        Codigo_de_seguridad= self.formulario.cleaned_data['Codigo_de_seguridad']
+        tarjeta = Tarjeta(nro_tarjeta = numero_tarjeta,
+                          codigo_seguridad = Codigo_de_seguridad,
+                          empresa = empresa,
+                          fecha_vencimiento = fecha_de_vencimiento,
+                          dni_titular = DNI_titular
+                          )
+        tarjeta.save()
 
     def validar(self):
         if self.estado:
