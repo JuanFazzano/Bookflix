@@ -48,7 +48,10 @@ class FormularioRegistro(forms.Form):
         return clean_campo(self,'Codigo_de_seguridad',3)
 
     def clean_Numero_de_tarjeta(self):
-        return clean_campo(self,'Numero_de_tarjeta',16)
+        campo=clean_campo(self,'Numero_de_tarjeta',16)
+        if Tarjeta.objects.filter(nro_tarjeta = campo).exists():
+            raise forms.ValidationError('El numero de tarjeta ya se encuentra registrado en el sistema')
+        return campo
 
     def clean_Fecha_de_vencimiento(self):
         fecha_vencimiento = (self.cleaned_data['Fecha_de_vencimiento'])
