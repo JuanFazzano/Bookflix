@@ -82,13 +82,14 @@
     <!-- Seccion de perfiles -------------------------->
     <div>
       <h2> Perfiles </h2>
+      <a id="boton_personalizado" href="#" style="margin-left:10px;"> Crear perfil </a>
       <table>
         {% for perfil in perfiles %}
         <tr>
             <td style="padding-top:10px;"> {{perfil}} </td>
             <td>
-                <a id="boton_personalizado" href="#" style="margin-left:10px;"> MODIFICAR </a>
-                <a id = "boton_personalizado" href="#" class="boton_personalizado" style="margin-left: 10px;"> ELIMINAR </a>
+                <a id="boton_personalizado" href="#" style="margin-left:10px;"> Modificar </a>
+                <a id = "boton_personalizado" href="#" class="boton_personalizado" style="margin-left: 10px;"> Eliminar </a>
             </td>
         </tr>
         {%endfor %}
