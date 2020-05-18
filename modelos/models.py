@@ -23,7 +23,7 @@ class Suscriptor(models.Model):
         verbose_name_plural = 'Suscriptores'
 
     auth = models.OneToOneField(User,primary_key = True, on_delete = models.CASCADE)
-    nro_tarjeta = models.ForeignKey(Tarjeta, null=False, on_delete=models.CASCADE)
+    nro_tarjeta = models.OneToOneField(Tarjeta, null=False, on_delete=models.CASCADE)
     tipo_suscripcion = models.ForeignKey(Tipo_Suscripcion, null=False, on_delete=models.CASCADE)
     fecha_suscripcion = models.DateField(null=False)
     nombre = models.CharField(max_length = 25, blank=False, null=False)
