@@ -320,14 +320,14 @@ class Vista_Listado(View):
 
 class Vista_Listado_Libro(Vista_Listado):
     def __init__(self,*args,**kwargs):
-        self.url = 'listado_libros.html'
+        self.url = 'listado_libro.html'
         self.modelo = Libro
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
 
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
-        self.url = 'listado_novedades.html'
+        self.url = 'listado_novedad.html'
         self.modelo = Novedad
         self.modelo_string = 'novedad'
         super(Vista_Listado_Novedad,self).__init__(*args,**kwargs)
@@ -341,21 +341,21 @@ class Vista_Detalle_Novedad(Vista_Detalle):
 
 class Vista_Listado_Genero(Vista_Listado):
     def __init__(self,*args,**kwargs):
-        self.url = 'listado_generos.html'
+        self.url = 'listado_genero.html'
         self.modelo = Genero
         self.modelo_string = 'genero'
         super(Vista_Listado_Genero,self).__init__(*args,**kwargs)
 
 class Vista_Listado_Autor(Vista_Listado):
     def __init__(self,*args,**kwargs):
-        self.url = 'listado_autores.html'
+        self.url = 'listado_autor.html'
         self.modelo = Autor
         self.modelo_string = 'autor'
         super(Vista_Listado_Autor,self).__init__(*args,**kwargs)
 
 class Vista_Listado_Editorial(Vista_Listado):
     def __init__(self,*args,**kwargs):
-        self.url = 'listado_editoriales.html'
+        self.url = 'listado_editorial.html'
         self.modelo = Editorial
         self.modelo_string = 'editorial'
         super(Vista_Listado_Editorial,self).__init__(*args,**kwargs)
