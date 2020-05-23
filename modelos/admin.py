@@ -14,54 +14,53 @@ class NovedadAdmin(admin.ModelAdmin):
     view_only=True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect('/listado_novedades/')
+        return redirect('/listado_novedad/')
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_novedades/')
+        return redirect('/listado_novedad/')
 
     def response_delete(self, request, obj, post_url_continue=None):
-        return redirect('/listado_novedades/')
-
+        return redirect('/listado_novedad/')
 
 class GeneroAdmin(admin.ModelAdmin):
     list_per_page = 10
     view_only=True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect('/listado_generos/')
+        return redirect('/listado_genero/')
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_generos/')
+        return redirect('/listado_genero/')
 
 class AutorAdmin(admin.ModelAdmin):
     list_per_page = 10
     view_only=True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect('/listado_autores/')
+        return redirect('/listado_autor/')
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_autores/')
+        return redirect('/listado_autor/')
 
 class EditorialAdmin(admin.ModelAdmin):
     list_per_page = 10
     view_only=True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect('/listado_editoriales/')
+        return redirect('/listado_editorial/')
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_editoriales/')
+        return redirect('/listado_editorial/')
 
 class LibroAdmin(admin.ModelAdmin):
     list_per_page = 10
     view_only=True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect('/listado_libros/')
+        return redirect('/listado_libro/')
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_libros/')
+        return redirect('/listado_libro/')
 
     def get_form(self, request, obj=None, **kwargs):
         #Deshabilita los botones de agregar y modificar de los campos many to many genero, autor y editorial
@@ -81,10 +80,10 @@ class EditorialAdmin(admin.ModelAdmin):
     view_only=True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect('/listado_editoriales/')
+        return redirect('/listado_editorial/')
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_editoriales/')
+        return redirect('/listado_editorial/')
 
 
 admin.site.site_header = 'Panel de Administracion Bookflix'
