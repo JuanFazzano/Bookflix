@@ -1,0 +1,11 @@
+{% extends “admin/change_form.html” %}
+{% load i18n %}
+{% block submit_buttons_bottom %}
+{{ block.super }}
+<div class=”submit-row list-group”>
+<button type=”button” title=”Cancel” class=”list-group-item active” name=”_cancel” onclick=”location.href=’/admin/order/project/’;”>
+<span class=”glyphicon step-backward”></span>
+<span class=”text”>Cancel</span>
+</button>
+</div>
+{% endblock %}
