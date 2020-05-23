@@ -45,53 +45,25 @@
     {{ adminform.form.non_field_errors }}
 {% endif %}
 
-<<<<<<< HEAD
-=======
-
-<!-- Personalizado para que muestra el formulario con el valor inicial -->
->>>>>>> 818b2a1cf48c708faf6e924f69a6ed15fd9c2738
 {% for field_sets in adminform %}
  {% for line in field_sets %}
   {% for field in line %}
     <!--Si hay algo en el valor inicial-->
     {% if field.field.initial %}
-<<<<<<< HEAD
       {{field.field.initial}}
-=======
-      {{field.field.initial}} 
->>>>>>> 818b2a1cf48c708faf6e924f69a6ed15fd9c2738
+     
     {% endif %}
     {{field.name}}
     {{field.label_tag}}
     <br>
     {{field.field}}
-<<<<<<< HEAD
+
     <br> <br>
   {% endfor %}
  {% endfor %}
 {% endfor %}
 
-<!--
-{% block field_sets %}
-{% for fieldset in adminform %}
-  {% include "admin/includes/fieldset.html" %}
-{% endfor %}
-{% endblock %}
-=======
-    <br> <br> 
-  {% endfor %}
- {% endfor %}
-{% endfor %}
 
-<!--
-  {% block field_sets %}
-  {% for fieldset in adminform %}
-    {% include "admin/includes/fieldset.html" %}
-  {% endfor %}
-  {% endblock %}
-
->>>>>>> 818b2a1cf48c708faf6e924f69a6ed15fd9c2738
--->
 
 {% block after_field_sets %}{% endblock %}
 
