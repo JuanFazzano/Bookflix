@@ -22,8 +22,7 @@
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
   data-admin-utc-offset="{% now "Z" %}">
 
-
-  <div class="container-fluid" style="margin: 0px;" >
+  <header class="container-fluid" style="margin: 0px;" >
     <div class="row" style=" height: 70px; background-color: #1c1c1f;">
         <div class="col-sm-8">
           <a href="/home_admin/">
@@ -36,26 +35,27 @@
           </ul>
         </div>
     </div>
-  </div>
-
+  </header>
 
   {% block messages %}
   {% if messages %}
-  <ul class="messagelist">{% for message in messages %}
-  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
-  {% endfor %}</ul>
+    <ul class="messagelist">
+    {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+    {% endfor %}
+    </ul>
   {% endif %}
   {% endblock messages %}
-  <!-- Content -->
+    <!-- Content -->
   <div id="content" class="{% block coltype %}colM{% endblock %}">
-  {% block pretitle %}{% endblock %}
-  {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
-  {% block content %}
-  {% block object-tools %}{% endblock %}
-  {{ content }}
-  {% endblock %}
-  {% block sidebar %}{% endblock %}
-  <br class="clear">
+    {% block pretitle %}{% endblock %}
+    {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+    {% block content %}
+    {% block object-tools %}{% endblock %}
+    {{ content }}
+    {% endblock %}
+    {% block sidebar %}{% endblock %}
+    <br class="clear">
   </div>
 
   {% block footer %}<div id="footer"></div>{% endblock %}

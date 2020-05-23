@@ -295,10 +295,13 @@ class Vista_Detalle(View):
     def get(self,request,id = None):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        tuplas = self.modelo.objects.values('titulo','foto','descripcion').filter(id = id)[0]
-        tuplas['id'] = id
-        tuplas['modelo'] = self.modelo_string
-        return render(request,self.url,tuplas)
+        try:
+            tuplas = self.modelo.objects.values('titulo','foto','descripcion').filter(id = id)[0]
+            tuplas['id'] = id
+            tuplas['modelo'] = self.modelo_string
+            return render(request,self.url,tuplas)
+        except:
+            return redirect('/')
 
 class Vista_Listado(View):
     def get(self,request):

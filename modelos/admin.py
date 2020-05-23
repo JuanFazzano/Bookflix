@@ -86,6 +86,7 @@ class EditorialAdmin(admin.ModelAdmin):
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_editoriales/')
 
+
 admin.site.site_header = 'Panel de Administracion Bookflix'
 
 #Saca los modelos que no queremos que se interactúen
