@@ -148,7 +148,7 @@ class Trailer(models.Model):
         verbose_name_plural = 'Trailers'
     titulo          = models.CharField(unique = True, max_length=255, default = None)
     descripcion     = models.TextField(null = False,default=None)
-    libro_asociado  = models.OneToOneField(Libro,null = True, blank = True,on_delete = models.CASCADE)
+    libro_asociado  = models.ForeignKey(Libro,null = True, blank = True,on_delete = models.CASCADE)
     pdf             = models.FileField(null = True, blank = True)
     video           = models.FileField(null = True, blank = True)
 
