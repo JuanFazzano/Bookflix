@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 
 class Tarjeta(models.Model):
-    nro_tarjeta = models.CharField(unique = True, max_length = 16)
+    nro_tarjeta = models.CharField(max_length = 16)
     fecha_vencimiento = models.DateField(null=False)
     dni_titular = models.CharField(unique = True, max_length = 8,null=False)
     empresa = models.CharField(max_length = 254,null=False)
