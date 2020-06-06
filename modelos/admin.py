@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
-from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad
+from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad,Trailer
 
 class NovedadAdmin(admin.ModelAdmin):
     list_display=('titulo',)
@@ -85,7 +85,22 @@ class EditorialAdmin(admin.ModelAdmin):
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_editorial/')
 
+class TrailerAdmin(admin.ModelAdmin):
+    view_only     = True
+    list_per_page = 10
+    #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
+    def response_add(self, request, obj, post_url_continue=None):
+        return redirect('/listado_editorial/')
 
+    def response_change(self, request, obj, post_url_continue=None):
+        return redirect('/listado_editorial/')
+
+    def get_form(self, request, obj=None, **kwargs):
+        #Deshabilita los botones de agregar y modificar de los campos many to many genero, autor y editorial
+        form = super(TrailerAdmin, self).get_form(request, obj, **kwargs)
+        form.base_fields['libro_asociado'].widget.can_add_related = False
+        form.base_fields['libro_asociado'].widget.can_change_related = False
+        return form
 admin.site.site_header = 'Panel de Administracion Bookflix'
 
 #Saca los modelos que no queremos que se interactúen
@@ -99,3 +114,4 @@ admin.site.register(Libro,LibroAdmin)
 admin.site.register(Genero,GeneroAdmin)
 admin.site.register(Editorial,EditorialAdmin)
 admin.site.register(Autor,AutorAdmin)
+admin.site.register(Trailer,TrailerAdmin)
