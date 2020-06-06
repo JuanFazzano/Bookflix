@@ -143,7 +143,14 @@ class Novedad(models.Model):
         return self.titulo
 
 class Trailer(models.Model):
-    pass
+    class Meta:
+        verbose_name        = 'Trailer'
+        verbose_name_plural = 'Trailers'
+    titulo          = models.CharField(unique = True, max_length=255, default = None)
+    descripcion     = models.TextField(null = False,default=None)
+    libro_asociado  = models.OneToOneField(Libro,null = True, blank = True,on_delete = models.CASCADE)
+    pdf             = models.FileField(null = True, blank = True)
+    video           = models.FileField(null = True, blank = True)
 
 class Posee_trailer(models.Model):
     trailer = models.OneToOneField(Trailer, on_delete=models.CASCADE)
