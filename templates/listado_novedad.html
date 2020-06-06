@@ -24,7 +24,7 @@
             {% if request.user.is_staff %}
                 <td style="padding-top:12px;"> {{novedad.titulo}} </td>
                 <td>
-                  <a id="boton_personalizado" href="/detalle_novedad/id={{novedad.id}}"> Ver </a>
+                  <a id="boton_personalizado" href="/detalle_novedad/id={{novedad.id}} "> Ver </a>
                   <a id="boton_personalizado" href="/admin/modelos/novedad/{{novedad.id}}/change/"> Modificar </a>
                   <a id="boton_personalizado" href="/admin/modelos/novedad/{{novedad.id}}/delete/"> Eliminar </a>
                 </td>

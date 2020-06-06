@@ -9,7 +9,7 @@ from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
 from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales
-from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Libro,Perfil,Novedad
+from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 def cerrar_sesion(request):
     #Cierra la sesion del usuario, y lo redireccion al /
@@ -296,7 +296,7 @@ class Vista_Detalle(View):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         try:
-            tuplas = self.modelo.objects.values('titulo','foto','descripcion').filter(id = id)[0]
+            tuplas = self.modelo.objects.values().filter(id = id)[0]
             tuplas['id'] = id
             tuplas['modelo'] = self.modelo_string
             return render(request,self.url,tuplas)
@@ -370,3 +370,10 @@ class Vista_Listado_Perfiles(View):
         lista_nombre_perfiles=list()
         lista_perfiles=Perfil.objects.values('nombre_perfil','id').filter(auth_id = id)
         return [diccionario for diccionario in lista_perfiles]
+
+class Vista_Detalle_Trailer(Vista_Detalle):
+    def __init__(self,*args,**kwargs):
+        self.url = 'detalle_trailer.html'
+        self.modelo = Trailer
+        self.modelo_string = 'trailer'
+        super(Vista_Detalle_Trailer,self).__init__(*args,**kwargs)

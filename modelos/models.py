@@ -152,6 +152,8 @@ class Trailer(models.Model):
     pdf             = models.FileField(null = True, blank = True)
     video           = models.FileField(null = True, blank = True)
 
+    def __str__(self):
+        return self.titulo
 class Posee_trailer(models.Model):
     trailer = models.OneToOneField(Trailer, on_delete=models.CASCADE)
     libro = models.ForeignKey(Libro, on_delete=models.CASCADE)

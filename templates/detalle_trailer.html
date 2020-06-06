@@ -1,0 +1,14 @@
+{% extends "detalle.html" %}
+
+{% block detalle %}
+    <ul style="list-style:none;">
+        <li> <h1> Trailer {{titulo}} </h1> </li>
+        <li> <h1> Trailer {{descripcion}}</h1> </li>
+        {% if video %}
+          <li>
+            <video width="320" height="240">
+                <source src="{% static video %}">
+            </video>
+          </li>
+        {% endif %}
+{% endblock %}
