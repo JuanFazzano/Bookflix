@@ -38,24 +38,24 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
 
     def __cargar_tarjeta(self):
         "Este metodo carga la tarjeta en caso de no existir"
-        numero_tarjeta=  self.formulario.cleaned_data['Numero_de_tarjeta']
-        if not Tarjeta.objects.filter(nro_tarjeta = numero_tarjeta).exists():
-            #Como no existe la tarjeta, la cargamos en la Base de datos
-            empresa= self.formulario.cleaned_data['Empresa']
-            DNI_titular=self.formulario.cleaned_data['DNI_titular']
-            fecha_de_vencimiento= self.formulario.cleaned_data['Fecha_de_vencimiento']
-            Codigo_de_seguridad= self.formulario.cleaned_data['Codigo_de_seguridad']
-            tarjeta = Tarjeta(nro_tarjeta = numero_tarjeta,
-                              codigo_seguridad = Codigo_de_seguridad,
-                              empresa = empresa,
-                              fecha_vencimiento = fecha_de_vencimiento,
-                              dni_titular = DNI_titular
-                              )
-            tarjeta.save()
+        #if not Tarjeta.objects.filter(nro_tarjeta = numero_tarjeta).exists():
+        #Como no existe la tarjeta, la cargamos en la Base de datos
+        empresa= self.formulario.cleaned_data['Empresa']
+        numero_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta']
+        DNI_titular=self.formulario.cleaned_data['DNI_titular']
+        fecha_de_vencimiento= self.formulario.cleaned_data['Fecha_de_vencimiento']
+        Codigo_de_seguridad= self.formulario.cleaned_data['Codigo_de_seguridad']
+        tarjeta = Tarjeta(nro_tarjeta = numero_tarjeta,
+                          codigo_seguridad = Codigo_de_seguridad,
+                          empresa = empresa,
+                          fecha_vencimiento = fecha_de_vencimiento,
+                          dni_titular = DNI_titular
+                          )
+        tarjeta.save()
 
     def cargar_tarjeta(self):
         "Este metodo carga la tarjeta en caso de no existir"
-        numero_tarjeta=  self.formulario.cleaned_data['Numero_de_tarjeta']
+        numero_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta']
 
         #Como no existe la tarjeta, la cargamos en la Base de datos
         empresa= self.formulario.cleaned_data['Empresa']
@@ -128,7 +128,7 @@ class Vista_Registro(View):
 
         #Tomamos las Claves foraneas
         auth_id = User.objects.values('id').get(username=email)['id']
-        id_tarjeta = Tarjeta.objects.values('id').get(nro_tarjeta = numero_tarjeta)['id']
+        id_tarjeta = Tarjeta.objects.values('id').get(dni_titular = dni_titular)['id']
         id_suscripcion = Tipo_Suscripcion.objects.values('id').get(tipo_suscripcion = suscripcion)['id']
 
 
