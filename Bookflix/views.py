@@ -399,20 +399,32 @@ class Vista_Formulario_Libro_Completo(View):
         return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
 
     def __guardar_libro_completo(self,formulario,id):
+        "----Guarda el archivo en la carpeta static--------"
         archivo_pdf = formulario.cleaned_data['pdf']
         fs = FileSystemStorage()
         fs.save(archivo_pdf.name, archivo_pdf)
+        "-------------------------------------------------"
         libro_completo = Libro_Completo(libro_id = id,
                                         fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento'],
                                         archivo_pdf = archivo_pdf
                                         )
+        fecha_vencimiento =  formulario.cleaned_data['fecha_de_vencimiento']
+        if fecha_vencimiento is not None: #Si lleno la fecha de vencimiento
+            libro_completo.fecha_vencimiento = fecha_vencimiento
         libro_completo.save()
+
+        # Seteamos que el libro ahora se encuentra completo
+        libro = Libro.objects.get(id=id)
+        libro.esta_completo = True
+        libro.save()
+
+        ##TODO: si tiene capitulos, borrarlos.
 
     def post(self,request,id=None):
         formulario = FormularioCargaLibro(request.POST,request.FILES)
         if formulario.is_valid():
             self.__guardar_libro_completo(formulario,id)
-
+            return redirect('/listado_libro/')
         return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
 
 class Vista_Detalle_libro(Vista_Detalle):

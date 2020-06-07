@@ -54,7 +54,7 @@ class EditorialAdmin(admin.ModelAdmin):
 
 class LibroAdmin(admin.ModelAdmin):
     list_per_page = 10
-    view_only=True
+    view_only = True
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
         return redirect('/listado_libro/')
@@ -72,7 +72,7 @@ class LibroAdmin(admin.ModelAdmin):
         form.base_fields['editorial'].widget.can_change_related = False
         form.base_fields['genero'].widget.can_add_related = False
         form.base_fields['genero'].widget.can_change_related = False
-        self.exclude = ('esta_completo',)
+        self.exclude = ('esta_completo',) #Saca el checkbox
         return form
 
 
