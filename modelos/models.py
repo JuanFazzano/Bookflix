@@ -112,7 +112,7 @@ class Lee_libro(models.Model):
     terminado=models.NullBooleanField(null=True)
 
 class Libro_Completo(models.Model):
-    libro = models.OneToOneField(Libro,primary_key = True, on_delete=models.CASCADE)
+    libro = models.OneToOneField(Libro,default=None, on_delete=models.CASCADE)
     fecha_lanzamiento = models.DateTimeField()
     fecha_vencimiento = models.DateTimeField(null=True)
     archivo_pdf = models.FileField(null = False)

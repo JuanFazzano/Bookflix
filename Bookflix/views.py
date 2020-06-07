@@ -9,7 +9,7 @@ from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
 from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
-from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
+from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 def cerrar_sesion(request):
     #Cierra la sesion del usuario, y lo redireccion al /
@@ -388,15 +388,18 @@ class Vista_Listado_Trailer(Vista_Listado):
         super(Vista_Listado_Trailer,self).__init__(*args,**kwargs)
 
 class Vista_Formulario_Libro_Completo(View):
-    def get(self,request,id=None):
+    def get(self,request):
         return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
 
+    def __guardar_libro_completo(self,formulario,id):
+        archivo_pdf = formulario.cleaned_data['pdf']
+        fs = FileSystemStorage()
+        fs.save(archivo_pdf.name, archivo_pdf)
+
     def post(self,request,id=None):
-        formulario = FormularioCargaLibro(request.POST)
+        formulario = FormularioCargaLibro(request.POST,request.FILES)
         if formulario.is_valid():
-            print(formulario.cleaned_data)
-            archivo_pdf = formulario.cleaned_data['pdf']
-            print(archivo_pdf)
-            fs = FileSystemStorage()
-          #  fs.save(archivo_pdf.name,archivo_pdf)
-        return render(request,'formulario_libro.html',{'formulario': formulario})
+            self.__guardar_libro_completo(formulario,id)
+            libro_completo = Libro_Completo(libro_id = id)
+            libro_completo.save()
+        return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
