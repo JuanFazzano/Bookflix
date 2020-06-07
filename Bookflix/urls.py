@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^detalle_novedad/id=(?P<id>\w+)/$',views.Vista_Detalle_Novedad.as_view()),
     url(r'^detalle_trailer/id=(?P<id>\w+)/$', views.Vista_Detalle_Trailer.as_view()),
     url(r'^listado_novedad/',views.Vista_Listado_Novedad.as_view()),
+    url(r'^listado_trailer/',views.Vista_Listado_Trailer.as_view()),
     url(r'^listado_genero/',views.Vista_Listado_Genero.as_view()),
     url(r'^listado_editorial/',views.Vista_Listado_Editorial.as_view()),
     url(r'^listado_autor/',views.Vista_Listado_Autor.as_view()),
