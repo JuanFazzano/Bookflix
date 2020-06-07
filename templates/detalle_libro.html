@@ -32,6 +32,7 @@
                 {% endif %}
                 {% if not request.user.is_staff %}
                     {% if libro.esta_completo %}
+                        {{completo.id}}
                         <button>
                             <a href="#"> Leer libro completo</a>
                         </button>

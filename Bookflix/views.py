@@ -20,8 +20,6 @@ from modelos.models                 import Libro_Completo,Autor,Genero,Editorial
 #        libro_baja.esta_activo = False
 #        libro_baja.save()
 
-
-
 def listado_libros_activos(request,limit=None):
     libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
     libros = libros.filter(fecha_vencimiento__gte = datetime.datetime.now())
@@ -456,6 +454,10 @@ class Vista_Detalle_libro(Vista_Detalle):
 
 
     def cargar_diccionario (self, id):
-
         trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
+        libro = Libro.objects.filter(id = id)[0]
+        if libro.esta_completo:
+            libro_completo =  Libro_Completo.objects.get(libro_id = libro.id)
+            self.contexto['completo'] = libro_completo
         self.contexto ['trailers'] = trailers
+

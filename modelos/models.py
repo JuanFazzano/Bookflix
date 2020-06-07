@@ -144,7 +144,8 @@ class Novedad(models.Model):
         return self.titulo
     def clean(self):
         if not self.validate_unique(self.titulo):
-            raise ValidationError('el titulo ya se encuentra registrado en el sistema')
+            print('Entró')
+            raise models.ValidationError('el titulo ya se encuentra registrado en el sistema')
 
 class Trailer(models.Model):
     class Meta:
