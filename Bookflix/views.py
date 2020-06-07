@@ -11,12 +11,15 @@ from django.http                    import HttpResponseRedirect
 from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
-def dar_de_baja_libros():
-    libros = Libro_Completo.objects.exclude(fecha_vencimiento=None)
-    libros = libros.filter(fecha_vencimiento__lte=datetime.datetime.now())
-    for libro in libros:
-        Libro.objects.get(id = libro.libro_id)
-#dar_de_baja_libros()
+#def dar_de_baja_libros():
+#    Da de baja los libros que están vencidos
+#    libros = Libro_Completo.objects.exclude(fecha_vencimiento=None)
+#    libros = libros.filter(fecha_vencimiento__lte=datetime.datetime.now())
+#    for libro in libros:
+#        libro_baja= Libro.objects.get(id = libro.libro_id)
+#        libro_baja.esta_activo = False
+#        libro_baja.save()
+
 
 
 def listado_libros_activos(request,limit=None):
@@ -24,7 +27,6 @@ def listado_libros_activos(request,limit=None):
     libros = libros.filter(fecha_vencimiento__gte = datetime.datetime.now())
     if limit is not None:
         libros = libros[:limit]
-    #tuplas = Trailer.objects.filter(id = 3)
     return paginar(request,libros,10)
 
 def cerrar_sesion(request):
