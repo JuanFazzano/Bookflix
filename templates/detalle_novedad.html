@@ -3,13 +3,15 @@
 
 {% block detalle %}
     <ul style="list-style:none;">
-        <li> <h1> Novedad {{titulo}} </h1> </li>
-        {% if descripcion %}
-          <li> Descripcion: {{ descripcion }} </li>
+        {% if objeto_pagina %}
+            {% for novedad in objeto_pagina %}
+                <li> <h1> Novedad {{novedad.titulo}} </h1> </li>
+                {% if novedad.descripcion %}
+                  <li> Descripcion: {{novedad.descripcion }} </li>
+                {% endif %}
+                {% if novedad.foto %}
+                  <li> <img src="{{novedad.foto.url}}"> </li>
+                {% endif %}
+            {% endfor %}
         {% endif %}
-
-        {% if foto %}
-          <li> <img src="{% static foto %}"> </li>
-        {% endif %}
-
 {% endblock %}

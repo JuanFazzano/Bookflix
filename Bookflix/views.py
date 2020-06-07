@@ -296,11 +296,13 @@ class Vista_Detalle(View):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         try:
-            tuplas = self.modelo.objects.values().filter(id = id)[0]
-            tuplas['id'] = id
-            tuplas['modelo'] = self.modelo_string
-            print(tuplas)
-            return render(request,self.url,tuplas)
+            #Se pagina porque si en la tabla las fk son ids, es porque el paginador asocia el id con la fila que le corresponde
+            tuplas = self.modelo.objects.filter(id = id)
+            paginador = Paginator(tuplas, 1)
+            numero_de_pagina = request.GET.get('page')
+            pagina = paginador.get_page(numero_de_pagina)  # Me devuelve el objeto de la pagina actualizamos
+            contexto = {'objeto_pagina': pagina, 'modelo': self.modelo_string,'id':id} #El id se usa para pasar entre las vistas
+            return render(request,self.url,contexto)
         except:
             return redirect('/')
 
@@ -314,7 +316,6 @@ class Vista_Listado(View):
         numero_de_pagina = request.GET.get('page')
         pagina = paginador.get_page(numero_de_pagina) #Me devuelve el objeto de la pagina actualizamos
         contexto = {'objeto_pagina': pagina,'modelo': self.modelo_string}
-
         #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
         return render(request,self.url,contexto)
 
