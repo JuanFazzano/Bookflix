@@ -405,5 +405,4 @@ class Vista_Formulario_Libro_Completo(View):
         formulario = FormularioCargaLibro(request.POST,request.FILES)
         if formulario.is_valid():
             self.__guardar_libro_completo(formulario,id)
-
         return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
