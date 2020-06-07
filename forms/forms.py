@@ -102,11 +102,13 @@ class FormularioModificarDatosPersonales(forms.Form):
         return valor_email_actual
 
 class FormularioCargaLibro(forms.Form):
-    #fecha_de_lanzamiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]))
-    #fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]))
-    pdf = forms.FileField(required=False)
-    fecha_de_lanzamiento = forms.DateTimeField()
-#    def clean_DNI_titular(self):
+    class DateInput(forms.DateInput):
+        input_type = 'date'
+    fecha_de_lanzamiento = forms.DateField(widget=DateInput)
+    fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
+    pdf = forms.FileField(required=True)
+
+    #    def clean_DNI_titular(self):
 #        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
 #        valor_dni_inicial = field_DNI_titular.initial
 #        valor_dni_actual = self.cleaned_data['DNI_titular']
