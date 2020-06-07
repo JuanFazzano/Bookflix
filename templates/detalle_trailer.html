@@ -4,6 +4,9 @@
     <ul style="list-style:none;">
         <li> <h1> Trailer {{titulo}} </h1> </li>
         <li> <h1> Trailer {{descripcion}}</h1> </li>
+        {% if libro_asociado_id %}
+          <li> <h1>Asociado a libro: {{libro_asociado_id}}</h1></li>
+        {% endif %}
         {% if video %}
           <li>
             <video width="320" height="240">

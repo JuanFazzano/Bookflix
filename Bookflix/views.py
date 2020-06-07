@@ -299,6 +299,7 @@ class Vista_Detalle(View):
             tuplas = self.modelo.objects.values().filter(id = id)[0]
             tuplas['id'] = id
             tuplas['modelo'] = self.modelo_string
+            print(tuplas)
             return render(request,self.url,tuplas)
         except:
             return redirect('/')
@@ -310,7 +311,6 @@ class Vista_Listado(View):
             return redirect('/iniciar_sesion/')
         tuplas = self.modelo.objects.all()
         paginador = Paginator(tuplas,10) #Pagina cada 10
-
         numero_de_pagina = request.GET.get('page')
         pagina = paginador.get_page(numero_de_pagina) #Me devuelve el objeto de la pagina actualizamos
         contexto = {'objeto_pagina': pagina,'modelo': self.modelo_string}
