@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^listado_libro/',views.Vista_Listado_Libro.as_view()),
     url(r'^listado_perfiles/',views.Vista_Listado_Perfiles.as_view()),
     url(r'^carga_libro_completo/id=(?P<id>\w+)/$', views.Vista_Formulario_Libro_Completo.as_view()),
+    url(r'^detalle_libro/id=(?P<id>\w+)/$',views.Vista_Detalle_libro.as_view()),
     url(r'^logout/',views.cerrar_sesion,name="logout"),
 
     #url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),

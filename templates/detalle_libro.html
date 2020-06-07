@@ -1,0 +1,54 @@
+{% extends "detalle.html" %}
+{% load static %}
+{% block detalle %}
+    <ul style="list-style:none;">
+        {% if objeto_pagina %}
+            {% for libro in objeto_pagina %}
+                <li>
+                    <h1> Titulo: </h1> {{libro.titulo}}
+                </li>
+                <li>
+                    <h1> ISBN: </h1> {{libro.ISBN}}
+                </li>
+
+                {% if libro.foto %}
+                <li>
+                    {{libro.foto}}
+                </li>
+                {% endif %}
+
+                {% if libro.descripcion %}
+                <li>
+                    <h1> Descripcion </h1> {{libro.descripcion}}
+                </li>
+                {% endif %}
+
+                <li>
+                    <h1> Autor </h1> {{libro.autor}}
+                </li>
+                <li>
+                    <h1> Editorial </h1> {{libro.editorial}}
+                </li>
+                <li>
+                    <h1> Genero </h1> {{libro.genero}}
+                </li>
+
+                {% if libro.esta_completo %}
+                    <button>
+                        <a href="#"> Leer libro completo</a>
+                    </button>
+                {% else %}
+                    <button>
+                        <a href="#"> Ver listado de capítulos</a>
+                    </button>
+                {% endif %}
+            {% endfor %}
+            {% for trailer in trailers %}
+                <li>
+                    {{trailer.titulo}}
+                    <a href="#"> Ver trailer</a>
+                </li>
+            {% endfor %}
+        {% endif %}
+
+{% endblock %}
