@@ -426,7 +426,7 @@ class Vista_Formulario_Libro_Completo(View):
         if formulario.is_valid():
             self.__guardar_libro_completo(formulario,id)
             return redirect('/listado_libro/')
-        return render(request,'formulario_libro_completo.html',{'formulario': FormularioCargaLibro()})
+        return render(request,'formulario_libro_completo.html',{'formulario': formulario})
 
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
