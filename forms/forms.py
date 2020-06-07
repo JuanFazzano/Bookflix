@@ -108,6 +108,15 @@ class FormularioCargaLibro(forms.Form):
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
     pdf = forms.FileField(required=True)
 
+    def clean_fecha_de_vencimiento(self):
+        fecha_de_lanzamiento1= self.cleaned_data['fecha_de_lanzamiento']
+        fecha_de_vencimiento1= self.cleaned_data['fecha_de_vencimiento']
+        if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
+            raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
+        return fecha_de_vencimiento1
+
+
+
     #    def clean_DNI_titular(self):
 #        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
 #        valor_dni_inicial = field_DNI_titular.initial
