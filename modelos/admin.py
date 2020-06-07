@@ -90,10 +90,10 @@ class TrailerAdmin(admin.ModelAdmin):
     list_per_page = 10
     #https://stackoverflow.com/questions/1339845/redirect-on-admin-save/1340106
     def response_add(self, request, obj, post_url_continue=None):
-        return redirect('/listado_editorial/')
+        return redirect('/listado_trailer/')
 
     def response_change(self, request, obj, post_url_continue=None):
-        return redirect('/listado_editorial/')
+        return redirect('/listado_trailer/')
 
     def get_form(self, request, obj=None, **kwargs):
         #Deshabilita los botones de agregar y modificar de los campos many to many genero, autor y editorial
