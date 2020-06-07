@@ -11,11 +11,13 @@ from django.http                    import HttpResponseRedirect
 from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
-def listado_libros_activos(request):
+def listado_libros_activos(request,limit=None):
     libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
     libros = Libro_Completo.objects.filter(fecha_vencimiento__gte = datetime.datetime.now())
+    if limit is not None:
+        libros = libros[:limit]
     #tuplas = Trailer.objects.filter(id = 3)
-    return paginar(request,libros,6)
+    return paginar(request,libros,10)
 
 def cerrar_sesion(request):
     #Cierra la sesion del usuario, y lo redireccion al /
@@ -233,7 +235,7 @@ class Vista_Visitante(View):
             if request.user.is_staff:
                 return redirect('/home_admin/')
             return redirect('/listado_perfiles/')
-        return render(request,'visitante.html',{'objeto_pagina': listado_libros_activos(request)})
+        return render(request,'visitante.html',{'objeto_pagina': listado_libros_activos(request,6)})
 
 class Home_Admin(View):
     def get(self,request):
