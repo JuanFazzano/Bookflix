@@ -10,13 +10,6 @@
                 <li>
                     <h1> ISBN: </h1> {{libro.ISBN}}
                 </li>
-
-                {% if libro.foto %}
-                <li>
-                    {{libro.foto}}
-                </li>
-                {% endif %}
-
                 {% if libro.descripcion %}
                 <li>
                     <h1> Descripcion </h1> {{libro.descripcion}}
@@ -32,21 +25,27 @@
                 <li>
                     <h1> Genero </h1> {{libro.genero}}
                 </li>
+                {% if libro.foto %}
+                <li>
+                   <img id="imagen_detalle" src="{{MEDIA_URL}}{{libro.foto.url}}" />
+                </li>
+                {% endif %}
 
-                {% if libro.esta_completo %}
-                    <button>
-                        <a href="#"> Leer libro completo</a>
-                    </button>
-                {% else %}
-                    <button>
-                        <a href="#"> Ver listado de capítulos</a>
-                    </button>
+                {% if not request.user.is_staff %}
+                    {% if libro.esta_completo %}
+                        <button>
+                            <a href="#"> Leer libro completo</a>
+                        </button>
+                    {% else %}
+                        <button>
+                            <a href="#"> Ver listado de capítulos</a>
+                        </button>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
             {% for trailer in trailers %}
                 <li>
-                    {{trailer.titulo}}
-                    <a href="#"> Ver trailer</a>
+                   {{trailer.titulo}} <a href="/detalle_trailer/id={{trailer.id}}"> Ver trailer</a>
                 </li>
             {% endfor %}
         {% endif %}

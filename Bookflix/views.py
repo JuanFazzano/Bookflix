@@ -311,11 +311,12 @@ class Vista_Detalle(View):
             self.contexto ['id'] = id #El id se usa para pasar entre las vistas, porque se usa en el "detalle.html"
             self.contexto['objeto_pagina'] = paginar(request, tuplas)
             self.cargar_diccionario(id)
-            print(self.contexto)
             return render(request,self.url,self.contexto)
         except:
             return redirect('/')
     def cargar_diccionario(self,id):
+        "Hook que sobreescriben los hijos"
+        "Este mensaje carga el contexto con lo que requiera un detalle especifico"
         pass
 
 class Vista_Listado(View):
@@ -396,7 +397,7 @@ class Vista_Listado_Trailer(Vista_Listado):
 
 class Vista_Formulario_Libro_Completo(View):
     def get(self,request,id=None):
-        return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
+        return render(request,'formulario_libro_completo.html',{'formulario': FormularioCargaLibro()})
 
     def __guardar_libro_completo(self,formulario,id):
         "----Guarda el archivo en la carpeta static--------"
@@ -425,7 +426,7 @@ class Vista_Formulario_Libro_Completo(View):
         if formulario.is_valid():
             self.__guardar_libro_completo(formulario,id)
             return redirect('/listado_libro/')
-        return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
+        return render(request,'formulario_libro_completo.html',{'formulario': FormularioCargaLibro()})
 
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
@@ -436,5 +437,6 @@ class Vista_Detalle_libro(Vista_Detalle):
 
 
     def cargar_diccionario (self, id):
-        trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo')
+
+        trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
         self.contexto ['trailers'] = trailers

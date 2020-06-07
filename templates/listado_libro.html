@@ -66,11 +66,14 @@
                 <td>{{libro.editorial}}</td>
                 <td> - </td>
                 <td>{{libro.ISBN}}</td>
-                <td> <a id="boton_personalizado" href="#"> Ver </a>
+                <td> <a id="boton_personalizado" href="/detalle_libro/id={{libro.id}}"> Ver </a>
                 <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a>
-                <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Eliminar </a>
-                <a id="boton_personalizado" style="margin-left: 10px;" href="/carga_libro_completo/id={{libro.id}}/"> Subir libro completo </a>
-                <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Subir capitulo </a>
+                <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/delete/"> Eliminar </a>
+                {% if not libro.esta_completo %}
+                  <!-- Si no está completo, muestra los botones de subir completo o por capitulo -->
+                  <a id="boton_personalizado" style="margin-left: 10px;" href="/carga_libro_completo/id={{libro.id}}/"> Subir libro completo </a>
+                  <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Subir capitulo </a>
+                {% endif %}
                 </td>
               </tr>
               </tbody>

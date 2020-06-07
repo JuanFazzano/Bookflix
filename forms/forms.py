@@ -104,7 +104,7 @@ class FormularioModificarDatosPersonales(forms.Form):
 class FormularioCargaLibro(forms.Form):
     class DateInput(forms.DateInput):
         input_type = 'date'
-    fecha_de_lanzamiento = forms.DateField(widget=DateInput)
+    fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
     pdf = forms.FileField(required=True)
 

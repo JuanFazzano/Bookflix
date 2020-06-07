@@ -12,7 +12,12 @@
                     {{trailer.descripcion}}
                 </li>
                 {% if trailer.libro_asociado %}
-                  <li> <h1>Asociado a libro: {{trailer.libro_asociado}}</h1></li>
+                  <li>
+
+                      <h1>Asociado a libro:</h1>
+                      <a href="/detalle_libro/id={{trailer.libro_asociado.id}}"> {{trailer.libro_asociado}} </a>
+
+                  </li>
                 {% endif %}
                 {% if trailer.video %}
                 <li>
