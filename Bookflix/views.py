@@ -388,18 +388,22 @@ class Vista_Listado_Trailer(Vista_Listado):
         super(Vista_Listado_Trailer,self).__init__(*args,**kwargs)
 
 class Vista_Formulario_Libro_Completo(View):
-    def get(self,request):
+    def get(self,request,id=None):
         return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
 
     def __guardar_libro_completo(self,formulario,id):
         archivo_pdf = formulario.cleaned_data['pdf']
         fs = FileSystemStorage()
         fs.save(archivo_pdf.name, archivo_pdf)
+        libro_completo = Libro_Completo(libro_id = id,
+                                        fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento'],
+                                        archivo_pdf = archivo_pdf
+                                        )
+        libro_completo.save()
 
     def post(self,request,id=None):
         formulario = FormularioCargaLibro(request.POST,request.FILES)
         if formulario.is_valid():
             self.__guardar_libro_completo(formulario,id)
-            libro_completo = Libro_Completo(libro_id = id)
-            libro_completo.save()
+
         return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
