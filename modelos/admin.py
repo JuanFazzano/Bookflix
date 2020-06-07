@@ -94,6 +94,8 @@ class TrailerAdmin(admin.ModelAdmin):
 
     def response_change(self, request, obj, post_url_continue=None):
         return redirect('/listado_trailer/')
+    def response_delete(self, request, obj, post_url_continue=None):
+        return redirect('/listado_trailer/')
 
     def get_form(self, request, obj=None, **kwargs):
         #Deshabilita los botones de agregar y modificar de los campos many to many genero, autor y editorial
