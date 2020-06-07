@@ -8,7 +8,7 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
-from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales
+from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
 from modelos.models                 import Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 def cerrar_sesion(request):
@@ -305,7 +305,7 @@ class Vista_Detalle(View):
         try:
             #Se pagina porque si en la tabla las fk son ids, es porque el paginador asocia el id con la fila que le corresponde
             tuplas = self.modelo.objects.filter(id = id)
-            contexto = {'objeto_pagina': paginar(request,tuplas), 'modelo': self.modelo_string,'id':id} #El id se usa para pasar entre las vistas
+            contexto = {'objeto_pagina': paginar(request,tuplas), 'modelo': self.modelo_string,'id':id} #El id se usa para pasar entre las vistas, porque se usa en el "detalle.html"
             return render(request,self.url,contexto)
         except:
             return redirect('/')
@@ -386,3 +386,17 @@ class Vista_Listado_Trailer(Vista_Listado):
         self.modelo = Trailer
         self.modelo_string = 'trailer'
         super(Vista_Listado_Trailer,self).__init__(*args,**kwargs)
+
+class Vista_Formulario_Libro_Completo(View):
+    def get(self,request,id=None):
+        return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
+
+    def post(self,request,id=None):
+        formulario = FormularioCargaLibro(request.POST)
+        if formulario.is_valid():
+            print(formulario.cleaned_data)
+            archivo_pdf = formulario.cleaned_data['pdf']
+            print(archivo_pdf)
+            fs = FileSystemStorage()
+          #  fs.save(archivo_pdf.name,archivo_pdf)
+        return render(request,'formulario_libro.html',{'formulario': formulario})
