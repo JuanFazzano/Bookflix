@@ -108,11 +108,20 @@ class FormularioCargaLibro(forms.Form):
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
     pdf = forms.FileField(required=True)
 
+    def clean_fecha_de_lanzamiento(self):
+        fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
+        if(fecha_de_lanzamiento1 < datetime.date.today()):
+            raise forms.ValidationError('La fecha de lanzamiento no puede ser anterior a la fecha de hoy')
+        return fecha_de_lanzamiento1
+
     def clean_fecha_de_vencimiento(self):
-        fecha_de_lanzamiento1= self.cleaned_data['fecha_de_lanzamiento']
-        fecha_de_vencimiento1= self.cleaned_data['fecha_de_vencimiento']
-        if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
-            raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
+        fecha_de_vencimiento1 =None
+        print(self.cleaned_data)
+        if 'fecha_de_lanzamiento' in self.cleaned_data.keys():
+            fecha_de_lanzamiento1= self.cleaned_data['fecha_de_lanzamiento']
+            fecha_de_vencimiento1= self.cleaned_data['fecha_de_vencimiento']
+            if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
+                raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
 
 

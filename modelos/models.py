@@ -142,6 +142,9 @@ class Novedad(models.Model):
 
     def __str__(self):
         return self.titulo
+    def clean(self):
+        if not self.validate_unique(self.titulo):
+            raise ValidationError('el titulo ya se encuentra registrado en el sistema')
 
 class Trailer(models.Model):
     class Meta:
@@ -152,6 +155,14 @@ class Trailer(models.Model):
     libro_asociado  = models.ForeignKey(Libro,null = True, blank = True,on_delete = models.CASCADE)
     pdf             = models.FileField(null = True, blank = True)
     video           = models.FileField(null = True, blank = True)
+
+    def clean(self):
+        if self.titulo is None:
+            raise ValidationError('el campo titulo es obligatorio')
+        print(self.descripcion,'descripcionnnn')
+        if self.descripcion == '':
+            raise ValidationError('el campo descripcion es obligatorio')
+
 
     def __str__(self):
         return self.titulo
