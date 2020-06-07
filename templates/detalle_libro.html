@@ -30,7 +30,6 @@
                    <img id="imagen_detalle" src="{{MEDIA_URL}}{{libro.foto.url}}" />
                 </li>
                 {% endif %}
-
                 {% if not request.user.is_staff %}
                     {% if libro.esta_completo %}
                         <button>
@@ -49,5 +48,4 @@
                 </li>
             {% endfor %}
         {% endif %}
-
 {% endblock %}

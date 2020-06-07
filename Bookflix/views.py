@@ -299,16 +299,25 @@ def paginar(request,tuplas,cantidad_maxima_paginado=1):
     return pagina
 
 class Vista_Detalle(View):
+    def __init__(self,*args, **kwargs):
+        self.contexto = {'modelo': self.modelo_string}
+
     def get(self,request,id = None):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         try:
             #Se pagina porque si en la tabla las fk son ids, es porque el paginador asocia el id con la fila que le corresponde
             tuplas = self.modelo.objects.filter(id = id)
-            contexto = {'objeto_pagina': paginar(request,tuplas), 'modelo': self.modelo_string,'id':id} #El id se usa para pasar entre las vistas, porque se usa en el "detalle.html"
-            return render(request,self.url,contexto)
+            self.contexto ['id'] = id #El id se usa para pasar entre las vistas, porque se usa en el "detalle.html"
+            self.contexto['objeto_pagina'] = paginar(request, tuplas)
+            self.cargar_diccionario(id)
+            return render(request,self.url,self.contexto)
         except:
             return redirect('/')
+    def cargar_diccionario(self,id):
+        "Hook que sobreescriben los hijos"
+        "Este mensaje carga el contexto con lo que requiera un detalle especifico"
+        pass
 
 class Vista_Listado(View):
     def get(self,request):
@@ -340,7 +349,6 @@ class Vista_Detalle_Novedad(Vista_Detalle):
         self.modelo = Novedad
         self.modelo_string = 'novedad'
         super(Vista_Detalle_Novedad,self).__init__(*args,**kwargs)
-
 class Vista_Listado_Genero(Vista_Listado):
     def __init__(self,*args,**kwargs):
         self.url = 'listado_genero.html'
@@ -389,7 +397,7 @@ class Vista_Listado_Trailer(Vista_Listado):
 
 class Vista_Formulario_Libro_Completo(View):
     def get(self,request,id=None):
-        return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
+        return render(request,'formulario_libro_completo.html',{'formulario': FormularioCargaLibro()})
 
     def __guardar_libro_completo(self,formulario,id):
         "----Guarda el archivo en la carpeta static--------"
@@ -418,4 +426,17 @@ class Vista_Formulario_Libro_Completo(View):
         if formulario.is_valid():
             self.__guardar_libro_completo(formulario,id)
             return redirect('/listado_libro/')
-        return render(request,'formulario_libro.html',{'formulario': FormularioCargaLibro()})
+        return render(request,'formulario_libro_completo.html',{'formulario': FormularioCargaLibro()})
+
+class Vista_Detalle_libro(Vista_Detalle):
+    def __init__(self,*args,**kwargs):
+        self.modelo_string = 'libro'
+        self.url = 'detalle_libro.html'
+        self.modelo = Libro
+        super(Vista_Detalle_libro, self).__init__(*args, **kwargs)
+
+
+    def cargar_diccionario (self, id):
+
+        trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
+        self.contexto ['trailers'] = trailers
