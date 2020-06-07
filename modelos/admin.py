@@ -72,6 +72,7 @@ class LibroAdmin(admin.ModelAdmin):
         form.base_fields['editorial'].widget.can_change_related = False
         form.base_fields['genero'].widget.can_add_related = False
         form.base_fields['genero'].widget.can_change_related = False
+        self.exclude = ('esta_completo',)
         return form
 
 

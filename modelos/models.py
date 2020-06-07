@@ -68,6 +68,7 @@ class Libro(models.Model):
     autor = models.ForeignKey(Autor,max_length=35,null=False, on_delete=models.CASCADE)
     editorial = models.ForeignKey(Editorial, max_length = 35, null = False, on_delete=models.CASCADE)
     genero = models.ForeignKey(Genero, max_length = 25, null = False, on_delete=models.CASCADE)
+    esta_completo= models.BooleanField(default=0)
 
     def __str__(self):
         return self.titulo
