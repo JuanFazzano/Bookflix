@@ -332,6 +332,8 @@ class Vista_Listado_Novedad(Vista_Listado):
         self.modelo_string = 'novedad'
         super(Vista_Listado_Novedad,self).__init__(*args,**kwargs)
 
+
+
 class Vista_Detalle_Novedad(Vista_Detalle):
     def __init__(self,*args,**kwargs):
         self.url = 'detalle_novedad.html'
@@ -377,3 +379,10 @@ class Vista_Detalle_Trailer(Vista_Detalle):
         self.modelo = Trailer
         self.modelo_string = 'trailer'
         super(Vista_Detalle_Trailer,self).__init__(*args,**kwargs)
+
+class Vista_Listado_Trailer(Vista_Listado):
+    def __init__(self,*args,**kwargs):
+        self.url = 'listado_trailer.html'
+        self.modelo = Trailer
+        self.modelo_string = 'trailer'
+        super(Vista_Listado_Trailer,self).__init__(*args,**kwargs)
