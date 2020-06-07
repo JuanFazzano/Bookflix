@@ -11,6 +11,12 @@ from django.http                    import HttpResponseRedirect
 from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
+def listado_libros_activos(request):
+    libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
+    libros = Libro_Completo.objects.filter(fecha_vencimiento__gte = datetime.datetime.now())
+    #tuplas = Trailer.objects.filter(id = 3)
+    return paginar(request,libros,6)
+
 def cerrar_sesion(request):
     #Cierra la sesion del usuario, y lo redireccion al /
     logout(request)
@@ -227,7 +233,7 @@ class Vista_Visitante(View):
             if request.user.is_staff:
                 return redirect('/home_admin/')
             return redirect('/listado_perfiles/')
-        return render(request,'visitante.html',{})
+        return render(request,'visitante.html',{'objeto_pagina': listado_libros_activos(request)})
 
 class Home_Admin(View):
     def get(self,request):
@@ -349,6 +355,7 @@ class Vista_Detalle_Novedad(Vista_Detalle):
         self.modelo = Novedad
         self.modelo_string = 'novedad'
         super(Vista_Detalle_Novedad,self).__init__(*args,**kwargs)
+
 class Vista_Listado_Genero(Vista_Listado):
     def __init__(self,*args,**kwargs):
         self.url = 'listado_genero.html'
