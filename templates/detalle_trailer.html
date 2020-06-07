@@ -4,16 +4,20 @@
     <ul style="list-style:none;">
         {% if objeto_pagina %}
             {% for trailer in objeto_pagina %}
-                {{trailer}}
-                <li> <h1> Trailer {{titulo}} </h1> </li>
-                <li> <h1> Trailer {{descripcion}}</h1> </li>
+                <li>
+                    <h1> Titulo </h1> {{trailer.titulo}}
+                </li>
+                <li>
+                    <h1> Descripcion</h1>
+                    {{trailer.descripcion}}
+                </li>
                 {% if trailer.libro_asociado %}
                   <li> <h1>Asociado a libro: {{trailer.libro_asociado}}</h1></li>
                 {% endif %}
-                {% if video %}
-                  <li>
-                    <video width="320" height="240">
-                        <source src="{% static video %}">
+                {% if trailer.video %}
+                <li>
+                    <video width="320" height="240" controls>
+                        <source src="{{trailer.video.url}}" type="video/mp4">
                     </video>
                   </li>
                 {% endif %}

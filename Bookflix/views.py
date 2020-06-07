@@ -291,6 +291,13 @@ class Vista_Modificar_Datos_Personales(View):
         self.contexto['formulario'] = formulario
         return render(request,'modificar_datos_personales.html',self.contexto)
 
+def paginar(request,tuplas,cantidad_maxima_paginado=1):
+    "Pagina la pagina para los listados o detalle (el detalle necesita pagina por las fk)"
+    paginador = Paginator(tuplas, cantidad_maxima_paginado)
+    numero_de_pagina = request.GET.get('page')
+    pagina = paginador.get_page(numero_de_pagina)  # Me devuelve el objeto de la pagina actualizamos
+    return pagina
+
 class Vista_Detalle(View):
     def get(self,request,id = None):
         if not request.user.is_authenticated:
@@ -298,10 +305,7 @@ class Vista_Detalle(View):
         try:
             #Se pagina porque si en la tabla las fk son ids, es porque el paginador asocia el id con la fila que le corresponde
             tuplas = self.modelo.objects.filter(id = id)
-            paginador = Paginator(tuplas, 1)
-            numero_de_pagina = request.GET.get('page')
-            pagina = paginador.get_page(numero_de_pagina)  # Me devuelve el objeto de la pagina actualizamos
-            contexto = {'objeto_pagina': pagina, 'modelo': self.modelo_string,'id':id} #El id se usa para pasar entre las vistas
+            contexto = {'objeto_pagina': paginar(request,tuplas), 'modelo': self.modelo_string,'id':id} #El id se usa para pasar entre las vistas
             return render(request,self.url,contexto)
         except:
             return redirect('/')
@@ -312,10 +316,7 @@ class Vista_Listado(View):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         tuplas = self.modelo.objects.all()
-        paginador = Paginator(tuplas,10) #Pagina cada 10
-        numero_de_pagina = request.GET.get('page')
-        pagina = paginador.get_page(numero_de_pagina) #Me devuelve el objeto de la pagina actualizamos
-        contexto = {'objeto_pagina': pagina,'modelo': self.modelo_string}
+        contexto = {'objeto_pagina': paginar(request,tuplas,10),'modelo': self.modelo_string}
         #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
         return render(request,self.url,contexto)
 
