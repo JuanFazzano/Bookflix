@@ -1,4 +1,6 @@
 import datetime
+import itertools
+
 from django.contrib.auth.models     import User
 from django.views                   import View
 from django.core.paginator          import Paginator
@@ -460,4 +462,36 @@ class Vista_Detalle_libro(Vista_Detalle):
             libro_completo =  Libro_Completo.objects.get(libro_id = libro.id)
             self.contexto['completo'] = libro_completo
         self.contexto ['trailers'] = trailers
+
+class Decorador:
+    def __init__(self,decorado,id):
+        self.decorado = decorado
+        self.id = id
+
+    def buscar_similares(self):
+        lista = list()
+        lista.append(self.libros())
+        lista.append(self.decorado.buscar_similares())
+        return lista
+
+
+class DecoradorGenero(Decorador):
+    def libros(self):
+        return Libro.objects.filter(genero_id = self.id)
+
+class DecoradorAutor(Decorador):
+    def libros(self):
+        return Libro.objects.filter(autor_id = self.id)
+
+class DecoradorEditorial(Decorador):
+    def libros(self):
+        return Libro.objects.filter(editorial_id = self.id)
+
+decoradorGenero = DecoradorGenero(Libro(),2)
+decoradorAutor = DecoradorAutor(decoradorGenero,1)
+decoradorEditorial = DecoradorEditorial(decoradorAutor,1)
+similares = decoradorEditorial.buscar_similares()
+print(similares)
+
+
 

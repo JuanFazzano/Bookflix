@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -21,7 +20,6 @@ class Suscriptor(models.Model):
     class Meta:
         verbose_name = 'Suscriptor'
         verbose_name_plural = 'Suscriptores'
-
     auth = models.OneToOneField(User,primary_key = True, on_delete = models.CASCADE)
     nro_tarjeta = models.OneToOneField(Tarjeta, null=False, on_delete=models.CASCADE)
     tipo_suscripcion = models.ForeignKey(Tipo_Suscripcion, null=False, on_delete=models.CASCADE)
@@ -35,6 +33,10 @@ class Autor (models.Model):
         verbose_name_plural = 'Autores'
     nombre = models.CharField(unique = True,max_length = 25)
 
+    def clean(self):
+        if Autor.objects.filter(nombre = self.nombre).exists():
+            raise ValidationError('El autor ya se encuentra registrado en el sistema')
+
     def __str__(self):
         return self.nombre
 
@@ -44,6 +46,10 @@ class Editorial (models.Model):
         verbose_name_plural = 'Editoriales'
     nombre = models.CharField(max_length = 35, unique=True)
 
+    def clean(self):
+        if Editorial.objects.filter(nombre = self.nombre).exists():
+            raise ValidationError('La editorial ya se encuentra registrado en el sistema')
+
     def __str__(self):
         return self.nombre
 
@@ -52,6 +58,10 @@ class Genero (models.Model):
         verbose_name = 'Genero'
         verbose_name_plural = 'Generos'
     nombre = models.CharField(max_length = 25, unique=True)
+
+    def clean(self):
+        if Genero.objects.filter(nombre = self.nombre).exists():
+            raise ValidationError('El género ya se encuentra registrado en el sistema')
 
     def __str__(self):
         return self.nombre
@@ -76,11 +86,19 @@ class Libro(models.Model):
     def clean(self):
         #Se valida el ISBN
         isbn = self.ISBN
+        if Libro.objects.filter(titulo = self.titulo).exists():
+            raise ValidationError('El titulo ya se encuentra registrado')
+
         if isbn.isdigit(): #verifica si un string tiene unicamente digitos
+            if Libro.objects.filter(ISBN = self.ISBN).exists():
+                raise ValidationError("El ISBN ya se encuentra registrado en el sistema")
             if (len(isbn) not in (10,13)):
                 raise ValidationError("Deben ingresarse 10 o 13 dígitos")
         else:
             raise ValidationError(" En ISBN solo debe ingresarse digitos numericos")
+
+    def buscar_similares(self):
+        pass
 
 
 class Perfil(models.Model):
@@ -142,10 +160,10 @@ class Novedad(models.Model):
 
     def __str__(self):
         return self.titulo
+
     def clean(self):
-        if not self.validate_unique(self.titulo):
-            print('Entró')
-            raise models.ValidationError('el titulo ya se encuentra registrado en el sistema')
+        if Novedad.objects.filter(titulo = self.titulo).exists():
+            raise ValidationError('El titulo ya se encuentra registrado en el sistema')
 
 class Trailer(models.Model):
     class Meta:
@@ -167,6 +185,4 @@ class Trailer(models.Model):
 
     def __str__(self):
         return self.titulo
-class Posee_trailer(models.Model):
-    trailer = models.OneToOneField(Trailer, on_delete=models.CASCADE)
-    libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
+

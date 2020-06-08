@@ -50,8 +50,8 @@
   {% for field in line %}
     <!--Si hay algo en el valor inicial-->
     {% if field.field.initial %}
+      {% include "admin/includes/fieldset.html" %} <!-- Esto permite mostrar los errores -->
       {{field.field.initial}}
-     
     {% endif %}
     {{field.name}}
     {{field.label_tag}}
