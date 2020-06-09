@@ -68,7 +68,6 @@ class LibroAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         #Deshabilita los botones de agregar y modificar de los campos many to many genero, autor y editorial
         form = super(LibroAdmin, self).get_form(request, obj, **kwargs)
-   #     print('Campo ',form.base_fields['titulo'].initial_value)
    #     form.base_fields['titulo'].widget.attrs['placeholder'] = 'Hola'
         form.base_fields['autor'].widget.can_add_related = False
         form.base_fields['autor'].widget.can_change_related = False

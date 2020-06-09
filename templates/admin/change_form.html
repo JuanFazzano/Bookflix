@@ -50,13 +50,14 @@
   {% for field in line %}
     <!--Si hay algo en el valor inicial-->
     {% if field.field.initial %}
-      {% include "admin/includes/fieldset.html" %} <!-- Esto permite mostrar los errores -->
+      {% include "admin/includes/fieldset.html" %}
       {{field.field.initial}}
     {% endif %}
     {{field.name}}
     {{field.label_tag}}
     <br>
     {{field.field}}
+    {{field.field.initial}}
 
     <br> <br>
   {% endfor %}
@@ -107,6 +108,7 @@
                 data-model-name="{{ opts.model_name }}"
             {% endif %}>
     </script>
+
 {% endblock %}
 {# JavaScript for prepopulated fields #}
 {% prepopulated_fields_js %}

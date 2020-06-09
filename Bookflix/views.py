@@ -487,7 +487,6 @@ class Decorador:
                         lista_a_retornar.append(lista_de_libros[i])
         return lista_a_retornar
 
-
 class DecoradorGenero(Decorador):
     def libros(self):
         return Libro.objects.filter(genero_id = self.id)
@@ -500,11 +499,11 @@ class DecoradorEditorial(Decorador):
     def libros(self):
         return Libro.objects.filter(editorial_id = self.id)
 
-decoradorGenero = DecoradorGenero(Libro(),2)
-decoradorAutor = DecoradorAutor(decoradorGenero,1)
-decoradorEditorial = DecoradorEditorial(decoradorAutor,1)
-similares = decoradorEditorial.buscar_similares()
-print(similares)
+#decoradorGenero = DecoradorGenero(Libro(),2)
+#decoradorAutor = DecoradorAutor(decoradorGenero,1)
+#decoradorEditorial = DecoradorEditorial(decoradorAutor,1)
+#similares = decoradorEditorial.buscar_similares()
+#print(similares)
 
 
 

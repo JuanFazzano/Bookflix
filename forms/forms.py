@@ -12,6 +12,16 @@ def clean_campo(clase,atributo,longitud):
         raise forms.ValidationError(" En {} solo debe ingresarse digitos numericos".format(atributo))
     return clase.cleaned_data[atributo]
 
+class FormularioCargaAtributos:
+    def __init__(self,nombre_modelo):
+        self.modelo = nombre_modelo
+
+    nombre = forms.CharField(max_length = 30)
+
+    def clean_nombre(self):
+        "Acá se hace la validación del nombre"
+        pass
+
 class FormularioRegistro(forms.Form):
     def __init__(self,*args,**kwargs):
         super(FormularioRegistro,self).__init__(*args,**kwargs)

@@ -84,10 +84,10 @@ class Libro(models.Model):
         return self.titulo
 
     def clean(self):
-        #Se valida el ISBN
         isbn = self.ISBN
         if Libro.objects.filter(titulo = self.titulo).exists():
-            raise ValidationError('El titulo ya se encuentra registrado')
+                print('Entre')
+                raise ValidationError('El titulo ya se encuentra registrado')
 
         if isbn.isdigit(): #verifica si un string tiene unicamente digitos
             if Libro.objects.filter(ISBN = self.ISBN).exists():
