@@ -481,8 +481,9 @@ class Decorador:
         lista.append(self.decorado.buscar_similares())
         lista_a_retornar=list()
         for lista_de_libros in lista:
-            if lista_de_libros is not None:
+            if lista_de_libros is not None: #Puede ser None por el archivo base
                 for i in range(0,len(lista_de_libros)):
+                    #Se saca el repetido
                     if lista_de_libros[i] not in lista_a_retornar:
                         lista_a_retornar.append(lista_de_libros[i])
         return lista_a_retornar

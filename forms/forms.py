@@ -13,14 +13,16 @@ def clean_campo(clase,atributo,longitud):
     return clase.cleaned_data[atributo]
 
 class FormularioCargaAtributos:
-    def __init__(self,nombre_modelo):
-        self.modelo = nombre_modelo
-
+    "Este formulario permite cargar autor,genero,editorial"
+    def __init__(self,modelo,nombre_modelo):
+        self.modelo = modelo
+        self.nombre_modelo = nombre_modelo
     nombre = forms.CharField(max_length = 30)
 
     def clean_nombre(self):
         "Acá se hace la validación del nombre"
-        pass
+        if self.modelo.objects.filter(nombre = self.cleaned_data['nombre']).exists():
+            raise forms.ValidationError('Ya existe el {}'.format(self.nombre_modelo))
 
 class FormularioRegistro(forms.Form):
     def __init__(self,*args,**kwargs):
