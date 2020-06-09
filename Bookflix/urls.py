@@ -41,9 +41,6 @@ urlpatterns = [
     url(r'^detalle_libro/id=(?P<id>\w+)/$',views.Vista_Detalle_libro.as_view()),
     url(r'^logout/',views.cerrar_sesion,name="logout"),
 
-    #url(r'^datos_suscriptor/id=(?P<id>\w+)/$',views.Vista_Datos_Usuario.as_view()),
-    #    url(r'^detalle_novedad/id=(?P<id>\w+)/$',views.Vista_Detalle_Novedad.as_view()),
-    #url(r'^prueba/id=(?P<id>\w+)/$',views.Prueba.as_view()),
 ]
 
 if settings.DEBUG:
