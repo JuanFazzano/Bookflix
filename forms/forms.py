@@ -35,6 +35,7 @@ class FormularioModificarAtributos(forms.Form):
                 raise forms.ValidationError('Ya existe {} '.format(self.nombre_modelo))
         return valor_nombre_actual
 
+
 class FormularioCargaAtributos(forms.Form):
     "Este formulario permite cargar autor,genero,editorial"
     nombre = forms.CharField(max_length = 30)

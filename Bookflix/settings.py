@@ -80,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bookflix',
         'USER':'root',
-        'PASSWORD':'123',
+        'PASSWORD':'Asdfgh*147258',
         'PORT':3306,
     }
 }

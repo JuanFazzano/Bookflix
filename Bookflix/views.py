@@ -535,7 +535,8 @@ class Vista_Modificar_Novedad(View):
             novedad.foto = formulario.cleaned_data['foto'] if (imagen) else None
             novedad.save()
             return redirect('/listado_novedad/')
-        return render(request,'carga_novedad.html',{'formulario':formulario})
+
+        return render(request,'carga_novedad.html',{'formulario':FormularioModificarNovedad(initial=self.__get_valores_inicials(id)),'errores':formulario.errors})
 
 class Vista_Formulario_Modificar_Atributo(View):
     def __init__(self):
@@ -558,7 +559,8 @@ class Vista_Formulario_Modificar_Atributo(View):
             modelo.nombre = formulario.cleaned_data['nombre']
             modelo.save()
             return redirect(self.url_redirect)
-        self.contexto['formulario'] = formulario
+        self.contexto['errores'] = formulario.errors
+        self.contexto['formulario'] = FormularioModificarAtributos(initial = self.__get_iniciales(id),modelo = self.modelo,nombre_modelo = self.nombre_modelo)
         return render(request,'carga_atributos_libro.html',self.contexto)
 
 class Vista_Formulario_Modificar_Genero(Vista_Formulario_Modificar_Atributo):
@@ -571,7 +573,7 @@ class Vista_Formulario_Modificar_Genero(Vista_Formulario_Modificar_Atributo):
 class Vista_Formulario_Modificar_Autor(Vista_Formulario_Modificar_Atributo):
     def __init__(self):
         self.modelo = Autor
-        self.nombre_modelo = 'genero'
+        self.nombre_modelo = 'autor'
         self.url_redirect = '/listado_autor/'
         super(Vista_Formulario_Modificar_Autor,self).__init__()
 
