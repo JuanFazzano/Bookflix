@@ -32,7 +32,7 @@
                 {% endif %}
                 {% if not request.user.is_staff %}
                     {% if libro.esta_completo %}
-                        {{completo.id}}
+                       
                         <button>
                             <a href="#"> Leer libro completo</a>
                         </button>
@@ -41,12 +41,22 @@
                             <a href="#"> Ver listado de capítulos</a>
                         </button>
                     {% endif %}
+
+                     <h2>Trailers del libro</h2>
+                    {% for trailer in trailers %}
+                        <li>
+                             {{trailer.titulo}} <a href="/detalle_trailer/id={{trailer.id}}"> Ver trailer</a>
+                        </li>
+                    {% endfor %}
+
+                    <h2> Libros similares que podrian gustarte</h2>
+                    {% for libro_similar in libros_similares %}
+                        <li>
+                            {{libro_similar.titulo}} <a href="/detalle_libro/id={{libro_similar.id}}"> Ver libro_similar</a>
+                        </li>
+                    {% endfor %}
                 {% endif %}
             {% endfor %}
-            {% for trailer in trailers %}
-                <li>
-                   {{trailer.titulo}} <a href="/detalle_trailer/id={{trailer.id}}"> Ver trailer</a>
-                </li>
-            {% endfor %}
+
         {% endif %}
 {% endblock %}

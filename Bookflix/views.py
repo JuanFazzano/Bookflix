@@ -332,6 +332,8 @@ class Vista_Detalle(View):
             return render(request,self.url,self.contexto)
         except:
             return redirect('/')
+
+
     def cargar_diccionario(self,id):
         "Hook que sobreescriben los hijos"
         "Este mensaje carga el contexto con lo que requiera un detalle especifico"
@@ -462,6 +464,11 @@ class Vista_Detalle_libro(Vista_Detalle):
             libro_completo =  Libro_Completo.objects.get(libro_id = libro.id)
             self.contexto['completo'] = libro_completo
         self.contexto ['trailers'] = trailers
+        print('se rompe acaaa')
+        decoradorGenero = DecoradorGenero(libro,libro.genero_id)
+        decoradorAutor = DecoradorAutor(decoradorGenero,libro.autor_id)
+        decoradorEditorial = DecoradorEditorial(decoradorAutor,libro.editorial_id)
+        self.contexto ['libros_similares'] = decoradorEditorial.buscar_similares()
 
 class Decorador:
     def __init__(self,decorado,id):
@@ -472,7 +479,13 @@ class Decorador:
         lista = list()
         lista.append(self.libros())
         lista.append(self.decorado.buscar_similares())
-        return lista
+        lista_a_retornar=list()
+        for lista_de_libros in lista:
+            if lista_de_libros is not None:
+                for i in range(0,len(lista_de_libros)):
+                    if lista_de_libros[i] not in lista_a_retornar:
+                        lista_a_retornar.append(lista_de_libros[i])
+        return lista_a_retornar
 
 
 class DecoradorGenero(Decorador):
@@ -492,6 +505,7 @@ decoradorAutor = DecoradorAutor(decoradorGenero,1)
 decoradorEditorial = DecoradorEditorial(decoradorAutor,1)
 similares = decoradorEditorial.buscar_similares()
 print(similares)
+
 
 
 
