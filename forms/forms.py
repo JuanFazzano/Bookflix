@@ -212,12 +212,13 @@ class FormularioCargaDeMetadatosLibro(forms.Form):
         lista_a_retornar=list()
         for i in range(0, len(todos_los_objetos)):
             lista_a_retornar.append(((todos_los_objetos[i]).id,(todos_los_objetos[i]).nombre))
+        print(lista_a_retornar)
         return lista_a_retornar
 
-    titulo= forms.CharField(max_length=40,required=True)
-    ISBN = forms.CharField(max_length=13,required=True)
-    imagen =forms.FileField(required=False)
-    descripcion= forms.CharField(widget=forms.Textarea, required=False)
+    titulo= forms.CharField(max_length=40,required=True,show_hidden_initial = True)
+    ISBN = forms.CharField(max_length=13,required=True,show_hidden_initial = True)
+    imagen =forms.FileField(required=False,show_hidden_initial = True)
+    descripcion= forms.CharField(widget=forms.Textarea, required=False,show_hidden_initial = True)
     autor = forms.CharField(widget=forms.Select(choices= obtener_objetos(Autor)),required=True)
     editorial=forms.CharField(widget=forms.Select(choices= obtener_objetos(Editorial)),required=True)
     genero=forms.CharField(widget=forms.Select(choices= obtener_objetos(Genero)),required=True)
@@ -243,6 +244,36 @@ class FormularioCargaDeMetadatosLibro(forms.Form):
 
 
 
+class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
+
+    def clean_limpiar_foto(self):
+        if self.cleaned_data['limpiar_foto']:
+            self.cleaned_data['foto'] = None
+        return self.cleaned_data['limpiar_foto']
+
+    def __cambio(self,valor_inicial,valor_nuevo):
+        return valor_inicial != valor_nuevo
+
+    def clean_titulo(self):
+        field_titulo = self.visible_fields()[0]  # Me devuelve una instancia del Charfield --> campo titulo
+        valor_titulo_inicial = field_titulo.initial
+        valor_titulo_actual = self.cleaned_data['titulo']
+        if self.__cambio(valor_titulo_inicial, valor_titulo_actual):
+            if (Libro.objects.filter(titulo = valor_titulo_actual).exists()):
+                print('HOLA entre aca papa ')
+                self.fields['titulo'].label = 'titulo anteriror'
+                raise forms.ValidationError('El titulo ya esta registrado en el sistema')
+        return valor_titulo_actual
+
+    def clean_ISBN(self):
+        field_ISBN = self.visible_fields()[1]  # Me devuelve una instancia del Charfield --> campo titulo
+        valor_ISBN_inicial = field_ISBN.initial
+        valor_ISBN_actual = self.cleaned_data['ISBN']
+        if self.__cambio(valor_ISBN_inicial, valor_ISBN_actual):
+            if (Libro.objects.filter(ISBN = valor_ISBN_actual).exists()):
+                print('HOLA entre aca papa ')
+                raise forms.ValidationError('El ISBN ya esta registrado en el sistema')
+        return valor_ISBN_actual
 
 
 

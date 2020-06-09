@@ -10,7 +10,7 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
-from forms.forms                    import FormularioCargaDeMetadatosLibro,FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
+from forms.forms                    import FormularioCargaDeMetadatosLibro,FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro,Formulario_modificar_metadatos_libro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 #def dar_de_baja_libros():
@@ -641,6 +641,50 @@ class Vista_Carga_Metadatos_Libro(View):
         self.contexto['modelo'] = 'libro'
         return render(request, 'carga_atributos_libro.html', self.contexto)
 
+
+class Vista_Modificar_Metadatos_Libro(View):
+    def __get_valores_inicials(self,id):
+        libro = Libro.objects.get(id = id)
+        return {
+            'titulo': libro.titulo,
+            'ISBN' : libro.ISBN,
+            'descripcion': libro.descripcion if (libro.descripcion is not None) else '',
+            'imagen': libro.foto if (libro.foto is not None) else '',
+            'autor': libro.autor_id,
+            'genero':libro.genero_id,
+            'editorial' : libro.editorial_id,
+        }
+
+    def get(self,request, id = None):
+        return render(request,'carga_atributos_libro.html',{'formulario': Formulario_modificar_metadatos_libro(initial = self.__get_valores_inicials(id)),'modelo':'libro'})
+
+    def post(self,request, id = None):
+        formulario = Formulario_modificar_metadatos_libro(request.POST,request.FILES,initial = self.__get_valores_inicials(id))
+        if formulario.is_valid():
+            imagen = formulario.cleaned_data['imagen']
+            print('Imagen ',imagen)
+            if imagen:
+                fs = FileSystemStorage()
+                fs.save(imagen.name, imagen)
+            libro = Libro.objects.get(id = id)
+            libro.titulo = formulario.cleaned_data['titulo']
+            libro.ISBN= formulario.cleaned_data['ISBN']
+            libro.descripcion = formulario.cleaned_data['descripcion']
+            libro.foto = formulario.cleaned_data['imagen'] if (imagen) else None
+            libro.autor_id= formulario.cleaned_data['autor']
+            libro.genero_id= formulario.cleaned_data['genero']
+            libro.editorial_id= formulario.cleaned_data['editorial']
+            libro.save()
+            return redirect('/listado_libro/')
+        print(formulario)
+        formulario.initial["titulo"]= 'hola'
+        print(formulario['titulo'].value())
+
+        print(formulario['ISBN'].value())
+
+        return render(request,'carga_atributos_libro.html',{'formulario':formulario,'modelo':'libro'})
+
+
 class Decorador:
     def __init__(self,decorado,id):
         self.decorado = decorado
@@ -670,6 +714,8 @@ class DecoradorAutor(Decorador):
 class DecoradorEditorial(Decorador):
     def libros(self):
         return Libro.objects.filter(editorial_id = self.id)
+
+
 
 
 

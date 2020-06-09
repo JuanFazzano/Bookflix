@@ -17,7 +17,7 @@
     {% endblock %}
 
 {% block contenido %}
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{formulario.as_p}}
         <input id="boton_personalizado" type="submit" value="Guardar" />

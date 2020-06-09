@@ -48,6 +48,7 @@ urlpatterns = [
     url(r'^modificar_autor/id=(?P<id>\w+)/$', views.Vista_Formulario_Modificar_Autor.as_view()),
     url(r'^modificar_editorial/id=(?P<id>\w+)/$', views.Vista_Formulario_Modificar_Editorial.as_view()),
     url(r'^modificar_novedad/id=(?P<id>\w+)/$', views.Vista_Modificar_Novedad.as_view()),
+    url(r'^modificar_libro/id=(?P<id>\w+)/$', views.Vista_Modificar_Metadatos_Libro.as_view()),
     url(r'^logout/',views.cerrar_sesion,name="logout"),
 
 ]
