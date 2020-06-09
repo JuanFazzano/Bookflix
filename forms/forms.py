@@ -12,17 +12,21 @@ def clean_campo(clase,atributo,longitud):
         raise forms.ValidationError(" En {} solo debe ingresarse digitos numericos".format(atributo))
     return clase.cleaned_data[atributo]
 
-class FormularioCargaAtributos:
+class FormularioCargaAtributos(forms.Form):
     "Este formulario permite cargar autor,genero,editorial"
-    def __init__(self,modelo,nombre_modelo):
+    nombre = forms.CharField(max_length = 30)
+
+    def __init__(self,modelo,nombre_modelo,*args,**kwargs):
         self.modelo = modelo
         self.nombre_modelo = nombre_modelo
-    nombre = forms.CharField(max_length = 30)
+        super(FormularioCargaAtributos,self).__init__(*args,**kwargs)
+
 
     def clean_nombre(self):
         "Acá se hace la validación del nombre"
         if self.modelo.objects.filter(nombre = self.cleaned_data['nombre']).exists():
-            raise forms.ValidationError('Ya existe el {}'.format(self.nombre_modelo))
+            raise forms.ValidationError('Ya existe {} {}'.format(self.nombre_modelo,self.cleaned_data['nombre']))
+        return self.cleaned_data['nombre']
 
 class FormularioRegistro(forms.Form):
     def __init__(self,*args,**kwargs):

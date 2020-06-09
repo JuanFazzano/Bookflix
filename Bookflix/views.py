@@ -10,7 +10,7 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
-from forms.forms                    import FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
+from forms.forms                    import FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 #def dar_de_baja_libros():
@@ -449,6 +449,18 @@ class Vista_Formulario_Libro_Completo(View):
             return redirect('/listado_libro/')
         return render(request,'formulario_libro_completo.html',{'formulario': formulario})
 
+class Vista_Formulario_Genero(View):
+    def get(self,request):
+        return render(request,'carga_atributos_libro.html',{'formulario': FormularioCargaAtributos(Genero,'genero'),'modelo':'genero'})
+
+    def post(self,request):
+        formulario = FormularioCargaAtributos(Genero,'genero')
+        if formulario.is_valid():
+            #Cargamos en la BD
+            genero = Genero(nombre = formulario.cleaned_data['nombre'])
+            genero.save()
+        return render(request,'carga_atributos_libro.html',{'formulario': formulario,'modelo':'genero'})
+
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
         self.modelo_string = 'libro'
@@ -499,6 +511,9 @@ class DecoradorAutor(Decorador):
 class DecoradorEditorial(Decorador):
     def libros(self):
         return Libro.objects.filter(editorial_id = self.id)
+
+
+
 
 #decoradorGenero = DecoradorGenero(Libro(),2)
 #decoradorAutor = DecoradorAutor(decoradorGenero,1)

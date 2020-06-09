@@ -39,6 +39,7 @@ urlpatterns = [
     url(r'^listado_perfiles/',views.Vista_Listado_Perfiles.as_view()),
     url(r'^carga_libro_completo/id=(?P<id>\w+)/$', views.Vista_Formulario_Libro_Completo.as_view()),
     url(r'^detalle_libro/id=(?P<id>\w+)/$',views.Vista_Detalle_libro.as_view()),
+    url(r'^cargar_genero',views.Vista_Formulario_Genero.as_view()),
     url(r'^logout/',views.cerrar_sesion,name="logout"),
 
 ]
