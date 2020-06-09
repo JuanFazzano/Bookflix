@@ -15,7 +15,7 @@
       }
 {% endblock %}
 {% block agregar_atributo %}
-  <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/novedad/add/"> Agregar Novedad </a></p>
+  <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/cargar_novedad/"> Agregar Novedad </a></p>
 {% endblock %}
 {% block listado %}
   <table>
@@ -25,7 +25,7 @@
                 <td style="padding-top:12px;"> {{novedad.titulo}} </td>
                 <td>
                   <a id="boton_personalizado" href="/detalle_novedad/id={{novedad.id}} "> Ver </a>
-                  <a id="boton_personalizado" href="/admin/modelos/novedad/{{novedad.id}}/change/"> Modificar </a>
+                  <a id="boton_personalizado" href="/modificar_novedad/id={{novedad.id}}/"> Modificar </a>
                   <a id="boton_personalizado" href="/admin/modelos/novedad/{{novedad.id}}/delete/"> Eliminar </a>
                 </td>
               {% else %}

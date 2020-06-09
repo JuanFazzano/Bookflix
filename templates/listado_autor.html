@@ -1,7 +1,4 @@
 {% extends "listado.html" %}
-
-
-
 {% block estilos %}
           #boton_personalizado{
           text-decoration: none;
@@ -18,7 +15,7 @@
 
   {% endblock %}
   {% block agregar_atributo %}
-      <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/autor/add/"> Agregar Autor </a></p>
+      <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/cargar_autor/"> Agregar Autor </a></p>
   {% endblock %}
 
 {% block listado %}
@@ -29,7 +26,7 @@
         {{autor.nombre}}
         </td>
         <td>
-            <a id="boton_personalizado" href="/admin/modelos/autor/{{autor.id}}/change/"> Modificar </a>
+            <a id="boton_personalizado" href="/modificar_autor/id={{autor.id}}/"> Modificar </a>
             <a id="boton_personalizado" href="#"> Eliminar </a>
         </td>
       </tr>

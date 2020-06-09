@@ -10,7 +10,7 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
-from forms.forms                    import FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
+from forms.forms                    import FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 #def dar_de_baja_libros():
@@ -449,19 +449,139 @@ class Vista_Formulario_Libro_Completo(View):
             return redirect('/listado_libro/')
         return render(request,'formulario_libro_completo.html',{'formulario': formulario})
 
-class Vista_Formulario_Genero(View):
+class Vista_Formulario_Atributo(View):
+    "Clase abstracta para la carga de autor,genero y editorial"
     def get(self,request):
-        return render(request,'carga_atributos_libro.html',{'formulario': FormularioCargaAtributos(Genero,'genero'),'modelo':'genero'})
+        return render(request,'carga_atributos_libro.html',self.contexto)
 
     @csrf_exempt
     def post(self,request):
-        formulario = FormularioCargaAtributos(data = request.POST,modelo = Genero,nombre_modelo = 'genero')
+        formulario = FormularioCargaAtributos(data = request.POST,modelo = self.modelo,nombre_modelo = self.nombre_modelo)
         if formulario.is_valid():
             #Cargamos en la BD
-            print('Entre')
-            genero = Genero(nombre = formulario.cleaned_data['nombre'])
-            genero.save()
-        return render(request,'carga_atributos_libro.html',{'formulario': formulario,'modelo':'genero'})
+            modelo = self.modelo(nombre = formulario.cleaned_data['nombre'])
+            modelo.save()
+            return redirect(self.url_redirect)
+        self.contexto['formulario'] = formulario
+        return render(request,'carga_atributos_libro.html',self.contexto)
+
+class Vista_Formulario_Genero(Vista_Formulario_Atributo):
+    def __init__(self):
+        self.modelo = Genero
+        self.nombre_modelo = 'genero'
+        self.url_redirect = '/listado_genero/'
+        self.contexto = {'formulario': FormularioCargaAtributos(Genero,'genero'),'modelo':'genero'}
+
+class Vista_Formulario_Autor(Vista_Formulario_Atributo):
+    def __init__(self):
+        self.modelo = Autor
+        self.nombre_modelo = 'autor'
+        self.url_redirect = '/listado_autor/'
+        self.contexto = {'formulario': FormularioCargaAtributos(Autor,'autor'),'modelo':'Autor'}
+
+class Vista_Formulario_Editorial(Vista_Formulario_Atributo):
+    def __init__(self):
+        self.modelo = Editorial
+        self.nombre_modelo = 'editorial'
+        self.url_redirect = '/listado_editorial/'
+        self.contexto = {'formulario': FormularioCargaAtributos(Editorial,'editorial'),'modelo':'editorial'}
+
+class Vista_Formulario_Novedad(View):
+    def get(self,request):
+        return render(request,'carga_novedad.html',{'formulario': FormularioCargaNovedad()})
+
+    def post(self,request):
+        formulario = FormularioCargaNovedad(request.POST,request.FILES)
+        if formulario.is_valid():
+
+            imagen = formulario.cleaned_data['foto']
+            if imagen is not None:
+                fs = FileSystemStorage()
+                fs.save(imagen.name, imagen)
+            novedad = Novedad(
+                titulo = formulario.cleaned_data['titulo'],
+                descripcion = formulario.cleaned_data['descripcion'],
+                foto = imagen
+                )
+            novedad.save()
+            return redirect('/listado_novedad/')
+        return render(request,'carga_novedad.html',{'formulario': formulario})
+
+class Vista_Modificar_Novedad(View):
+    def __get_valores_inicials(self,id):
+        novedad = Novedad.objects.get(id = id)
+        return {
+            'titulo': novedad.titulo,
+            'descripcion': novedad.descripcion if (novedad.descripcion is not None) else '',
+            'foto': novedad.foto if (novedad.foto is not None) else ''
+        }
+
+    def get(self,request, id = None):
+        print(self.__get_valores_inicials(id)['foto'])
+        return render(request,'carga_novedad.html',{'formulario': FormularioModificarNovedad(initial = self.__get_valores_inicials(id))})
+
+    def post(self,request, id = None):
+        formulario = FormularioModificarNovedad(request.POST,request.FILES,initial = self.__get_valores_inicials(id))
+        if formulario.is_valid():
+
+            imagen = formulario.cleaned_data['foto']
+            print('Imagen ',imagen)
+            if imagen:
+                fs = FileSystemStorage()
+                fs.save(imagen.name, imagen)
+            novedad = Novedad.objects.get(id = id)
+            novedad.titulo = formulario.cleaned_data['titulo']
+            novedad.descripcion = formulario.cleaned_data['descripcion']
+            novedad.foto = formulario.cleaned_data['foto'] if (imagen) else None
+            novedad.save()
+            return redirect('/listado_novedad/')
+        return render(request,'carga_novedad.html',{'formulario':formulario})
+
+
+class Vista_Formulario_Modificar_Atributo(View):
+    def __init__(self):
+        self.nombre = None
+        self.contexto = {'formulario': None, 'modelo':self.nombre_modelo}
+
+    def __get_iniciales(self,id):
+        "Devuelve los valores iniciales"
+        self.nombre = self.modelo.objects.get(id = id).nombre
+        return {'nombre': self.nombre}
+
+    def get(self,request,id = None):
+        self.contexto['formulario'] = FormularioModificarAtributos(initial = self.__get_iniciales(id),modelo = self.modelo,nombre_modelo = self.nombre_modelo)
+        return render(request,'carga_atributos_libro.html',self.contexto)
+
+    def post(self,request,id = None):
+        formulario = FormularioModificarAtributos(data = request.POST,initial = self.__get_iniciales(id),modelo = self.modelo,nombre_modelo = self.nombre_modelo)
+        if formulario.is_valid():
+            modelo = self.modelo.objects.get(id = id)
+            modelo.nombre = formulario.cleaned_data['nombre']
+            modelo.save()
+            return redirect(self.url_redirect)
+        self.contexto['formulario'] = formulario
+        return render(request,'carga_atributos_libro.html',self.contexto)
+
+class Vista_Formulario_Modificar_Genero(Vista_Formulario_Modificar_Atributo):
+    def __init__(self):
+        self.modelo = Genero
+        self.nombre_modelo = 'genero'
+        self.url_redirect = '/listado_genero/'
+        super(Vista_Formulario_Modificar_Genero,self).__init__()
+
+class Vista_Formulario_Modificar_Autor(Vista_Formulario_Modificar_Atributo):
+    def __init__(self):
+        self.modelo = Autor
+        self.nombre_modelo = 'genero'
+        self.url_redirect = '/listado_autor/'
+        super(Vista_Formulario_Modificar_Autor,self).__init__()
+
+class Vista_Formulario_Modificar_Editorial(Vista_Formulario_Modificar_Atributo):
+    def __init__(self):
+        self.modelo = Editorial
+        self.nombre_modelo = 'editorial'
+        self.url_redirect = '/listado_editorial/'
+        super(Vista_Formulario_Modificar_Editorial,self).__init__()
 
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):

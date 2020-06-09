@@ -14,7 +14,7 @@
     }
 {% endblock %}
 {% block agregar_atributo %}
-    <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/admin/modelos/editorial/add/"> Agregar Editorial </a></p>
+    <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/cargar_editorial/"> Agregar Editorial </a></p>
 {% endblock %}
 {% block listado %}
     <table>
@@ -24,7 +24,7 @@
         {{editorial.nombre}}
         </td>
         <td>
-            <a id="boton_personalizado" href="/admin/modelos/editorial/{{editorial.id}}/change/"> Modificar </a>
+            <a id="boton_personalizado" href="/modificar_editorial/id={{editorial.id}}/"> Modificar </a>
             <a id="boton_personalizado" href="#"> Eliminar </a>
         </td>
       </tr>

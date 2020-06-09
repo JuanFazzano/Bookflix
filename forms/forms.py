@@ -1,7 +1,7 @@
 import datetime
 from django import forms
 from django.contrib.auth.models import User
-from modelos.models import Suscriptor,Tarjeta,Tipo_Suscripcion
+from modelos.models import Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad
 
 def clean_campo(clase,atributo,longitud):
     campo = clase.cleaned_data[atributo] #Si no es un numero, esto levanta excepcion.
@@ -12,6 +12,29 @@ def clean_campo(clase,atributo,longitud):
         raise forms.ValidationError(" En {} solo debe ingresarse digitos numericos".format(atributo))
     return clase.cleaned_data[atributo]
 
+class FormularioModificarAtributos(forms.Form):
+    "Este formulario permite modificar autor,genero,editorial"
+
+    #show_hidden_initial permite mostrar el valor inicial
+    nombre = forms.CharField(max_length=30,show_hidden_initial = True)
+
+    def __init__(self,modelo,nombre_modelo,*args,**kwargs):
+        self.modelo = modelo
+        self.nombre_modelo = nombre_modelo
+        super(FormularioModificarAtributos,self).__init__(*args,**kwargs)
+
+    def __cambio(self,valor_inicial,valor_nuevo):
+        return valor_inicial != valor_nuevo
+
+    def clean_nombre(self):
+        field_nombre = self.visible_fields()[0] #Me devuelve una instancia del CharField --> campo nombre
+        valor_nombre_inicial = field_nombre.initial
+        valor_nombre_actual = self.cleaned_data['nombre']
+        if self.__cambio(valor_nombre_inicial,valor_nombre_actual):
+            if (self.modelo.objects.filter(nombre = valor_nombre_actual).exists()):
+                raise forms.ValidationError('Ya existe {} '.format(self.nombre_modelo))
+        return valor_nombre_actual
+
 class FormularioCargaAtributos(forms.Form):
     "Este formulario permite cargar autor,genero,editorial"
     nombre = forms.CharField(max_length = 30)
@@ -21,10 +44,8 @@ class FormularioCargaAtributos(forms.Form):
         self.nombre_modelo = nombre_modelo
         super(FormularioCargaAtributos,self).__init__(*args,**kwargs)
 
-
     def clean_nombre(self):
         "Acá se hace la validación del nombre"
-        print('HOLA')
         if self.modelo.objects.filter(nombre = self.cleaned_data['nombre']).exists():
             raise forms.ValidationError('Ya existe {} {}'.format(self.nombre_modelo,self.cleaned_data['nombre']))
         return self.cleaned_data['nombre']
@@ -144,6 +165,60 @@ class FormularioCargaLibro(forms.Form):
 
 
     #    def clean_DNI_titular(self):
+
+class FormularioNovedad(forms.Form):
+    titulo = forms.CharField(max_length = 255,show_hidden_initial = True)
+    descripcion = forms.CharField(widget=forms.Textarea,required=False, show_hidden_initial = True)
+    foto = forms.FileField(required=False, show_hidden_initial = True)
+
+    def clean_titulo(self):
+        pass
+
+class FormularioCargaNovedad(FormularioNovedad):
+    limpiar_foto = forms.BooleanField(required=False,widget=forms.CheckboxInput)
+
+
+    def clean_titulo(self):
+        print('ENTRE')
+        if Novedad.objects.filter(titulo = self.cleaned_data['titulo']).exists():
+            raise forms.ValidationError('Ya exista la novedad con ese titulo')
+        return self.cleaned_data['titulo']
+
+    def clean_limpiar_foto(self):
+        if self.cleaned_data['limpiar_foto']:
+            self.cleaned_data['foto'] = None
+        return self.cleaned_data['limpiar_foto']
+
+class FormularioModificarNovedad(FormularioNovedad):
+    def __cambio(self,valor_inicial,valor_nuevo):
+        return valor_inicial != valor_nuevo
+
+    def clean_titulo(self):
+        field_titulo = self.visible_fields()[0]  # Me devuelve una instancia del Charfield --> campo titulo
+        valor_titulo_inicial = field_titulo.initial
+        valor_titulo_actual = self.cleaned_data['titulo']
+        print(Novedad.objects.filter(titulo = valor_titulo_actual).exists())
+        if self.__cambio(valor_titulo_inicial, valor_titulo_actual):
+            if (Novedad.objects.filter(titulo = valor_titulo_actual).exists()):
+                print('HOLA entre aca papa ')
+                raise forms.ValidationError('El titulo ya esta registrado en el sistema')
+        return valor_titulo_actual
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
 #        valor_dni_inicial = field_DNI_titular.initial
 #        valor_dni_actual = self.cleaned_data['DNI_titular']
