@@ -453,10 +453,12 @@ class Vista_Formulario_Genero(View):
     def get(self,request):
         return render(request,'carga_atributos_libro.html',{'formulario': FormularioCargaAtributos(Genero,'genero'),'modelo':'genero'})
 
+    @csrf_exempt
     def post(self,request):
-        formulario = FormularioCargaAtributos(Genero,'genero')
+        formulario = FormularioCargaAtributos(data = request.POST,modelo = Genero,nombre_modelo = 'genero')
         if formulario.is_valid():
             #Cargamos en la BD
+            print('Entre')
             genero = Genero(nombre = formulario.cleaned_data['nombre'])
             genero.save()
         return render(request,'carga_atributos_libro.html',{'formulario': formulario,'modelo':'genero'})

@@ -24,6 +24,7 @@ class FormularioCargaAtributos(forms.Form):
 
     def clean_nombre(self):
         "Acá se hace la validación del nombre"
+        print('HOLA')
         if self.modelo.objects.filter(nombre = self.cleaned_data['nombre']).exists():
             raise forms.ValidationError('Ya existe {} {}'.format(self.nombre_modelo,self.cleaned_data['nombre']))
         return self.cleaned_data['nombre']
