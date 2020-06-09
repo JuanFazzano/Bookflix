@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^cargar_autor', views.Vista_Formulario_Autor.as_view()),
     url(r'^cargar_editorial', views.Vista_Formulario_Editorial.as_view()),
     url(r'^cargar_novedad', views.Vista_Formulario_Novedad.as_view()),
+    url(r'^cargar_metadatos_libro', views.Vista_Carga_Metadatos_Libro.as_view()),
     url(r'^modificar_genero/id=(?P<id>\w+)/$', views.Vista_Formulario_Modificar_Genero.as_view()),
     url(r'^modificar_autor/id=(?P<id>\w+)/$', views.Vista_Formulario_Modificar_Autor.as_view()),
     url(r'^modificar_editorial/id=(?P<id>\w+)/$', views.Vista_Formulario_Modificar_Editorial.as_view()),

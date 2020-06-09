@@ -1,7 +1,7 @@
 import datetime
 from django import forms
 from django.contrib.auth.models import User
-from modelos.models import Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad
+from modelos.models import Libro,Autor,Editorial,Genero,Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad
 
 def clean_campo(clase,atributo,longitud):
     campo = clase.cleaned_data[atributo] #Si no es un numero, esto levanta excepcion.
@@ -205,7 +205,39 @@ class FormularioModificarNovedad(FormularioNovedad):
         return valor_titulo_actual
 
 
+class FormularioCargaDeMetadatosLibro(forms.Form):
+    def obtener_objetos(modelo):
+        todos_los_objetos= modelo.objects.all()
+        print(todos_los_objetos)
+        lista_a_retornar=list()
+        for i in range(0, len(todos_los_objetos)):
+            lista_a_retornar.append(((todos_los_objetos[i]).id,(todos_los_objetos[i]).nombre))
+        return lista_a_retornar
 
+    titulo= forms.CharField(max_length=40,required=True)
+    ISBN = forms.CharField(max_length=13,required=True)
+    imagen =forms.FileField(required=False)
+    descripcion= forms.CharField(widget=forms.Textarea, required=False)
+    autor = forms.CharField(widget=forms.Select(choices= obtener_objetos(Autor)),required=True)
+    editorial=forms.CharField(widget=forms.Select(choices= obtener_objetos(Editorial)),required=True)
+    genero=forms.CharField(widget=forms.Select(choices= obtener_objetos(Genero)),required=True)
+
+    def clean_titulo(self):
+        titulo = self.cleaned_data['titulo']
+        if Libro.objects.filter(titulo=titulo).exists():
+            raise forms.ValidationError('El titulo ya se encuentra registrado')
+        return titulo
+
+    def clean_ISBN(self):
+        isbn = self.cleaned_data['ISBN']
+        if isbn.isdigit(): #verifica si un string tiene unicamente digitos
+            if Libro.objects.filter(ISBN = isbn).exists():
+                raise forms.ValidationError("El ISBN ya se encuentra registrado en el sistema")
+            if (len(isbn) not in (10,13)):
+                raise forms.ValidationError("Deben ingresarse 10 o 13 dígitos")
+        else:
+            raise forms.ValidationError(" En ISBN solo debe ingresarse digitos numericos")
+        return isbn
 
 
 

@@ -10,7 +10,7 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
-from forms.forms                    import FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
+from forms.forms                    import FormularioCargaDeMetadatosLibro,FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 #def dar_de_baja_libros():
@@ -537,7 +537,6 @@ class Vista_Modificar_Novedad(View):
             return redirect('/listado_novedad/')
         return render(request,'carga_novedad.html',{'formulario':formulario})
 
-
 class Vista_Formulario_Modificar_Atributo(View):
     def __init__(self):
         self.nombre = None
@@ -603,6 +602,44 @@ class Vista_Detalle_libro(Vista_Detalle):
         decoradorAutor = DecoradorAutor(decoradorGenero,libro.autor_id)
         decoradorEditorial = DecoradorEditorial(decoradorAutor,libro.editorial_id)
         self.contexto ['libros_similares'] = decoradorEditorial.buscar_similares()
+
+class Vista_Carga_Metadatos_Libro(View):
+    def __init__(self, *args, **kwargs):
+        self.contexto = dict()
+        self.url = '/listado_libro/'
+        super(Vista_Carga_Metadatos_Libro, self).__init__(*args, **kwargs)
+
+    def __cargar_metadatos_libro(self,formulario):
+        archivo_imagen = formulario.cleaned_data['imagen']
+        if archivo_imagen is not None:
+            "----Guarda el archivo en la carpeta static--------"
+            fs = FileSystemStorage()
+            fs.save(archivo_imagen.name, archivo_imagen)
+        titulo = formulario.cleaned_data['titulo']
+        isbn = formulario.cleaned_data['ISBN']
+        descripcion = formulario.cleaned_data['descripcion']
+        autor = formulario.cleaned_data['autor']
+        editorial = formulario.cleaned_data['editorial']
+        genero = formulario.cleaned_data['genero']
+        nuevo_libro = Libro(titulo=titulo, ISBN = isbn ,foto= archivo_imagen, descripcion= descripcion , autor_id = autor ,editorial_id= editorial, genero_id = genero  )
+        nuevo_libro.save()
+
+    def get(self, request):
+        formulario = FormularioCargaDeMetadatosLibro()
+        self.contexto['formulario'] = formulario
+        self.contexto['modelo'] = 'libro'
+        return render(request, 'carga_atributos_libro.html', self.contexto)
+
+    @csrf_exempt
+    def post(self, request):
+        formulario = FormularioCargaDeMetadatosLibro(request.POST, request.FILES)
+        if formulario.is_valid():
+            print(formulario.cleaned_data)
+            self.__cargar_metadatos_libro(formulario)
+            return redirect(self.url)
+        self.contexto['formulario'] = formulario
+        self.contexto['modelo'] = 'libro'
+        return render(request, 'carga_atributos_libro.html', self.contexto)
 
 class Decorador:
     def __init__(self,decorado,id):
