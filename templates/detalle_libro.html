@@ -1,5 +1,21 @@
 {% extends "detalle.html" %}
 {% load static %}
+  {% block estilos %}
+        #boton_personalizado{
+          text-decoration: none;
+          padding: 10px;
+          font-weight: 400;
+          font-size: 12px;
+          color: #ffffff;
+          background-color: black;
+          border-radius: 4px;
+          font-family: "Roboto";
+        }
+        #imagen_detalle {
+            width:250px;
+            height: 250px;
+        }
+    {% endblock %}
 {% block detalle %}
     <ul style="list-style:none;">
         {% if objeto_pagina %}
@@ -29,13 +45,12 @@
                 <li>
                    <img id="imagen_detalle" src="{{MEDIA_URL}}{{libro.foto.url}}" />
                 </li>
+                <br>
                 {% endif %}
                 {% if not request.user.is_staff %}
                     {% if libro.esta_completo %}
-                       
-                        <button>
-                            <a href="#"> Leer libro completo</a>
-                        </button>
+                         <a id="boton_personalizado" href="/media/{{libro.libro_completo.archivo_pdf}}/"> Leer libro completo</a>
+                         <br> <br>
                     {% else %}
                         <button>
                             <a href="#"> Ver listado de capítulos</a>

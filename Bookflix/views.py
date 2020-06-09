@@ -10,7 +10,7 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
-from forms.forms                    import FormularioCargaDeMetadatosLibro,FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro,Formulario_modificar_metadatos_libro
+from forms.forms                    import FormularioModificarTrailer,FormularioCargaTrailer,FormularioTrailer,FormularioCargaDeMetadatosLibro,FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro,Formulario_modificar_metadatos_libro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 #def dar_de_baja_libros():
@@ -507,6 +507,38 @@ class Vista_Formulario_Novedad(View):
             return redirect('/listado_novedad/')
         return render(request,'carga_novedad.html',{'formulario': formulario})
 
+class Vista_Formulario_Trailer(View):
+    def __init__(self):
+        self.contexto = {'modelo':'trailer'}
+
+    def __carga_archivo(self,campo_archivo):
+        archivo = campo_archivo
+        if archivo is not None:
+            fs = FileSystemStorage()
+            fs.save(archivo.name, archivo)
+
+    def get(self,request):
+        self.contexto['formulario'] =  FormularioCargaTrailer()
+        return render(request,'carga_atributos_libro.html',self.contexto)
+
+    def post(self,request):
+        formulario = FormularioCargaTrailer(request.POST,request.FILES)
+        if formulario.is_valid():
+            self.__carga_archivo(formulario.cleaned_data['pdf'])
+            self.__carga_archivo(formulario.cleaned_data['video'])
+            trailer = Trailer(
+                titulo = formulario.cleaned_data['titulo'],
+                descripcion = formulario.cleaned_data['descripcion'],
+                pdf = formulario.cleaned_data['pdf'],
+                video = formulario.cleaned_data['video'],
+                libro_asociado_id = formulario.cleaned_data['libro']
+            )
+            trailer.save()
+            return redirect('/listado_trailer/')
+        self.contexto['errores'] = formulario.errors
+        self.contexto['formulario'] = FormularioCargaTrailer()
+        return render(request,'carga_atributos_libro.html',self.contexto)
+
 class Vista_Modificar_Novedad(View):
     def __get_valores_inicials(self,id):
         novedad = Novedad.objects.get(id = id)
@@ -584,6 +616,39 @@ class Vista_Formulario_Modificar_Editorial(Vista_Formulario_Modificar_Atributo):
         self.url_redirect = '/listado_editorial/'
         super(Vista_Formulario_Modificar_Editorial,self).__init__()
 
+class Vista_Formulario_Modificar_Trailer(View):
+    def __init__(self):
+        self.contexto = {'modelo':'trailer'}
+
+    def __get_valores_iniciales(self,id):
+        trailer = Trailer.objects.get(id = id)
+        return{
+            'titulo': trailer.titulo,
+            'descripcion': trailer.descripcion,
+            'pdf': trailer.pdf if (trailer.pdf is not None) else None,
+            'video': trailer.video if (trailer.video is not None) else None,
+            'libro': trailer.libro_asociado_id if (trailer.libro_asociado is not None) else ''
+        }
+
+    def get(self,request,id = None):
+        self.contexto['formulario'] = FormularioModificarTrailer(initial=self.__get_valores_iniciales(id))
+        return render(request,'carga_atributos_libro.html',self.contexto)
+
+    def post(self,request,id = None):
+        formulario = FormularioModificarTrailer(request.POST,request.FILES,initial=self.__get_valores_iniciales(id))
+        if formulario.is_valid():
+            trailer = Trailer.objects.get(id = id)
+            trailer.titulo = formulario.cleaned_data['titulo']
+            trailer.descripcion =  formulario.cleaned_data['descripcion']
+            trailer.pdf =  None if (not formulario.cleaned_data['pdf']) else formulario.cleaned_data['pdf']
+            trailer.video =  None if (not formulario.cleaned_data['video']) else formulario.cleaned_data['video']
+            trailer.libro_asociado_id =  formulario.cleaned_data['libro']
+            trailer.save()
+            return redirect('/listado_trailer/')
+        self.contexto['errores'] = formulario.errors
+        self.contexto['formulario'] = FormularioModificarTrailer(initial = self.__get_valores_iniciales(id))
+        return render(request,'carga_atributos_libro.html',self.contexto)
+
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
         self.modelo_string = 'libro'
@@ -596,10 +661,11 @@ class Vista_Detalle_libro(Vista_Detalle):
         trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
         libro = Libro.objects.filter(id = id)[0]
         if libro.esta_completo:
+            #libro_completo =  Libro_Completo.objects.values().filter(libro_id = libro.id)
             libro_completo =  Libro_Completo.objects.get(libro_id = libro.id)
+            print('VALORES COMPLETO ',libro_completo)
             self.contexto['completo'] = libro_completo
         self.contexto ['trailers'] = trailers
-        print('se rompe acaaa')
         decoradorGenero = DecoradorGenero(libro,libro.genero_id)
         decoradorAutor = DecoradorAutor(decoradorGenero,libro.autor_id)
         decoradorEditorial = DecoradorEditorial(decoradorAutor,libro.editorial_id)
@@ -643,7 +709,6 @@ class Vista_Carga_Metadatos_Libro(View):
         self.contexto['modelo'] = 'libro'
         return render(request, 'carga_atributos_libro.html', self.contexto)
 
-
 class Vista_Modificar_Metadatos_Libro(View):
     def __get_valores_inicials(self,id):
         libro = Libro.objects.get(id = id)
@@ -678,14 +743,8 @@ class Vista_Modificar_Metadatos_Libro(View):
             libro.editorial_id= formulario.cleaned_data['editorial']
             libro.save()
             return redirect('/listado_libro/')
-        print(formulario)
         formulario.initial["titulo"]= 'hola'
-        print(formulario['titulo'].value())
-
-        print(formulario['ISBN'].value())
-
         return render(request,'carga_atributos_libro.html',{'formulario':formulario,'modelo':'libro'})
-
 
 class Decorador:
     def __init__(self,decorado,id):

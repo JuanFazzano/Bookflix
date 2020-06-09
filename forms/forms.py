@@ -1,7 +1,7 @@
 import datetime
 from django import forms
 from django.contrib.auth.models import User
-from modelos.models import Libro,Autor,Editorial,Genero,Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad
+from modelos.models import Libro,Autor,Editorial,Genero,Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad,Trailer
 
 def clean_campo(clase,atributo,longitud):
     campo = clase.cleaned_data[atributo] #Si no es un numero, esto levanta excepcion.
@@ -11,6 +11,15 @@ def clean_campo(clase,atributo,longitud):
     else:
         raise forms.ValidationError(" En {} solo debe ingresarse digitos numericos".format(atributo))
     return clase.cleaned_data[atributo]
+
+def obtener_objetos(modelo):
+    todos_los_objetos= modelo.objects.all()
+    print(todos_los_objetos)
+    lista_a_retornar=list()
+    for i in range(0, len(todos_los_objetos)):
+        lista_a_retornar.append(((todos_los_objetos[i]).id,(todos_los_objetos[i]).nombre))
+        print(lista_a_retornar)
+    return lista_a_retornar
 
 class FormularioModificarAtributos(forms.Form):
     "Este formulario permite modificar autor,genero,editorial"
@@ -34,7 +43,6 @@ class FormularioModificarAtributos(forms.Form):
             if (self.modelo.objects.filter(nombre = valor_nombre_actual).exists()):
                 raise forms.ValidationError('Ya existe {} '.format(self.nombre_modelo))
         return valor_nombre_actual
-
 
 class FormularioCargaAtributos(forms.Form):
     "Este formulario permite cargar autor,genero,editorial"
@@ -178,7 +186,6 @@ class FormularioNovedad(forms.Form):
 class FormularioCargaNovedad(FormularioNovedad):
     limpiar_foto = forms.BooleanField(required=False,widget=forms.CheckboxInput)
 
-
     def clean_titulo(self):
         print('ENTRE')
         if Novedad.objects.filter(titulo = self.cleaned_data['titulo']).exists():
@@ -187,6 +194,7 @@ class FormularioCargaNovedad(FormularioNovedad):
 
     def clean_limpiar_foto(self):
         if self.cleaned_data['limpiar_foto']:
+            #Si pide limpiar la foto, en el diccionario guardo None para que en la BD ponga none en el campo foto
             self.cleaned_data['foto'] = None
         return self.cleaned_data['limpiar_foto']
 
@@ -205,17 +213,7 @@ class FormularioModificarNovedad(FormularioNovedad):
                 raise forms.ValidationError('El titulo ya esta registrado en el sistema')
         return valor_titulo_actual
 
-
 class FormularioCargaDeMetadatosLibro(forms.Form):
-    def obtener_objetos(modelo):
-        todos_los_objetos= modelo.objects.all()
-        print(todos_los_objetos)
-        lista_a_retornar=list()
-        for i in range(0, len(todos_los_objetos)):
-            lista_a_retornar.append(((todos_los_objetos[i]).id,(todos_los_objetos[i]).nombre))
-        print(lista_a_retornar)
-        return lista_a_retornar
-
     titulo= forms.CharField(max_length=40,required=True,show_hidden_initial = True)
     ISBN = forms.CharField(max_length=13,required=True,show_hidden_initial = True)
     imagen =forms.FileField(required=False,show_hidden_initial = True)
@@ -241,12 +239,7 @@ class FormularioCargaDeMetadatosLibro(forms.Form):
             raise forms.ValidationError(" En ISBN solo debe ingresarse digitos numericos")
         return isbn
 
-
-
-
-
 class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
-
     def clean_limpiar_foto(self):
         if self.cleaned_data['limpiar_foto']:
             self.cleaned_data['foto'] = None
@@ -276,12 +269,62 @@ class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
                 raise forms.ValidationError('El ISBN ya esta registrado en el sistema')
         return valor_ISBN_actual
 
+def obtener_libros():
+    libros = Libro.objects.all()
+    lista_libros = list()
+    for i in range(0, len(libros)):
+        #Arega una tupla (id_libro, titulo_libro)
+        lista_libros.append(((libros[i]).id, (libros[i]).titulo))
+    lista_libros.insert(0,(None,''))
+    return lista_libros
 
+class FormularioTrailer(forms.Form):
+    titulo = forms.CharField(max_length=255,show_hidden_initial = True)
+    descripcion = forms.CharField(widget = forms.Textarea,show_hidden_initial = True)
+    libro = forms.CharField(widget=forms.Select(choices= obtener_libros()),required = False,show_hidden_initial = True)
+    pdf = forms.FileField(required = False,show_hidden_initial = True)
+    video = forms.FileField(required = False,show_hidden_initial = True)
 
+    def clean_titulo(self):
+        pass
 
+class FormularioCargaTrailer(FormularioTrailer):
+    limpiar_pdf = forms.BooleanField(required=False,widget=forms.CheckboxInput)
+    limpiar_video = forms.BooleanField(required=False,widget=forms.CheckboxInput)
 
+    def clean_titulo(self):
+        if Trailer.objects.filter(titulo = self.cleaned_data['titulo']).exists():
+            raise forms.ValidationError('El titulo ya existe')
+        return self.cleaned_data['titulo']
 
+    def clean_limpiar_checkbox(self,atributo,campo_bd):
+        if self.cleaned_data[atributo]:
+            #Si pide limpiar la foto, en el diccionario guardo None para que en la BD ponga none en el campo foto
+            self.cleaned_data[campo_bd] = None
+        return self.cleaned_data[atributo]
 
+    def clean_limpiar_pdf(self):
+        self.clean_limpiar_checkbox('limpiar_pdf','pdf')
+        return self.cleaned_data['limpiar_pdf']
+
+    def clean_limpiar_video(self):
+        self.clean_limpiar_checkbox('limpiar_video','video')
+        return self.cleaned_data['limpiar_video']
+
+class FormularioModificarTrailer(FormularioTrailer):
+    def __cambio(self, valor_inicial, valor_nuevo):
+        return valor_inicial != valor_nuevo
+
+    def clean_titulo(self):
+        field_titulo = self.visible_fields()[0]  # Me devuelve una instancia del Charfield --> campo titulo
+        valor_titulo_inicial = field_titulo.initial
+        valor_titulo_actual = self.cleaned_data['titulo']
+        print(valor_titulo_actual,valor_titulo_inicial)
+        print(self.__cambio(valor_titulo_inicial,valor_titulo_actual))
+        if self.__cambio(valor_titulo_inicial, valor_titulo_actual):
+            if (Trailer.objects.filter(titulo=valor_titulo_actual).exists()):
+                raise forms.ValidationError('El titulo ya esta en el sistema')
+        return valor_titulo_actual
 
 #        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
 #        valor_dni_inicial = field_DNI_titular.initial
