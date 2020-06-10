@@ -231,7 +231,16 @@ class FormularioModificarNovedad(FormularioNovedad):
         return valor_titulo_actual
 
 class FormularioCargaDeMetadatosLibro(forms.Form):
-    def obtener_objetos(modelo):
+
+    def __init__(self,*args,**kwargs):
+        super(FormularioCargaDeMetadatosLibro, self).__init__(*args, **kwargs)
+        self.fields['autor']=forms.CharField(widget=forms.Select(choices= self.obtener_objetos(Autor)),required=True)
+        self.fields['editorial']=forms.CharField(widget=forms.Select(choices= self.obtener_objetos(Editorial)),required=True)
+        self.fields['genero']=forms.CharField(widget=forms.Select(choices= self.obtener_objetos(Genero)),required=True)
+
+
+    def obtener_objetos(self,modelo):
+        print('entre')
         todos_los_objetos = modelo.objects.all()
         print(todos_los_objetos)
         lista_a_retornar = list()
@@ -239,13 +248,11 @@ class FormularioCargaDeMetadatosLibro(forms.Form):
             lista_a_retornar.append(((todos_los_objetos[i]).id, (todos_los_objetos[i]).nombre))
             print(lista_a_retornar)
         return lista_a_retornar
+
     titulo= forms.CharField(max_length=40,required=True,show_hidden_initial = True)
     ISBN = forms.CharField(max_length=13,required=True,show_hidden_initial = True)
     imagen =forms.FileField(required=False,show_hidden_initial = True)
     descripcion= forms.CharField(widget=forms.Textarea, required=False,show_hidden_initial = True)
-    autor = forms.CharField(widget=forms.Select(choices= obtener_objetos(Autor)),required=True)
-    editorial=forms.CharField(widget=forms.Select(choices= obtener_objetos(Editorial)),required=True)
-    genero=forms.CharField(widget=forms.Select(choices= obtener_objetos(Genero)),required=True)
 
     def clean_titulo(self):
         titulo = self.cleaned_data['titulo']
@@ -294,19 +301,26 @@ class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
                 raise forms.ValidationError('El ISBN ya esta registrado en el sistema')
         return valor_ISBN_actual
 
-def obtener_libros():
-    libros = Libro.objects.all()
-    lista_libros = list()
-    for i in range(0, len(libros)):
-        #Arega una tupla (id_libro, titulo_libro)
-        lista_libros.append(((libros[i]).id, (libros[i]).titulo))
-    lista_libros.insert(0,(None,''))
-    return lista_libros
+
 
 class FormularioTrailer(forms.Form):
+    def obtener_libros(self):
+        libros = Libro.objects.all()
+        lista_libros = list()
+        for i in range(0, len(libros)):
+            # Arega una tupla (id_libro, titulo_libro)
+            lista_libros.append(((libros[i]).id, (libros[i]).titulo))
+        lista_libros.insert(0, (None, ''))
+        return lista_libros
+
+    def __init__(self,*args,**kwargs):
+        super(FormularioTrailer, self).__init__(*args,**kwargs)
+        self.fields['libro']=forms.CharField(widget=forms.Select(choices= self.obtener_libros()),required=True)
+
+
+
     titulo = forms.CharField(max_length=255,show_hidden_initial = True)
     descripcion = forms.CharField(widget = forms.Textarea,show_hidden_initial = True)
-    libro = forms.CharField(widget=forms.Select(choices= obtener_libros()),required = False,show_hidden_initial = True)
     pdf = forms.FileField(required = False,show_hidden_initial = True)
     video = forms.FileField(required = False,show_hidden_initial = True)
 
