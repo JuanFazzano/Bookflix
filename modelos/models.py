@@ -138,6 +138,8 @@ class Libro_Completo(models.Model):
 
 class Libro_Incompleto(models.Model):
     libro = models.OneToOneField(Libro,primary_key = True, on_delete=models.CASCADE)
+    esta_completo=models.BooleanField(default=0)
+
 
 class Capitulo(models.Model):
     class Meta:

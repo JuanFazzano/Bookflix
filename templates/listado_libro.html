@@ -71,10 +71,12 @@
                 -->
                 <a id="boton_personalizado" style="margin-left: 10px;" href="/modificar_libro/id={{libro.id}}"> Modificar </a>
                 <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/delete/"> Eliminar </a>
+                  <a id="boton_personalizado" style="margin-left: 10px;" href="/modificar_fechas_libro/id={{libro.id}}/"> Cambiar Fechas </a>
                 {% if not libro.esta_completo %}
                   <!-- Si no está completo, muestra los botones de subir completo o por capitulo -->
                   <a id="boton_personalizado" style="margin-left: 10px;" href="/carga_libro_completo/id={{libro.id}}/"> Subir libro completo </a>
                   <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Subir capitulo </a>
+
                 {% endif %}
                 </td>
               </tr>

@@ -10,7 +10,7 @@ from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
-from forms.forms                    import FormularioModificarTrailer,FormularioCargaTrailer,FormularioTrailer,FormularioCargaDeMetadatosLibro,FormularioModificarNovedad,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro,Formulario_modificar_metadatos_libro
+from forms.forms                    import FormularioCargaDeMetadatosLibro,FormularioModificarTrailer,FormularioModificarNovedad,FormularioCargaTrailer,FormularioCargaNovedad,FormularioModificarAtributos,FormularioCargaAtributos,FormularioIniciarSesion,FormularioCargaFechas,FormularioRegistro,FormularioModificarDatosPersonales,FormularioCargaLibro,Formulario_modificar_metadatos_libro
 from modelos.models                 import Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 
 #def dar_de_baja_libros():
@@ -190,6 +190,8 @@ class Vista_Iniciar_Sesion(View):
         self.__contexto['formulario'] = FormularioIniciarSesion()
 
     def get(self,request):
+        if request.user.is_authenticated:
+            return redirect('/')
         self.__contextualizar_formulario()
         return render(request,self.__vista_html,self.__contexto)
 
@@ -539,6 +541,7 @@ class Vista_Formulario_Trailer(View):
         self.contexto['formulario'] = FormularioCargaTrailer()
         return render(request,'carga_atributos_libro.html',self.contexto)
 
+
 class Vista_Modificar_Novedad(View):
     def __get_valores_inicials(self,id):
         novedad = Novedad.objects.get(id = id)
@@ -584,17 +587,6 @@ class Vista_Formulario_Modificar_Atributo(View):
         self.contexto['formulario'] = FormularioModificarAtributos(initial = self.__get_iniciales(id),modelo = self.modelo,nombre_modelo = self.nombre_modelo)
         return render(request,'carga_atributos_libro.html',self.contexto)
 
-    def post(self,request,id = None):
-        formulario = FormularioModificarAtributos(data = request.POST,initial = self.__get_iniciales(id),modelo = self.modelo,nombre_modelo = self.nombre_modelo)
-        if formulario.is_valid():
-            modelo = self.modelo.objects.get(id = id)
-            modelo.nombre = formulario.cleaned_data['nombre']
-            modelo.save()
-            return redirect(self.url_redirect)
-        self.contexto['errores'] = formulario.errors
-        self.contexto['formulario'] = FormularioModificarAtributos(initial = self.__get_iniciales(id),modelo = self.modelo,nombre_modelo = self.nombre_modelo)
-        return render(request,'carga_atributos_libro.html',self.contexto)
-
 class Vista_Formulario_Modificar_Genero(Vista_Formulario_Modificar_Atributo):
     def __init__(self):
         self.modelo = Genero
@@ -615,6 +607,7 @@ class Vista_Formulario_Modificar_Editorial(Vista_Formulario_Modificar_Atributo):
         self.nombre_modelo = 'editorial'
         self.url_redirect = '/listado_editorial/'
         super(Vista_Formulario_Modificar_Editorial,self).__init__()
+
 
 class Vista_Formulario_Modificar_Trailer(View):
     def __init__(self):
@@ -661,11 +654,10 @@ class Vista_Detalle_libro(Vista_Detalle):
         trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
         libro = Libro.objects.filter(id = id)[0]
         if libro.esta_completo:
-            #libro_completo =  Libro_Completo.objects.values().filter(libro_id = libro.id)
             libro_completo =  Libro_Completo.objects.get(libro_id = libro.id)
-            print('VALORES COMPLETO ',libro_completo)
             self.contexto['completo'] = libro_completo
         self.contexto ['trailers'] = trailers
+        print('se rompe acaaa')
         decoradorGenero = DecoradorGenero(libro,libro.genero_id)
         decoradorAutor = DecoradorAutor(decoradorGenero,libro.autor_id)
         decoradorEditorial = DecoradorEditorial(decoradorAutor,libro.editorial_id)
@@ -709,7 +701,8 @@ class Vista_Carga_Metadatos_Libro(View):
         self.contexto['modelo'] = 'libro'
         return render(request, 'carga_atributos_libro.html', self.contexto)
 
-class Vista_Modificar_Metadatos_Libro(View):
+
+class Vista_Modificar_Metadatos_Libro(Vista_Carga_Metadatos_Libro):
     def __get_valores_inicials(self,id):
         libro = Libro.objects.get(id = id)
         return {
@@ -743,8 +736,43 @@ class Vista_Modificar_Metadatos_Libro(View):
             libro.editorial_id= formulario.cleaned_data['editorial']
             libro.save()
             return redirect('/listado_libro/')
-        formulario.initial["titulo"]= 'hola'
-        return render(request,'carga_atributos_libro.html',{'formulario':formulario,'modelo':'libro'})
+        contexto = {}
+        contexto['errores'] = formulario.errors
+        contexto['formulario'] = Formulario_modificar_metadatos_libro(initial=self.__get_valores_inicials(id))
+        contexto['modelo'] = 'libro'
+        return render(request, 'carga_atributos_libro.html', contexto)
+
+class Vista_modificar_fechas_libro(View):
+    def __init__(self, *args, **kwargs):
+        self.esta_completo = None
+        super(Vista_modificar_fechas_libro, self).__init__(*args, **kwargs)
+
+    def __get_valores_inicials(self, id):
+        libro_completo = Libro_Completo.objects.get(libro_id=id)
+        print(libro_completo)
+        return {
+            'fecha_de_lanzamiento': libro_completo.fecha_lanzamiento.date(),
+            'fecha_de_vencimiento': libro_completo.fecha_vencimiento.date(),
+        }
+
+    def get(self, request, id=None):
+
+        self.esta_completo = Libro.objects.get(id=id).esta_completo
+        print(self.esta_completo)
+        if (self.esta_completo):
+            print(self.__get_valores_inicials(id))
+            return render(request, 'carga_atributos_libro.html', {'formulario': FormularioCargaFechas(self.__get_valores_inicials(id))})
+        return render(request, 'carga_atributos_libro.html', {'formulario': FormularioCargaFechas()})
+
+    def post(self, request, id=None):
+        formulario = FormularioCargaFechas(request.POST, initial=self.__get_valores_inicials(id))
+        if formulario.is_valid():
+
+            return redirect('/listado_libro/')
+        '''if (self.esta_completo):'''
+        return render(request, 'carga_atributos_libro.html',{'formulario': FormularioCargaFechas(initial=self.__get_valores_inicials(id)),'errores': formulario.errors})
+        '''return render(request, 'carga_atributos_libro.html',{'formulario': FormularioCargaFechas(), 'errores': formulario.errors})'''
+
 
 class Decorador:
     def __init__(self,decorado,id):

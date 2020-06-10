@@ -148,6 +148,33 @@ class FormularioModificarDatosPersonales(forms.Form):
             self.datos_cambiados['Email'] = False
         return valor_email_actual
 
+class FormularioCargaFechas(forms.Form):
+
+    fecha_de_lanzamiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
+    fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
+
+
+
+    def clean_fecha_de_lanzamiento(self):
+        fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
+        if(fecha_de_lanzamiento1 < datetime.date.today()):
+            print('tire alto error')
+            raise forms.ValidationError('La fecha de lanzamiento no puede ser anterior a la fecha de hoy')
+        return fecha_de_lanzamiento1
+
+    def clean_fecha_de_vencimiento(self):
+        fecha_de_vencimiento1 =None
+        print(self.cleaned_data)
+        if 'fecha_de_lanzamiento' in self.cleaned_data.keys():
+            fecha_de_lanzamiento1= self.cleaned_data['fecha_de_lanzamiento']
+            fecha_de_vencimiento1= self.cleaned_data['fecha_de_vencimiento']
+            if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
+                raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
+        return fecha_de_vencimiento1
+
+
+
+
 class FormularioCargaLibro(forms.Form):
     class DateInput(forms.DateInput):
         input_type = 'date'
@@ -170,7 +197,6 @@ class FormularioCargaLibro(forms.Form):
             if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
-
 
 
     #    def clean_DNI_titular(self):
