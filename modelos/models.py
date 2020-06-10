@@ -137,7 +137,7 @@ class Libro_Completo(models.Model):
     archivo_pdf = models.FileField(null = False)
 
 class Libro_Incompleto(models.Model):
-    libro = models.OneToOneField(Libro,primary_key = True, on_delete=models.CASCADE)
+    libro = models.OneToOneField(Libro,unique = True, on_delete=models.CASCADE)
     esta_completo=models.BooleanField(default=0)
 
 
@@ -146,8 +146,8 @@ class Capitulo(models.Model):
         unique_together = (('capitulo','titulo'),)
     titulo = models.ForeignKey(Libro_Incompleto, on_delete=models.CASCADE)
     capitulo = models.IntegerField()
-    fecha_lanzamiento = models.DateTimeField()
-    fecha_vencimiento = models.DateTimeField(null=True)
+    #fecha_lanzamiento = models.DateTimeField()
+    #fecha_vencimiento = models.DateTimeField(null=True)
     archivo_pdf = models.FileField(null = False)
 
 class Novedad(models.Model):

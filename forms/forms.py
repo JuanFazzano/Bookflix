@@ -1,7 +1,8 @@
 import datetime
 from django import forms
 from django.contrib.auth.models import User
-from modelos.models import Libro,Autor,Editorial,Genero,Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad,Trailer
+from modelos.models import Libro,Autor,Editorial,Genero,Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad,Trailer,Capitulo
+from django.db.models import Max
 
 def clean_campo(clase,atributo,longitud):
     campo = clase.cleaned_data[atributo] #Si no es un numero, esto levanta excepcion.
@@ -12,14 +13,8 @@ def clean_campo(clase,atributo,longitud):
         raise forms.ValidationError(" En {} solo debe ingresarse digitos numericos".format(atributo))
     return clase.cleaned_data[atributo]
 
-def obtener_objetos(modelo):
-    todos_los_objetos= modelo.objects.all()
-    print(todos_los_objetos)
-    lista_a_retornar=list()
-    for i in range(0, len(todos_los_objetos)):
-        lista_a_retornar.append(((todos_los_objetos[i]).id,(todos_los_objetos[i]).nombre))
-        print(lista_a_retornar)
-    return lista_a_retornar
+class DateInput(forms.DateInput):
+    input_type = 'date'
 
 class FormularioModificarAtributos(forms.Form):
     "Este formulario permite modificar autor,genero,editorial"
@@ -151,9 +146,7 @@ class FormularioModificarDatosPersonales(forms.Form):
 class FormularioCargaFechas(forms.Form):
 
     fecha_de_lanzamiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
-    fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
-
-
+    fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True,required=False)
 
     def clean_fecha_de_lanzamiento(self):
         fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
@@ -176,8 +169,6 @@ class FormularioCargaFechas(forms.Form):
 
 
 class FormularioCargaLibro(forms.Form):
-    class DateInput(forms.DateInput):
-        input_type = 'date'
     fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
     pdf = forms.FileField(required=True)
@@ -240,6 +231,14 @@ class FormularioModificarNovedad(FormularioNovedad):
         return valor_titulo_actual
 
 class FormularioCargaDeMetadatosLibro(forms.Form):
+    def obtener_objetos(modelo):
+        todos_los_objetos = modelo.objects.all()
+        print(todos_los_objetos)
+        lista_a_retornar = list()
+        for i in range(0, len(todos_los_objetos)):
+            lista_a_retornar.append(((todos_los_objetos[i]).id, (todos_los_objetos[i]).nombre))
+            print(lista_a_retornar)
+        return lista_a_retornar
     titulo= forms.CharField(max_length=40,required=True,show_hidden_initial = True)
     ISBN = forms.CharField(max_length=13,required=True,show_hidden_initial = True)
     imagen =forms.FileField(required=False,show_hidden_initial = True)
@@ -352,6 +351,42 @@ class FormularioModificarTrailer(FormularioTrailer):
                 raise forms.ValidationError('El titulo ya esta en el sistema')
         return valor_titulo_actual
 
+class FormularioCapitulo(forms.Form):
+    def __init__(self,id = None,*args,**kwargs):
+        super(FormularioCapitulo,self).__init__(*args,**kwargs)
+        self.id_libro = id
+
+    numero_capitulo = forms.IntegerField()
+    fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
+    fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
+    ultimo_capitulo = forms.BooleanField(required=False,widget=forms.CheckboxInput)
+
+    def clean_fecha_de_lanzamiento(self):
+        fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
+        if(fecha_de_lanzamiento1 < datetime.date.today()):
+            raise forms.ValidationError('La fecha de lanzamiento no puede ser anterior a la fecha de hoy')
+        return fecha_de_lanzamiento1
+
+    def clean_fecha_de_vencimiento(self):
+        fecha_de_vencimiento1 =None
+        print(self.cleaned_data)
+        if 'fecha_de_lanzamiento' in self.cleaned_data.keys():
+            fecha_de_lanzamiento1= self.cleaned_data['fecha_de_lanzamiento']
+            fecha_de_vencimiento1= self.cleaned_data['fecha_de_vencimiento']
+            if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
+                raise forms.ValidationError('La fecha de vencimiento no puede ser inferior a la fecha de lanzamiento')
+        return fecha_de_vencimiento1
+
+    def clean_numero_capitulo(self):
+        "Checkea que no exista el capítulo para el mismo libro"
+        print('ENTRE')
+        capitulos_libro = Capitulo.objects.filter(titulo_id = self.id_libro).values('capitulo')
+        existe_capitulo = capitulos_libro.filter(capitulo = self.cleaned_data['numero_capitulo']).exists()
+        if existe_capitulo:
+            raise forms.ValidationError('Ya existe el capitulo para ese libro')
+        return self.cleaned_data['numero_capitulo']
+#
+#
 #        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
 #        valor_dni_inicial = field_DNI_titular.initial
 #        valor_dni_actual = self.cleaned_data['DNI_titular']
