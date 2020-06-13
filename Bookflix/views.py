@@ -340,14 +340,18 @@ class Vista_Detalle(View):
         pass
 
 class Vista_Listado(View):
+    def __init__(self, *args, **kwargs):
+        self.contexto = {}
+
     def get(self,request):
-        contexto = dict()
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         tuplas = self.modelo.objects.all()
-        contexto = {'objeto_pagina': paginar(request,tuplas,10),'modelo': self.modelo_string}
+        #self.contexto = {'objeto_pagina': paginar(request,tuplas,10),'modelo': self.modelo_string}
+        self.contexto['objeto_pagina']=paginar(request,tuplas,10)
+        self.contexto['modelo']=self.modelo_string
         #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
-        return render(request,self.url,contexto)
+        return render(request,self.url,self.contexto)
 
 class Vista_Listado_Libro(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -356,6 +360,10 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
         #TODO agregar fecha de vencimiento (Checkear si está por capitulos o completo)
+
+
+
+
 
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -427,17 +435,15 @@ class Vista_Formulario_Libro_Completo(View):
         fs = FileSystemStorage()
         fs.save(archivo_pdf.name, archivo_pdf)
         "-------------------------------------------------"
-        libro_completo = Libro_Completo(libro_id = id,
-                                        fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento'],
-                                        archivo_pdf = archivo_pdf
-                                        )
+        libro_completo = Libro_Completo(libro_id = id,archivo_pdf = archivo_pdf)
+        libro_completo.save()
+        libro = Libro.objects.get(id=id)
+        libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
+
         fecha_vencimiento =  formulario.cleaned_data['fecha_de_vencimiento']
         if fecha_vencimiento is not None: #Si lleno la fecha de vencimiento
-            libro_completo.fecha_vencimiento = fecha_vencimiento
-        libro_completo.save()
-
+            libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
         # Seteamos que el libro ahora se encuentra completo
-        libro = Libro.objects.get(id=id)
         libro.esta_completo = True
         libro.save()
 
@@ -753,19 +759,20 @@ class Vista_modificar_fechas_libro(View):
         super(Vista_modificar_fechas_libro, self).__init__(*args, **kwargs)
 
     def __get_valores_inicials(self, id):
-        libro_completo = Libro_Completo.objects.get(libro_id=id)
+        libro = Libro.objects.get(id=id)
         return {
-            'fecha_de_lanzamiento': libro_completo.fecha_lanzamiento,
-            'fecha_de_vencimiento': libro_completo.fecha_vencimiento,
+            'fecha_de_lanzamiento': libro.fecha_lanzamiento.date(),
+            'fecha_de_vencimiento': libro.fecha_vencimiento if libro.fecha_vencimiento is None else libro.fecha_vencimiento.date(),
         }
     def cambiar_fechas(self,id,formulario):
+        #Todo cambiar para que las fechas las ponga en el libro Común.
         esta_completo = Libro.objects.get(id=id).esta_completo
         if esta_completo:
             # Si el libro esta completo, le cambiamos la fecha de lanzamiento y vencimiento
-            libro_completo = Libro_Completo.objects.get(libro_id=id)
-            libro_completo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
-            libro_completo.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
-            libro_completo.save()
+            libro = Libro.objects.get(id=id)
+            libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
+            libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+            libro.save()
         else:
             # TODO cargar las fechas para todos los capitulos del libro
             pass
@@ -773,9 +780,9 @@ class Vista_modificar_fechas_libro(View):
     def get(self, request, id=None):
         #TODO hacer que la fecha de vencimiento sea opcional. Actualmentee
         esta_completo = Libro.objects.get(id=id).esta_completo
-        if (esta_completo):
-            return render(request, 'carga_atributos_libro.html', {'formulario': FormularioCargaFechas(self.__get_valores_inicials(id)),'modelo':'libro'})
-        return render(request, 'carga_atributos_libro.html', {'formulario': FormularioCargaFechas(),'modelo':'libro'})
+        valores_fechas=self.__get_valores_inicials(id)
+        return render(request, 'carga_atributos_libro.html', {'formulario': FormularioCargaFechas(valores_fechas['fecha_de_lanzamiento'],valores_fechas['fecha_de_vencimiento']),'modelo':'libro'})
+
 
     def post(self, request, id=None):
         formulario = FormularioCargaFechas(request.POST, initial=self.__get_valores_inicials(id))
@@ -792,12 +799,12 @@ class Vista_Alta_Capitulo(View):
     def get_capitulo_mas_grande(self,id):
         "id:int que representa el titulo_id (id del Libro)"
         "Devuelve el capítulo más grande cargado"
-        capitulos = Capitulo.objects.filter(titulo_id = id)
+        capitulos = Capitulo.objects.filter(titulo_id = Libro_Incompleto.objects.get(libro_id=id).id)
         capitulo_maximo = 1 #Por defecto sugiere el 1
         if capitulos: #Si hay capitulos
             capitulo_maximo = (capitulos.order_by('-capitulo').values('capitulo')).first() #Ordena de mayor a menor
-            capitulo_maximo = capitulo_maximo['capitulo']
-        return (capitulo_maximo + 1)
+            capitulo_maximo = capitulo_maximo['capitulo'] + 1
+        return capitulo_maximo
 
     def cargar_incompleto(self,id):
         "Carga el libro incompleto en caso de que sea la primera carga"
@@ -815,10 +822,11 @@ class Vista_Alta_Capitulo(View):
         formulario = FormularioCapitulo(data = request.POST,files = request.FILES,id = id)
         if formulario.is_valid():
             #Si es valido el formulario, cargo el capitulo
+            incompleto = Libro_Incompleto.objects.get(libro_id=id)
             capitulo = Capitulo(
                 capitulo=formulario.cleaned_data['numero_capitulo'],
                 archivo_pdf=formulario.cleaned_data['archivo_pdf'],
-                titulo_id=id,
+                titulo_id=incompleto.id,
             )
             capitulo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
             capitulo.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
@@ -828,8 +836,6 @@ class Vista_Alta_Capitulo(View):
                 libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
                 libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
                 libro.save()
-
-                incompleto = Libro_Incompleto.objects.get(libro_id = id)
                 incompleto.esta_completo = True
                 incompleto.save()
             capitulo.save()

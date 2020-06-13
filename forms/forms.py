@@ -1,7 +1,7 @@
 import datetime
 from django import forms
 from django.contrib.auth.models import User
-from modelos.models import Libro,Autor,Editorial,Genero,Suscriptor,Tarjeta,Tipo_Suscripcion,Novedad,Trailer,Capitulo
+from modelos.models import *
 from django.db.models import Max
 
 def clean_campo(clase,atributo,longitud):
@@ -145,9 +145,14 @@ class FormularioModificarDatosPersonales(forms.Form):
 
 class FormularioCargaFechas(forms.Form):
 
-    fecha_de_lanzamiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
-    fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True,required=False)
+    def __init__(self,lanzamiento,vencimiento,*args,**kwargs):
+        super(FormularioCargaFechas, self).__init__(*args, **kwargs)
+        self.fields['fecha_de_lanzamiento'] =forms.DateField(widget=forms.DateInput(attrs={'type':'date','value': lanzamiento}))
+        self.fields['fecha_de_vencimiento'] =forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'value': vencimiento}))
 
+    '''fecha_de_lanzamiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
+    fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True,required=False)
+    '''
     def clean_fecha_de_lanzamiento(self):
         fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
         if(fecha_de_lanzamiento1 < datetime.date.today()):
@@ -393,7 +398,7 @@ class FormularioCapitulo(forms.Form):
 
     def clean_numero_capitulo(self):
         "Checkea que no exista el capítulo para el mismo libro"
-        capitulos_libro = Capitulo.objects.filter(titulo_id = self.id_libro).values('capitulo')
+        capitulos_libro = Capitulo.objects.filter(titulo_id = Libro_Incompleto.objects.get(libro_id=self.id_libro).id).values('capitulo')
         existe_capitulo = capitulos_libro.filter(capitulo = self.cleaned_data['numero_capitulo']).exists()
         if existe_capitulo:
             raise forms.ValidationError('Ya existe el capitulo para ese libro')

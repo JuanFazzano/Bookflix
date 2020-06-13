@@ -40,6 +40,7 @@
   <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/cargar_metadatos_libro/"> Agregar Libro </a></p>
 {% endblock %}
 {% block listado %}
+
   <table id="t01">
     <thead>
       <tr>
@@ -64,20 +65,37 @@
                 <td>{{libro.genero}}</td>
                 <td>{{libro.autor}}</td>
                 <td>{{libro.editorial}}</td>
-                <td> - </td>
+                {% if libro.fecha_vencimiento is none  %}
+                    <td> - </td>
+                {% else %}
+                  <td> {{libro.fecha_vencimiento|date:"D d M Y"}} </td>
+                {% endif %}
                 <td>{{libro.ISBN}}</td>
                 <td> <a id="boton_personalizado" href="/detalle_libro/id={{libro.id}}"> Ver </a>     <!--
                   <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/change/"> Modificar </a>
                 -->
                 <a id="boton_personalizado" style="margin-left: 10px;" href="/modificar_libro/id={{libro.id}}"> Modificar </a>
                 <a id="boton_personalizado" style="margin-left: 10px;" href="/admin/modelos/libro/{{libro.id}}/delete/"> Eliminar </a>
-                  <a id="boton_personalizado" style="margin-left: 10px;" href="/modificar_fechas_libro/id={{libro.id}}/"> Cambiar Fechas </a>
-                {% if not libro.esta_completo %}
-                  <!-- Si no está completo, muestra los botones de subir completo o por capitulo -->
-                  <a id="boton_personalizado" style="margin-left: 10px;" href="/carga_libro_completo/id={{libro.id}}/"> Subir libro completo </a>
-                  <a id="boton_personalizado" style="margin-left: 10px;" href="#"> Subir capitulo </a>
 
-                {% endif %}
+                {% if not libro.esta_completo %}
+                  <a id="boton_personalizado" style="margin-left: 10px;" href="/carga_libro_completo/id={{libro.id}}/"> Subir libro completo </a>
+                  {%if not libro.fecha_lanzamiento %}
+                    <a id="boton_personalizado" style="margin-left: 10px;" href="/cargar_capitulo/id={{libro.id}}"> Subir capitulo </a>
+                  {% else %}
+                    <a id="boton_personalizado" style="margin-left: 10px;" href="/modificar_fechas_libro/id={{libro.id}}/"> Cambiar Fechas </a>
+                  {% endif %}
+               {% else %}
+                  <a id="boton_personalizado" style="margin-left: 10px;" href="/modificar_fechas_libro/id={{libro.id}}/"> Cambiar Fechas </a>
+               {% endif %}
+
+
+                  <!-- Si no está completo, muestra los botones de subir completo o por capitulo -->
+
+
+
+
+
+
                 </td>
               </tr>
               </tbody>
