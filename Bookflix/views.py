@@ -825,6 +825,20 @@ class Vista_Alta_Capitulo(View):
             incompleto.save()
         except:
             pass
+
+
+    def cambiamos_fechas_capitulos(self,id,fecha_lanzamiento,fecha_vencimiento):
+        "Cambia las fechas de los capitulos del libro para mantener la consistencia"
+        try:
+            capitulos = Capitulo.objects.filter(titulo_id = id)
+            for capitulo in capitulos:
+                capitulo.fecha_lanzamiento = fecha_lanzamiento
+                capitulo.fecha_vencimiento = fecha_vencimiento
+                capitulo.save()
+
+        except:
+            return None
+
     def get(self,request,id = None):
         self.cargar_incompleto(id)
         self.contexto['formulario'] = FormularioCapitulo(id = id,initial={'numero_capitulo':self.get_capitulo_mas_grande(id)})
@@ -835,6 +849,7 @@ class Vista_Alta_Capitulo(View):
         if formulario.is_valid():
             #Si es valido el formulario, cargo el capitulo
             incompleto = Libro_Incompleto.objects.get(libro_id=id)
+            print('ID incompleto ',incompleto.id)
             capitulo = Capitulo(
                 capitulo=formulario.cleaned_data['numero_capitulo'],
                 archivo_pdf=formulario.cleaned_data['archivo_pdf'],
@@ -850,6 +865,8 @@ class Vista_Alta_Capitulo(View):
                 libro.save()
                 incompleto.esta_completo = True
                 incompleto.save()
+                print(self.cambiamos_fechas_capitulos(incompleto.id,formulario.cleaned_data['fecha_de_lanzamiento'], formulario.cleaned_data['fecha_de_vencimiento']))
+
             capitulo.save()
             return redirect('/listado_libro/')
         self.contexto['formulario'] = formulario
