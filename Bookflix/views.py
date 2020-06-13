@@ -23,7 +23,8 @@ from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor
 #        libro_baja.save()
 
 def listado_libros_activos(request,limit=None):
-    libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
+    #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
+    libros = Libro.objects.exclude(fecha_vencimiento = None)
     libros = libros.filter(fecha_vencimiento__gte = datetime.datetime.now())
     if limit is not None:
         libros = libros[:limit]
@@ -464,7 +465,6 @@ class Vista_Formulario_Libro_Completo(View):
         except:
             "No estaba cargado como libro incompleto"
             pass
-        ##TODO: si tiene capitulos, borrarlos.
 
     def post(self,request,id=None):
         formulario = FormularioCargaLibro(request.POST,request.FILES)
