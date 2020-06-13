@@ -797,30 +797,43 @@ class Vista_Alta_Capitulo(View):
         if capitulos: #Si hay capitulos
             capitulo_maximo = (capitulos.order_by('-capitulo').values('capitulo')).first() #Ordena de mayor a menor
             capitulo_maximo = capitulo_maximo['capitulo']
-        return capitulo_maximo
+        return (capitulo_maximo + 1)
 
     def cargar_incompleto(self,id):
         "Carga el libro incompleto en caso de que sea la primera carga"
         try:
-            #TODO ver que esto se rompe. Si mando un id inexistente, igual va al except ?)
-            print(id)
-            libro_incompleto = Libro_Incompleto(libro_id = id)
-            libro_incompleto.save()
+            incompleto = Libro_Incompleto(libro_id = id)
+            incompleto.save()
         except:
-            print('El libro incompleto ya fue cargado')
-
+            pass
     def get(self,request,id = None):
         self.cargar_incompleto(id)
         self.contexto['formulario'] = FormularioCapitulo(id = id,initial={'numero_capitulo':self.get_capitulo_mas_grande(id)})
         return render(request,'carga_atributos_libro.html',self.contexto)
 
     def post(self,request,id = None):
-        formulario = FormularioCapitulo(data = request.POST,id = id)
+        formulario = FormularioCapitulo(data = request.POST,files = request.FILES,id = id)
         if formulario.is_valid():
-            if not formulario.cleaned_data['ultimo_capitulo']:
-                #TODO cargar capitulo en la BD
-                print('No es el ultimo')
-            #TODO si es ultimo capitulo cargarlo como ultimo
+            #Si es valido el formulario, cargo el capitulo
+            capitulo = Capitulo(
+                capitulo=formulario.cleaned_data['numero_capitulo'],
+                archivo_pdf=formulario.cleaned_data['archivo_pdf'],
+                titulo_id=id,
+            )
+            capitulo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
+            capitulo.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+            if formulario.cleaned_data['ultimo_capitulo']:
+                #Si no es el ultimo capitulo, le cargo la fecha
+                libro = Libro.objects.get(id=id)
+                libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
+                libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+                libro.save()
+
+                incompleto = Libro_Incompleto.objects.get(libro_id = id)
+                incompleto.esta_completo = True
+                incompleto.save()
+            capitulo.save()
+            return redirect('/listado_libro/')
         self.contexto['formulario'] = formulario
         return render(request,'carga_atributos_libro.html',self.contexto)
 

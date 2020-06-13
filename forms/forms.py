@@ -19,7 +19,7 @@ class DateInput(forms.DateInput):
 class FormularioModificarAtributos(forms.Form):
     "Este formulario permite modificar autor,genero,editorial"
 
-    #show_hidden_initial permite mostrar el valor inicial
+    #show_hidden_initial permite mostrar el valor inicial/home/marcos/Escritorio/Bookflix/Bookflix
     nombre = forms.CharField(max_length=30,show_hidden_initial = True)
 
     def __init__(self,modelo,nombre_modelo,*args,**kwargs):
@@ -369,11 +369,12 @@ class FormularioCapitulo(forms.Form):
     def __init__(self,id = None,*args,**kwargs):
         super(FormularioCapitulo,self).__init__(*args,**kwargs)
         self.id_libro = id
+        self.fields['numero_capitulo'] = forms.IntegerField()
+        self.fields['archivo_pdf'] = forms.FileField()
+        self.fields['fecha_de_lanzamiento'] =  forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
+        self.fields['fecha_de_vencimiento'] = forms.DateField(widget=DateInput,required=False)
+        self.fields['ultimo_capitulo'] = forms.BooleanField(required=False,widget=forms.CheckboxInput)
 
-    numero_capitulo = forms.IntegerField()
-    fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
-    fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
-    ultimo_capitulo = forms.BooleanField(required=False,widget=forms.CheckboxInput)
 
     def clean_fecha_de_lanzamiento(self):
         fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
@@ -383,7 +384,6 @@ class FormularioCapitulo(forms.Form):
 
     def clean_fecha_de_vencimiento(self):
         fecha_de_vencimiento1 =None
-        print(self.cleaned_data)
         if 'fecha_de_lanzamiento' in self.cleaned_data.keys():
             fecha_de_lanzamiento1= self.cleaned_data['fecha_de_lanzamiento']
             fecha_de_vencimiento1= self.cleaned_data['fecha_de_vencimiento']
@@ -393,7 +393,6 @@ class FormularioCapitulo(forms.Form):
 
     def clean_numero_capitulo(self):
         "Checkea que no exista el capítulo para el mismo libro"
-        print('ENTRE')
         capitulos_libro = Capitulo.objects.filter(titulo_id = self.id_libro).values('capitulo')
         existe_capitulo = capitulos_libro.filter(capitulo = self.cleaned_data['numero_capitulo']).exists()
         if existe_capitulo:
