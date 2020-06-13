@@ -767,15 +767,11 @@ class Vista_modificar_fechas_libro(View):
     def cambiar_fechas(self,id,formulario):
         #Todo cambiar para que las fechas las ponga en el libro Común.
         esta_completo = Libro.objects.get(id=id).esta_completo
-        if esta_completo:
-            # Si el libro esta completo, le cambiamos la fecha de lanzamiento y vencimiento
-            libro = Libro.objects.get(id=id)
-            libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
-            libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
-            libro.save()
-        else:
-            # TODO cargar las fechas para todos los capitulos del libro
-            pass
+        # Si el libro esta completo, le cambiamos la fecha de lanzamiento y vencimiento
+        libro = Libro.objects.get(id=id)
+        libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
+        libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+        libro.save()
 
     def get(self, request, id=None):
         #TODO hacer que la fecha de vencimiento sea opcional. Actualmentee
@@ -785,11 +781,12 @@ class Vista_modificar_fechas_libro(View):
 
 
     def post(self, request, id=None):
-        formulario = FormularioCargaFechas(request.POST, initial=self.__get_valores_inicials(id))
+        valores_fechas=self.__get_valores_inicials(id)
+        formulario = FormularioCargaFechas(data = request.POST,lanzamiento=valores_fechas['fecha_de_lanzamiento'],vencimiento = valores_fechas['fecha_de_vencimiento'], initial=self.__get_valores_inicials(id))
         if formulario.is_valid():
             self.cambiar_fechas(id,formulario)
             return redirect('/listado_libro/')
-        return render(request, 'carga_atributos_libro.html',{'formulario': FormularioCargaFechas(initial=self.__get_valores_inicials(id)),'errores': formulario.errors,'modelo':'libro'})
+        return render(request, 'carga_atributos_libro.html',{'formulario': FormularioCargaFechas(valores_fechas['fecha_de_lanzamiento'],valores_fechas['fecha_de_vencimiento']),'errores': formulario.errors,'modelo':'libro'})
 
 
 class Vista_Alta_Capitulo(View):
