@@ -407,7 +407,7 @@ class Vista_Listado_Perfiles(View):
         return render(request,'listado_perfiles.html',{'perfiles': self.__obtener_perfiles(request.session['_auth_user_id'])})
 
     def __obtener_perfiles(self,id):
-        lista_nombre_perfiles=list()
+        #lista_nombre_perfiles=list()
         lista_perfiles=Perfil.objects.values('nombre_perfil','id').filter(auth_id = id)
         return [diccionario for diccionario in lista_perfiles]
 
@@ -430,23 +430,40 @@ class Vista_Formulario_Libro_Completo(View):
         return render(request,'formulario_libro_completo.html',{'formulario': FormularioCargaLibro()})
 
     def __guardar_libro_completo(self,formulario,id):
+        """
+        :param formulario:
+        :param id: es el id del libro
+        :return:
+        """
         "----Guarda el archivo en la carpeta static--------"
+
         archivo_pdf = formulario.cleaned_data['pdf']
         fs = FileSystemStorage()
         fs.save(archivo_pdf.name, archivo_pdf)
         "-------------------------------------------------"
+        "Lo cargamos como libro incomplto"
         libro_completo = Libro_Completo(libro_id = id,archivo_pdf = archivo_pdf)
         libro_completo.save()
+
+        "Actualizamos su metadata"
         libro = Libro.objects.get(id=id)
         libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
-
-        fecha_vencimiento =  formulario.cleaned_data['fecha_de_vencimiento']
-        if fecha_vencimiento is not None: #Si lleno la fecha de vencimiento
-            libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
-        # Seteamos que el libro ahora se encuentra completo
+        libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
         libro.esta_completo = True
         libro.save()
 
+        "Borramos los capitulos del libro"
+        try:
+            libro_incompleto = Libro_Incompleto.objects.get(libro_id = id)
+
+            "Borramos los capitulos del libro"
+            Capitulo.objects.filter(titulo_id = libro_incompleto.id).delete()
+
+            "Borramos la instancia de libro incompleto"
+            libro_incompleto.delete()
+        except:
+            "No estaba cargado como libro incompleto"
+            pass
         ##TODO: si tiene capitulos, borrarlos.
 
     def post(self,request,id=None):
@@ -765,9 +782,7 @@ class Vista_modificar_fechas_libro(View):
             'fecha_de_vencimiento': libro.fecha_vencimiento if libro.fecha_vencimiento is None else libro.fecha_vencimiento.date(),
         }
     def cambiar_fechas(self,id,formulario):
-        #Todo cambiar para que las fechas las ponga en el libro Común.
-        esta_completo = Libro.objects.get(id=id).esta_completo
-        # Si el libro esta completo, le cambiamos la fecha de lanzamiento y vencimiento
+        "Cambia las fechas del libro (el boton se habilita cuando esté completo o tenga el último capitulo cargado"
         libro = Libro.objects.get(id=id)
         libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
         libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
