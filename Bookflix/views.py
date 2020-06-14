@@ -23,6 +23,7 @@ from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor
 #        libro_baja.save()
 
 def listado_libros_activos(request,limit=None):
+    #TODO ver listado de libros activos si está incompleto por capitulos
     #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
     libros = Libro.objects.exclude(fecha_vencimiento = None)
     libros = libros.filter(fecha_vencimiento__gte = datetime.datetime.now())
@@ -96,7 +97,7 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
             id_tarjeta = (Tarjeta.objects.values('id').filter(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])[0])['id']
             suscriptor.nro_tarjeta_id = id_tarjeta
             suscriptor.save()
-        tarjeta=Tarjeta.objects.get(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])
+        tarjeta=Tarjeta.objects.get(nro_tarjeta =formulario.cleaned_data['Numero_de_tarjeta'])
         tarjeta.codigo_seguridad = self.formulario.cleaned_data['Codigo_de_seguridad']
         tarjeta.fecha_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
         tarjeta.empresa = self.formulario.cleaned_data['Empresa']
@@ -889,6 +890,10 @@ class Decorador:
                     if lista_de_libros[i] not in lista_a_retornar:
                         lista_a_retornar.append(lista_de_libros[i])
         return lista_a_retornar
+
+class Vista_Lectura_Libro(View):
+    def get(self,request):
+        return render(request,'prueba.html',{'pdf': 'TrabajoPráctico2019(1).pdf'})
 
 class DecoradorGenero(Decorador):
     def libros(self):

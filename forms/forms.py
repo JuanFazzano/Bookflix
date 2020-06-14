@@ -236,7 +236,6 @@ class FormularioModificarNovedad(FormularioNovedad):
         return valor_titulo_actual
 
 class FormularioCargaDeMetadatosLibro(forms.Form):
-
     def __init__(self,*args,**kwargs):
         super(FormularioCargaDeMetadatosLibro, self).__init__(*args, **kwargs)
         self.fields['autor']=forms.CharField(widget=forms.Select(choices= self.obtener_objetos(Autor)),required=True)
@@ -320,7 +319,7 @@ class FormularioTrailer(forms.Form):
 
     def __init__(self,*args,**kwargs):
         super(FormularioTrailer, self).__init__(*args,**kwargs)
-        self.fields['libro']=forms.CharField(widget=forms.Select(choices= self.obtener_libros()),required=True)
+        self.fields['libro']=forms.CharField(widget=forms.Select(choices= self.obtener_libros()),required = False)
 
 
 
