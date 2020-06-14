@@ -33,10 +33,10 @@
             {% else %}
             <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.user}} </li>
             {% if not request.user.is_staff%}
-            <li style="padding-left:10px; display:inline;">
-                <a href="/listado_novedad/" style="text-decoration: none; color: white;"> Ver novedades </a>
-            </li>
-              <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none; color: white;">  Ver datos suscripcion     </a>  </li>
+                <li style="padding-left:10px; display:inline;">
+                    <a href="/listado_novedad/" style="text-decoration: none; color: white;"> Ver novedades </a>
+                </li>
+                <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none; color: white;">  Ver datos suscripcion     </a>  </li>
             {% endif %}
             <li style="padding-left:10px; display:inline;"> <a href="{% url 'logout' %}" style="text-decoration: none; color: white;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
         </ul>
