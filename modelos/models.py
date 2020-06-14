@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 class Tarjeta(models.Model):
     nro_tarjeta = models.CharField(max_length = 16)
     fecha_vencimiento = models.DateField(null=False)
-    dni_titular = models.CharField(unique = True, max_length = 8,null=False)
+    #dni_titular = models.CharField(unique = True, max_length = 8,null=False)
     empresa = models.CharField(max_length = 254,null=False)
     codigo_seguridad = models.CharField(max_length = 3,null=False)
 
@@ -26,6 +26,8 @@ class Suscriptor(models.Model):
     fecha_suscripcion = models.DateField(null=False)
     nombre = models.CharField(max_length = 25, blank=False, null=False)
     apellido = models.CharField(max_length = 25, blank=False, null=False)
+    dni_titular = models.CharField(unique = True, max_length = 8,null=False)
+
 
 class Autor (models.Model):
     class Meta:
@@ -132,7 +134,7 @@ class Lee_libro(models.Model):
     perfil=models.ForeignKey(Perfil, on_delete=models.CASCADE)
     libro=models.ForeignKey(Libro, on_delete=models.CASCADE)
     terminado=models.NullBooleanField(null=True)
-
+    ultimo_acceso= models.DateTimeField(null = True)
 
 class Libro_Completo(models.Model):
     libro = models.OneToOneField(Libro,default=None, on_delete=models.CASCADE)
@@ -142,8 +144,6 @@ class Libro_Incompleto(models.Model):
     libro = models.OneToOneField(Libro,unique = True, on_delete=models.CASCADE)
     esta_completo=models.BooleanField(default = 0,null = True)
 
-
-
 class Capitulo(models.Model):
     class Meta:
         unique_together = (('capitulo','titulo'),)
@@ -152,6 +152,13 @@ class Capitulo(models.Model):
     fecha_lanzamiento = models.DateTimeField()
     fecha_vencimiento = models.DateTimeField(null=True)
     archivo_pdf = models.FileField(null = False)
+
+class Lee_Capitulo(models.Model):
+    class Meta:
+        unique_together = (('capitulo','perfil'),)
+    perfil=models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    capitulo=models.ForeignKey(Capitulo, on_delete=models.CASCADE)
+    ultimo_acceso= models.DateTimeField(null = True)
 
 class Novedad(models.Model):
     class Meta:
@@ -190,4 +197,3 @@ class Trailer(models.Model):
 
     def __str__(self):
         return self.titulo
-

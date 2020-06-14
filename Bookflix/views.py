@@ -1,6 +1,5 @@
 import datetime
 import itertools
-
 from django.contrib.auth.models     import User
 from django.views                   import View
 from django.core.paginator          import Paginator
@@ -12,7 +11,7 @@ from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
 from forms.forms                    import *
 from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
-
+from django.db.models import Q
 #def dar_de_baja_libros():
 #    Da de baja los libros que están vencidos
 #    libros = Libro_Completo.objects.exclude(fecha_vencimiento=None)
@@ -23,13 +22,38 @@ from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor
 #        libro_baja.save()
 
 def listado_libros_activos(request,limit=None):
+    "limit es un parametro que define cuantas tuplas se van a tomar"
     #TODO ver listado de libros activos si está incompleto por capitulos
     #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
-    libros = Libro.objects.exclude(fecha_vencimiento = None)
-    libros = libros.filter(fecha_vencimiento__gte = datetime.datetime.now())
+    #print('Esto es lo que devolvio' ,(Libro.objects.all().select_related('libro').all().values()))
+
+    #capitulos = Capitulo.objects.exclude(fecha_vencimiento = None)
+    '''Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
+    ()'''
+
+    "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
+    capitulos_activos =  Capitulo.objects.filter(
+                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
+                                                    (
+                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento = None) |
+                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now())
+                                                    )
+                                                )
+
+    "Filtramos los libros_incompletos que esté entre los libros de capitulos activos"
+    libros_incompletos_activos = Libro_Incompleto.objects.filter(id__in = capitulos_activos.values('titulo_id'))
+    #Recordemos que la coma es and
+    '''
+        Filtra los LIBROS cuya fecha_vencimiento sea menor a la actual O la fecha de vencimiento no es None y está completo (con ult cap cargado )
+        o el libro que esté entre los incompletos_activos
+    '''
+    libros_activos = Libro.objects.filter(          Q(id__in = libros_incompletos_activos.values('libro_id')) |
+                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now()) |
+                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento = None)
+                                        ).distinct()
     if limit is not None:
-        libros = libros[:limit]
-    return paginar(request,libros,10)
+        libros_activos = libros_activos[:limit]
+    return paginar(request,libros_activos,10)
 
 def cerrar_sesion(request):
     #Cierra la sesion del usuario, y lo redireccion al /
@@ -97,7 +121,7 @@ class Estrategia_Numero_de_tarjeta(Estrategia):
             id_tarjeta = (Tarjeta.objects.values('id').filter(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])[0])['id']
             suscriptor.nro_tarjeta_id = id_tarjeta
             suscriptor.save()
-        tarjeta=Tarjeta.objects.get(nro_tarjeta =formulario.cleaned_data['Numero_de_tarjeta'])
+        tarjeta=Tarjeta.objects.get(nro_tarjeta = self.formulario.cleaned_data['Numero_de_tarjeta'])
         tarjeta.codigo_seguridad = self.formulario.cleaned_data['Codigo_de_seguridad']
         tarjeta.fecha_vencimiento = self.formulario.cleaned_data['Fecha_de_vencimiento']
         tarjeta.empresa = self.formulario.cleaned_data['Empresa']
@@ -893,7 +917,7 @@ class Decorador:
 
 class Vista_Lectura_Libro(View):
     def get(self,request):
-        return render(request,'prueba.html',{'pdf': 'TrabajoPráctico2019(1).pdf'})
+        return render(request,'prueba.html',{'pdf': 'parte2grupo52.pdf'})
 
 class DecoradorGenero(Decorador):
     def libros(self):
@@ -917,7 +941,3 @@ class DecoradorEditorial(Decorador):
 #decoradorEditorial = DecoradorEditorial(decoradorAutor,1)
 #similares = decoradorEditorial.buscar_similares()
 #print(similares)
-
-
-
-
