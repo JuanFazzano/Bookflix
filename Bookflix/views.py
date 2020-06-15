@@ -4,7 +4,7 @@ from django.contrib.auth.models     import User
 from django.views                   import View
 from django.core.paginator          import Paginator
 from django.views.decorators.csrf   import csrf_exempt
-from django.http                    import HttpResponse
+from django.http                    import HttpResponse,FileResponse
 from django.shortcuts               import render,redirect
 from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
@@ -55,8 +55,42 @@ def listado_libros_activos(request,limit=None):
         libros_activos = libros_activos[:limit]
     return paginar(request,libros_activos,10)
 
+def listado_libros_activos_1(limit=None):
+    "limit es un parametro que define cuantas tuplas se van a tomar"
+    #TODO ver listado de libros activos si está incompleto por capitulos
+    #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
+    #print('Esto es lo que devolvio' ,(Libro.objects.all().select_related('libro').all().values()))
+
+    #capitulos = Capitulo.objects.exclude(fecha_vencimiento = None)
+    '''Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
+    ()'''
+
+    "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
+    capitulos_activos =  Capitulo.objects.filter(
+                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
+                                                    (
+                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento = None) |
+                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now())
+                                                    )
+                                                )
+
+    "Filtramos los libros_incompletos que esté entre los libros de capitulos activos"
+    libros_incompletos_activos = Libro_Incompleto.objects.filter(id__in = capitulos_activos.values('titulo_id'))
+    #Recordemos que la coma es and
+    '''
+        Filtra los LIBROS cuya fecha_vencimiento sea menor a la actual O la fecha de vencimiento no es None y está completo (con ult cap cargado )
+        o el libro que esté entre los incompletos_activos
+    '''
+    libros_activos = Libro.objects.filter(          Q(id__in = libros_incompletos_activos.values('libro_id')) |
+                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now()) |
+                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento = None)
+                                        ).distinct()
+
+    return libros_activos
+
+
 def cerrar_sesion(request):
-    #Cierra la sesion del usuario, y lo redireccion al /
+    #Cierra la sesion del usuarios, y lo redireccion al /
     logout(request)
     return HttpResponseRedirect('/')
 
@@ -273,8 +307,40 @@ class Vista_Visitante(View):
             return redirect('/listado_perfiles/')
         return render(request,'visitante.html',{'objeto_pagina': listado_libros_activos(request,6)})
 
+class Buscar:
+    def __init__(self,request = None):
+        self.request = request
+
+    def tuplas(self):
+        if not all(map(lambda x: x == '', self.request.GET.values())):
+            if(self.request.user.is_staff):
+                listado_de_libros=Libro.objects.all()
+            else:
+                listado_de_libros= listado_libros_activos_1()
+            decorado = Listado_decorado(listado_de_libros)
+            decoradorGenero = DecoradorGenero(decorado,self.request.GET['genero'])
+            decoradorAutor = DecoradorAutor(decoradorGenero,self.request.GET['autor'])
+            decoradorEditorial = DecoradorEditorial(decoradorAutor,self.request.GET['editorial'])
+            decoradorTitulo = DecoradorTitulo(decoradorEditorial,self.request.GET['titulo'])
+            return decoradorTitulo.buscar_libro()
+        return ()
+def listado_libros_buscados(request):
+    contexto = {}
+    if not all(map(lambda x: x == '', request.GET.values())):
+        buscar = Buscar(request)
+        tuplas = buscar.tuplas()
+        print('Las tuplas ', tuplas)
+        if tuplas:
+            print('entre al if')
+            contexto['objeto_pagina'] = paginar(request, tuplas, 10)
+            contexto['modelo'] = 'libro'
+    return contexto
+
 class Home_Admin(View):
     def get(self,request):
+        contexto = listado_libros_buscados(request)
+        if contexto != {}:
+            return render(request, 'listado_libro.html', contexto)
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         return render(request,'home_admin.html',{})
@@ -365,11 +431,15 @@ class Vista_Detalle(View):
         "Este mensaje carga el contexto con lo que requiera un detalle especifico"
         pass
 
+
 class Vista_Listado(View):
     def __init__(self, *args, **kwargs):
         self.contexto = {}
 
     def get(self,request):
+        contexto = listado_libros_buscados(request)
+        if contexto != {}:
+            return render(request, 'listado_libro.html', contexto)
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         tuplas = self.modelo.objects.all()
@@ -386,9 +456,6 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
         #TODO agregar fecha de vencimiento (Checkear si está por capitulos o completo)
-
-
-
 
 
 class Vista_Listado_Novedad(Vista_Listado):
@@ -897,10 +964,24 @@ class Vista_Alta_Capitulo(View):
         self.contexto['formulario'] = formulario
         return render(request,'carga_atributos_libro.html',self.contexto)
 
+class Vista_Lectura_Libro(View):
+    def get(self,request):
+        #return render(request,'prueba.html',{'pdf': 'parte2grupo52.pdf'})
+        return FileResponse(open('static/parte2grupo52.pdf', 'rb'), content_type='application/pdf')
+
+
+class Listado_decorado:
+    def __init__(self,listado):
+        self.listado = listado
+
+    def buscar_libro(self):
+        return self.listado
+
 class Decorador:
-    def __init__(self,decorado,id):
+    def __init__(self,decorado,campo):
+        self.campo = campo
         self.decorado = decorado
-        self.id = id
+        self.libros_del_decorado=None
 
     def buscar_similares(self):
         lista = list()
@@ -915,29 +996,52 @@ class Decorador:
                         lista_a_retornar.append(lista_de_libros[i])
         return lista_a_retornar
 
-class Vista_Lectura_Libro(View):
-    def get(self,request):
-        return render(request,'prueba.html',{'pdf': 'parte2grupo52.pdf'})
+
+    def buscar_libro(self):
+        '''
+            libros: param
+            input_busqueda: Dictionary {'titulo': '','genero': '',}
+        '''
+
+        self.libros_del_decorado = self.decorado.buscar_libro()
+        if (self.campo == ''):
+            return self.libros_del_decorado
+        return self.template()
+
+#decorado = Listado_decorado(listado_de_libros)
+#decoradorGenero = DecoradorGenero(decorado,self.request.GET['genero'])
+#decoradorAutor = DecoradorAutor(decoradorGenero,self.request.GET['autor'])
+#decoradorEditorial = DecoradorEditorial(decoradorAutor,self.request.GET['editorial'])
+#decoradorTitulo = DecoradorTitulo(decoradorEditorial,self.request.GET['titulo'])
+#decoradorTitulo.buscar_libro()
+
+class DecoradorTitulo(Decorador):
+    def template(self):
+        titulos = Libro.objects.filter(titulo__icontains = self.campo).values('titulo')
+        return self.libros_del_decorado.filter(titulo__in = titulos)
 
 class DecoradorGenero(Decorador):
+    def template(self):
+        generos = Genero.objects.filter(nombre__icontains = self.campo).values('id')
+        return self.libros_del_decorado.filter(genero_id__in = generos)
+
     def libros(self):
-        return Libro.objects.filter(genero_id = self.id)
+        return Libro.objects.filter(genero_id = self.campo)
+
 
 class DecoradorAutor(Decorador):
+    def template(self):
+        autores = Autor.objects.filter(nombre__icontains = self.campo).values('id')
+        return self.libros_del_decorado.filter(autor_id__in = autores)
+
+
     def libros(self):
-        return Libro.objects.filter(autor_id = self.id)
+        return Libro.objects.filter(autor_id = self.campo)
 
 class DecoradorEditorial(Decorador):
+    def template(self):
+        editoriales = Editorial.objects.filter(nombre__icontains = self.campo).values('id')
+        return self.libros_del_decorado.filter(editorial_id__in = editoriales)
+
     def libros(self):
-        return Libro.objects.filter(editorial_id = self.id)
-
-
-
-
-
-
-#decoradorGenero = DecoradorGenero(Libro(),2)
-#decoradorAutor = DecoradorAutor(decoradorGenero,1)
-#decoradorEditorial = DecoradorEditorial(decoradorAutor,1)
-#similares = decoradorEditorial.buscar_similares()
-#print(similares)
+        return Libro.objects.filter(editorial_id = self.campo)

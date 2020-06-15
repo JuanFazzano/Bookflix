@@ -1,11 +1,9 @@
 {% extends "header.html"%}
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
     {% block link %}
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     {% endblock%}
+
     {% block estilos %}
             #boton_personalizado{
               text-decoration: none;
@@ -18,12 +16,17 @@
               font-family: "Roboto";
             }
     {% endblock %}
-    <meta charset="utf-8">
-    <title></title>
-
-
-  </head>
-  <body style="background-color:rgba(255,0,0,0.5);">
+    {% block barra_busqueda %}
+              <div id="barra_busqueda">
+                <form method="GET">
+                    <input type="search" name="titulo"    placeholder="Titulo Libro">
+                    <input type="search" name="autor"     placeholder="Autor">
+                    <input type="search" name="genero"    placeholder="Género">
+                    <input type="search" name="editorial" placeholder="Editorial">
+                    <input type="submit" value="Buscar">
+                </form>
+            </div>
+    {% endblock %}
       {% block contenido %}
         <ul style="margin-top: 10px">
           <li style="margin-left:60px; display:inline;"> <a id="boton_personalizado"   href="/listado_trailer/">   Ver listado Trailer        </a> </li>
@@ -34,5 +37,3 @@
             <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_editorial/"> Ver listado Editoriales      </a> </li>
         </ul>
       {% endblock %}
-  </body>
-</html>

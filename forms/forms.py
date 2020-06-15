@@ -147,18 +147,22 @@ class FormularioCargaFechas(forms.Form):
 
     def __init__(self,lanzamiento,vencimiento,*args,**kwargs):
         super(FormularioCargaFechas, self).__init__(*args, **kwargs)
+        self.fecha_vencimiento_inicial=vencimiento
+        self.fecha_lanzamiento_inicial = lanzamiento
         self.fields['fecha_de_lanzamiento'] =forms.DateField(widget=forms.DateInput(attrs={'type':'date','value': lanzamiento}))
         self.fields['fecha_de_vencimiento'] =forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'value': vencimiento}))
-
     '''fecha_de_lanzamiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
     fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True,required=False)
     '''
     def clean_fecha_de_lanzamiento(self):
+        print('la fecha incial mandada es: ', self.fecha_lanzamiento_inicial)
         fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
-        if(fecha_de_lanzamiento1 < datetime.date.today()):
-            print('tire alto error')
-            raise forms.ValidationError('La fecha de lanzamiento no puede ser anterior a la fecha de hoy')
-        return fecha_de_lanzamiento1
+        if( self.fecha_lanzamiento_inicial != fecha_de_lanzamiento1):
+            if(fecha_de_lanzamiento1 < datetime.date.today()):
+                print('tire alto error')
+                raise forms.ValidationError('La fecha de lanzamiento no puede ser anterior a la fecha de hoy')
+            return fecha_de_lanzamiento1
+        return  self.fecha_lanzamiento_inicial
 
     def clean_fecha_de_vencimiento(self):
         fecha_de_vencimiento1 =None
