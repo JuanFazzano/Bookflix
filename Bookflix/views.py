@@ -15,10 +15,6 @@ from django.db.models import Q
 
 def listado_libros_activos(request,limit=None):
     "limit es un parametro que define cuantas tuplas se van a tomar"
-    #TODO ver listado de libros activos si está incompleto por capitulos
-    #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
-    #print('Esto es lo que devolvio' ,(Libro.objects.all().select_related('libro').all().values()))
-
     #capitulos = Capitulo.objects.exclude(fecha_vencimiento = None)
     '''Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
     ()'''
@@ -49,14 +45,6 @@ def listado_libros_activos(request,limit=None):
 
 def listado_libros_activos_1(limit=None):
     "limit es un parametro que define cuantas tuplas se van a tomar"
-    #TODO ver listado de libros activos si está incompleto por capitulos
-    #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
-    #print('Esto es lo que devolvio' ,(Libro.objects.all().select_related('libro').all().values()))
-
-    #capitulos = Capitulo.objects.exclude(fecha_vencimiento = None)
-    '''Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
-    ()'''
-
     "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
     capitulos_activos =  Capitulo.objects.filter(
                                                     Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
@@ -225,7 +213,7 @@ class Vista_Visitante(View):
             if request.user.is_staff:
                 return redirect('/home_admin/')
             return redirect('/listado_perfiles/')
-        return render(request,'visitante.html',{'objeto_pagina': listado_libros_activos(request,6)})
+        return render(request,'visitante.html',{'objeto_pagina': paginar(request,listado_libros_activos_1(),6)})
 
 class Buscar:
     def __init__(self,request = None):
@@ -1000,3 +988,5 @@ class DecoradorEditorial(Decorador):
 
     def libros(self):
         return Libro.objects.filter(editorial_id = self.campo)
+
+#TODO de los libros similares, sacar al libro del que se está viendo el detalle
