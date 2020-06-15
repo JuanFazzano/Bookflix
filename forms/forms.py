@@ -67,9 +67,9 @@ class FormularioRegistro(forms.Form):
     Apellido =forms.CharField(max_length = 25)
     Email = forms.EmailField(max_length = 254)
     Contrasena = forms.CharField(widget=forms.PasswordInput,max_length = 20)
+    DNI = forms.CharField(max_length = 8)
     Numero_de_tarjeta = forms.CharField(max_length = 16)
     Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]))
-    DNI_titular = forms.CharField(max_length = 8)
     Empresa= forms.CharField(max_length = 254)
     Codigo_de_seguridad = forms.CharField(max_length = 3)
     Suscripcion=forms.CharField(widget=forms.Select(choices=tipo_suscripcion))
@@ -80,9 +80,9 @@ class FormularioRegistro(forms.Form):
             raise forms.ValidationError('El Email ya esta registrado en el sistema')
         return email
 
-    def clean_DNI_titular(self):
-        campo = clean_campo(self,'DNI_titular',8)
-        if (Tarjeta.objects.values('dni_titular').filter(dni_titular = campo).exists()):
+    def clean_DNI(self):
+        campo = clean_campo(self,'DNI',8)
+        if (Suscriptor.objects.values('dni').filter(dni = campo).exists()):
             raise forms.ValidationError('El DNI ya esta registrado en el sistema')
         return campo
 
@@ -113,15 +113,14 @@ class FormularioModificarDatosPersonales(forms.Form):
         self.datos_cambiados = {'Email': False, 'DNI': False, 'Numero_de_tarjeta': False}
         super(FormularioModificarDatosPersonales,self).__init__(*args,**kwargs)
 
-
     Email = forms.EmailField(max_length = 254,show_hidden_initial=True)
     Nombre = forms.CharField(max_length = 25,show_hidden_initial=True)
     Apellido =forms.CharField(max_length = 25,show_hidden_initial=True)
-    Numero_de_tarjeta = forms.CharField(disabled = True,max_length = 16,show_hidden_initial=True)
-    Fecha_de_vencimiento = forms.DateField(disabled = True,widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
-    DNI_titular = forms.CharField(disabled = True,show_hidden_initial=True)
-    Empresa= forms.CharField(disabled = True,show_hidden_initial=True)
-    Codigo_de_seguridad = forms.CharField(disabled = True,show_hidden_initial=True)
+    DNI = forms.CharField(max_length = 8, show_hidden_initial=True)
+    Numero_de_tarjeta = forms.CharField(max_length = 16,show_hidden_initial=True)
+    Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
+    Empresa= forms.CharField(show_hidden_initial=True)
+    Codigo_de_seguridad = forms.CharField(max_length = 3,show_hidden_initial=True)
     Suscripcion=forms.CharField(disabled = True,show_hidden_initial=True)
 
 
@@ -130,6 +129,16 @@ class FormularioModificarDatosPersonales(forms.Form):
 
     def __cambio(self,valor_inicial,valor_nuevo):
         return valor_inicial != valor_nuevo
+
+    def clean_Fecha_de_vencimiento(self):
+        field_fecha_vencimiento = self.visible_fields()[5]
+        valor_fecha_inicial = field_fecha_vencimiento.initial
+        valor_fecha_actual = self.cleaned_data['Fecha_de_vencimiento']
+        if valor_fecha_actual < datetime.date.today():
+            raise forms.ValidationError('La fecha de vencimiento no puede ser inferior a la fecha del dia de hoy')
+        if (self.__cambio(valor_fecha_inicial,valor_fecha_actual) and (valor_fecha_actual < valor_fecha_inicial)):
+            raise forms.ValidationError('La fecha de vencimiento no puede ser inferior a la ya ingresada')
+        return valor_fecha_actual
 
     def clean_Email(self):
         field_email = self.visible_fields()[0] #Me devuelve una instancia del EmailField --> campo Email
@@ -142,6 +151,26 @@ class FormularioModificarDatosPersonales(forms.Form):
         else:
             self.datos_cambiados['Email'] = False
         return valor_email_actual
+
+    def clean_DNI(self):
+        field_DNI = self.visible_fields()[3] #Me devuelve una instancia del CharField --> campo DNI
+        valor_dni_inicial = field_DNI.initial
+        valor_dni_actual = self.cleaned_data['DNI']
+        clean_campo(self,'DNI',8)
+        if (self.__cambio(valor_dni_inicial,valor_dni_actual)):
+            if (Suscriptor.objects.values('dni').filter(dni = valor_dni_actual).exists()):
+               raise forms.ValidationError('El DNI ya esta registrado en el sistema')
+            self.datos_cambiados['DNI'] = True
+        else:
+            self.datos_cambiados['DNI'] = False
+
+        return valor_dni_actual
+
+    def clean_Codigo_de_seguridad(self):
+        return clean_campo(self,'Codigo_de_seguridad',3)
+
+    def clean_Numero_de_tarjeta(self):
+        return clean_campo(self,'Numero_de_tarjeta',16)
 
 class FormularioCargaFechas(forms.Form):
 
@@ -176,7 +205,6 @@ class FormularioCargaFechas(forms.Form):
 
 
 
-
 class FormularioCargaLibro(forms.Form):
     fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
@@ -199,7 +227,7 @@ class FormularioCargaLibro(forms.Form):
         return fecha_de_vencimiento1
 
 
-    #    def clean_DNI_titular(self):
+
 
 class FormularioNovedad(forms.Form):
     titulo = forms.CharField(max_length = 255,show_hidden_initial = True)

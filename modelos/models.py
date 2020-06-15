@@ -26,7 +26,7 @@ class Suscriptor(models.Model):
     fecha_suscripcion = models.DateField(null=False)
     nombre = models.CharField(max_length = 25, blank=False, null=False)
     apellido = models.CharField(max_length = 25, blank=False, null=False)
-    dni_titular = models.CharField(unique = True, max_length = 8,null=False)
+    dni = models.CharField(unique = True, max_length = 8, null=False)
 
 
 class Autor (models.Model):

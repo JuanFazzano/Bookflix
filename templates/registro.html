@@ -1,15 +1,9 @@
 {% extends "header.html"%}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     {% block link %}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     {% endblock%}
     {% block estilos %}
-    <style>
 
             label{
                 font-family: Arial;
@@ -23,21 +17,15 @@
                 color: #ffffff;
                 background-color: black;
                 border-radius: 4px;
-                font-family: 'Roboto'";    
+                font-family: 'Roboto'";
             }
             #id_Nombre,#id_Apellido,#id_Email,#id_Contrasena,#id_Numero_de_Tarjeta,#id_Fecha_de_vencimiento,
-            #id_DNI_titular,#id_Empresa,#id_Codigo_de_seguridad,#id_Suscripcion{
+            #id_DNI,#id_Empresa,#id_Codigo_de_seguridad,#id_Suscripcion{
                 display: block;
                 width: 400px;
             }
-        </style>  
     {% endblock %}
     <title>Carga de {{nombre}}</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <script src='main.js'></script>
-</head>
-<body style="margin: 0px;">
     {% block contenido %}
     <br>
     <div style="margin-left:400px">
@@ -49,6 +37,3 @@
 
     </div>
     {% endblock %}
-
-</body>
-</html>
