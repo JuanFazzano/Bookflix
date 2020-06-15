@@ -13,37 +13,7 @@ from forms.forms                    import *
 from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 from django.db.models import Q
 
-def listado_libros_activos(request,limit=None):
-    "limit es un parametro que define cuantas tuplas se van a tomar"
-    #capitulos = Capitulo.objects.exclude(fecha_vencimiento = None)
-    '''Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
-    ()'''
-
-    "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
-    capitulos_activos =  Capitulo.objects.filter(
-                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
-                                                    (
-                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento = None) |
-                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now())
-                                                    )
-                                                )
-
-    "Filtramos los libros_incompletos que esté entre los libros de capitulos activos"
-    libros_incompletos_activos = Libro_Incompleto.objects.filter(id__in = capitulos_activos.values('titulo_id'))
-    #Recordemos que la coma es and
-    '''
-        Filtra los LIBROS cuya fecha_vencimiento sea menor a la actual O la fecha de vencimiento no es None y está completo (con ult cap cargado )
-        o el libro que esté entre los incompletos_activos
-    '''
-    libros_activos = Libro.objects.filter(          Q(id__in = libros_incompletos_activos.values('libro_id')) |
-                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now()) |
-                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento = None)
-                                        ).distinct()
-    if limit is not None:
-        libros_activos = libros_activos[:limit]
-    return paginar(request,libros_activos,10)
-
-def listado_libros_activos_1(limit=None):
+def listado_libros_activos():
     "limit es un parametro que define cuantas tuplas se van a tomar"
     "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
     capitulos_activos =  Capitulo.objects.filter(
@@ -213,7 +183,7 @@ class Vista_Visitante(View):
             if request.user.is_staff:
                 return redirect('/home_admin/')
             return redirect('/listado_perfiles/')
-        return render(request,'visitante.html',{'objeto_pagina': paginar(request,listado_libros_activos_1(),6)})
+        return render(request,'visitante.html', {'objeto_pagina': paginar(request, listado_libros_activos(), 6)})
 
 class Buscar:
     def __init__(self,request = None):
@@ -224,7 +194,7 @@ class Buscar:
             if(self.request.user.is_staff):
                 listado_de_libros=Libro.objects.all()
             else:
-                listado_de_libros= listado_libros_activos_1()
+                listado_de_libros= listado_libros_activos()
             decorado = Listado_decorado(listado_de_libros)
             decoradorGenero = DecoradorGenero(decorado,self.request.GET['genero'])
             decoradorAutor = DecoradorAutor(decoradorGenero,self.request.GET['autor'])
