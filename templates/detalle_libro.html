@@ -49,7 +49,7 @@
                 {% endif %}
                 {% if not request.user.is_staff %}
                     {% if libro.esta_completo %}
-                         <a id="boton_personalizado" href="/media/{{libro.libro_completo.archivo_pdf}}/"> Leer libro completo</a>
+                         <a id="boton_personalizado" href="/lectura_completo/id={{libro.id}}"> Leer libro completo</a>
                          <br> <br>
                     {% else %}
                         <button>

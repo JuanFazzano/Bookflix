@@ -54,7 +54,7 @@ urlpatterns = [
     url(r'^modificar_trailer/id=(?P<id>\w+)/$', views.Vista_Formulario_Modificar_Trailer.as_view()),
     url(r'^modificar_fechas_libro/id=(?P<id>\w+)/$',views.Vista_modificar_fechas_libro.as_view()),
     url(r'^logout/',views.cerrar_sesion,name="logout"),
-    url(r'^prueba/',views.Vista_Lectura_Libro.as_view()),
+    url(r'^lectura_completo/id=(?P<id>\w+)/$',views.Vista_Lectura_Libro_Completo.as_view()),
 
 ]
 

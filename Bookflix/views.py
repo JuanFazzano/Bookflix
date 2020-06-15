@@ -184,8 +184,8 @@ class Vista_Iniciar_Sesion(View):
             if usuario is not None: #El usuario se autentica
                 login(request,usuario)
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
-                url = str(id_usuario_logueado)+'/'
                 if not usuario.is_staff:
+                    request.session['perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).id
                     return redirect('/listado_perfiles/')
                 else:
                     return redirect('/home_admin/')
@@ -246,6 +246,7 @@ class Buscar:
         return ()
 
 def listado_libros_buscados(request):
+    "Se usa por el buscar para deolver el contexto de los libros buscados"
     contexto = {}
     if not all(map(lambda x: x == '', request.GET.values())):
         buscar = Buscar(request)
@@ -367,7 +368,6 @@ class Vista_Detalle(View):
         "Este mensaje carga el contexto con lo que requiera un detalle especifico"
         pass
 
-
 class Vista_Listado(View):
     def __init__(self, *args, **kwargs):
         self.contexto = {}
@@ -392,7 +392,6 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
         #TODO agregar fecha de vencimiento (Checkear si está por capitulos o completo)
-
 
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -831,7 +830,6 @@ class Vista_modificar_fechas_libro(View):
             return redirect('/listado_libro/')
         return render(request, 'carga_atributos_libro.html',{'formulario': FormularioCargaFechas(valores_fechas['fecha_de_lanzamiento'],valores_fechas['fecha_de_vencimiento']),'errores': formulario.errors,'modelo':'libro'})
 
-
 class Vista_Alta_Capitulo(View):
     def __init__(self):
         self.contexto = {'modelo': 'libro'}
@@ -901,11 +899,39 @@ class Vista_Alta_Capitulo(View):
         return render(request,'carga_atributos_libro.html',self.contexto)
 
 class Vista_Lectura_Libro(View):
-    def get(self,request):
+    def __init__(self,*args,**kwargs):
+        self.contexto = {}
+        self.id = None #El id puede ser el id del libro o el id_capitulo
+
+    def get(self,request,id = None):
+        print('ACA')
+        self.id = id
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        return render(request,'prueba.html',{'pdf': 'TrabajoPráctico2019(1).pdf'})
-        #return FileResponse(open('static/TrabajoPráctico2019(1).pdf', 'rb'), content_type='application/pdf')
+        self.marcar_como_leido(id_perfil = request.session['perfil'])
+        return render(request,'prueba.html',self.contexto)
+
+    def marcar_como_leido(self):
+        pass
+
+class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
+    def __init__(self,*args,**kwargs):
+        super(Vista_Lectura_Libro_Completo,self).__init__(*args,**kwargs)
+
+    def marcar_como_leido(self,id_perfil):
+        try:
+            libro_leido = Lee_libro.objects.get(perfil_id = id_perfil)
+            libro_leido.ultimo_acceso = datetime.datetime.now()
+        except:
+            libro_leido = Lee_libro(
+                libro_id = self.id,
+                perfil_id = id_perfil,
+                terminado = False,
+                ultimo_acceso = datetime.datetime.now()
+            )
+        finally:
+            libro_leido.save()
+            self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
 
 class Listado_decorado:
     def __init__(self,listado):
