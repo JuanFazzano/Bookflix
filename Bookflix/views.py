@@ -12,14 +12,6 @@ from django.http                    import HttpResponseRedirect
 from forms.forms                    import *
 from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 from django.db.models import Q
-#def dar_de_baja_libros():
-#    Da de baja los libros que están vencidos
-#    libros = Libro_Completo.objects.exclude(fecha_vencimiento=None)
-#    libros = libros.filter(fecha_vencimiento__lte=datetime.datetime.now())
-#    for libro in libros:
-#        libro_baja= Libro.objects.get(id = libro.libro_id)
-#        libro_baja.esta_activo = False
-#        libro_baja.save()
 
 def listado_libros_activos(request,limit=None):
     "limit es un parametro que define cuantas tuplas se van a tomar"
@@ -87,7 +79,6 @@ def listado_libros_activos_1(limit=None):
                                         ).distinct()
 
     return libros_activos
-
 
 def cerrar_sesion(request):
     #Cierra la sesion del usuarios, y lo redireccion al /
@@ -911,9 +902,10 @@ class Vista_Alta_Capitulo(View):
 
 class Vista_Lectura_Libro(View):
     def get(self,request):
-        #return render(request,'prueba.html',{'pdf': 'parte2grupo52.pdf'})
-        return FileResponse(open('static/parte2grupo52.pdf', 'rb'), content_type='application/pdf')
-
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
+        return render(request,'prueba.html',{'pdf': 'TrabajoPráctico2019(1).pdf'})
+        #return FileResponse(open('static/TrabajoPráctico2019(1).pdf', 'rb'), content_type='application/pdf')
 
 class Listado_decorado:
     def __init__(self,listado):
@@ -953,13 +945,6 @@ class Decorador:
             return self.libros_del_decorado
         return self.template()
 
-#decorado = Listado_decorado(listado_de_libros)
-#decoradorGenero = DecoradorGenero(decorado,self.request.GET['genero'])
-#decoradorAutor = DecoradorAutor(decoradorGenero,self.request.GET['autor'])
-#decoradorEditorial = DecoradorEditorial(decoradorAutor,self.request.GET['editorial'])
-#decoradorTitulo = DecoradorTitulo(decoradorEditorial,self.request.GET['titulo'])
-#decoradorTitulo.buscar_libro()
-
 class DecoradorTitulo(Decorador):
     def template(self):
         titulos = Libro.objects.filter(titulo__icontains = self.campo).values('titulo')
@@ -972,7 +957,6 @@ class DecoradorGenero(Decorador):
 
     def libros(self):
         return Libro.objects.filter(genero_id = self.campo)
-
 
 class DecoradorAutor(Decorador):
     def template(self):
