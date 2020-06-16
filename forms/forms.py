@@ -108,6 +108,20 @@ class FormularioIniciarSesion(forms.Form):
     email = forms.EmailField(max_length=254)
     clave = forms.CharField(widget=forms.PasswordInput)
 
+class FormularioCambiarContraseña(forms.Form):
+    def __init__(self,id_usuario, *args, **kwargs):
+        self.id = id_usuario
+        super(FormularioCambiarContraseña,self).__init__(*args,**kwargs)
+
+    Contraseña_actual = forms.CharField(widget=forms.PasswordInput, max_length=20)
+    Contraseña_nueva = forms.CharField(widget=forms.PasswordInput, max_length=20)
+
+    def clean_Contraseña_actual(self):
+        if not User.objects.get(id=self.id).check_password(self.cleaned_data['Contraseña_actual']):
+            raise forms.ValidationError('Contraseña actual incorrecta')
+        else:
+            return self.cleaned_data['Contraseña_actual']
+
 class FormularioModificarDatosPersonales(forms.Form):
     def __init__(self,*args,**kwargs):
         self.datos_cambiados = {'Email': False, 'DNI': False, 'Numero_de_tarjeta': False}
@@ -203,8 +217,6 @@ class FormularioCargaFechas(forms.Form):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
 
-
-
 class FormularioCargaLibro(forms.Form):
     fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
@@ -225,9 +237,6 @@ class FormularioCargaLibro(forms.Form):
             if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
-
-
-
 
 class FormularioNovedad(forms.Form):
     titulo = forms.CharField(max_length = 255,show_hidden_initial = True)
@@ -336,8 +345,6 @@ class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
                 print('HOLA entre aca papa ')
                 raise forms.ValidationError('El ISBN ya esta registrado en el sistema')
         return valor_ISBN_actual
-
-
 
 class FormularioTrailer(forms.Form):
     def obtener_libros(self):

@@ -275,6 +275,31 @@ class Home_Admin(View):
             return redirect('/iniciar_sesion/')
         return render(request,'home_admin.html',{})
 
+class Cambiar_Contraseña(View):
+    def __init__(self, *args,**kwargs):
+        self.contexto = dict()
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
+        self.contexto['formulario'] = FormularioCambiarContraseña(request.session['_auth_user_id'])
+        return render(request,'cambiar_contrasena.html',self.contexto)
+
+    def post(self,request):
+        formulario = FormularioCambiarContraseña(id_usuario=request.session['_auth_user_id'],data=request.POST)
+        if formulario.is_valid():
+            self.__cambiar_contraseña(formulario,request.session['_auth_user_id'])
+            return redirect('/iniciar_sesion/')
+        self.contexto['errores'] = formulario.errors
+        self.contexto['formulario'] = FormularioCambiarContraseña(id_usuario=request.session['_auth_user_id'])
+        return render(request,'cambiar_contrasena.html',self.contexto)
+
+    def __cambiar_contraseña(self,formulario,id):
+        contraseña = formulario.cleaned_data['Contraseña_nueva']
+        user = User.objects.get(id=id)
+        user.set_password(contraseña)
+        user.save()
+
 class Vista_Modificar_Datos_Personales(View):
     def __init__(self,*args,**kwargs):
         self.contexto = dict()
@@ -302,7 +327,7 @@ class Vista_Modificar_Datos_Personales(View):
         return valores_por_defecto
 
     def __cambiar_datos_usuario(self,formulario,id):
-        print('Entre')
+        print(formulario)
         nombre = formulario.cleaned_data['Nombre']
         apellido = formulario.cleaned_data['Apellido']
 
@@ -376,7 +401,6 @@ class Vista_Detalle(View):
         "Este mensaje carga el contexto con lo que requiera un detalle especifico"
         pass
 
-
 class Vista_Listado(View):
     def __init__(self, *args, **kwargs):
         self.contexto = {}
@@ -401,7 +425,6 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
         #TODO agregar fecha de vencimiento (Checkear si está por capitulos o completo)
-
 
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
