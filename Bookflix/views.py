@@ -12,24 +12,8 @@ from django.http                    import HttpResponseRedirect
 from forms.forms                    import *
 from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
 from django.db.models import Q
-#def dar_de_baja_libros():
-#    Da de baja los libros que están vencidos
-#    libros = Libro_Completo.objects.exclude(fecha_vencimiento=None)
-#    libros = libros.filter(fecha_vencimiento__lte=datetime.datetime.now())
-#    for libro in libros:
-#        libro_baja= Libro.objects.get(id = libro.libro_id)
-#        libro_baja.esta_activo = False
-#        libro_baja.save()
 
-def listado_libros_activos(request,limit=None):
-    "limit es un parametro que define cuantas tuplas se van a tomar"
-    #TODO ver listado de libros activos si está incompleto por capitulos
-    #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
-    #print('Esto es lo que devolvio' ,(Libro.objects.all().select_related('libro').all().values()))
-
-    #capitulos = Capitulo.objects.exclude(fecha_vencimiento = None)
-    '''Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
-    ()'''
+def listado_libros_activos():
 
     "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
     capitulos_activos =  Capitulo.objects.filter(
@@ -42,41 +26,7 @@ def listado_libros_activos(request,limit=None):
 
     "Filtramos los libros_incompletos que esté entre los libros de capitulos activos"
     libros_incompletos_activos = Libro_Incompleto.objects.filter(id__in = capitulos_activos.values('titulo_id'))
-    #Recordemos que la coma es and
-    '''
-        Filtra los LIBROS cuya fecha_vencimiento sea menor a la actual O la fecha de vencimiento no es None y está completo (con ult cap cargado )
-        o el libro que esté entre los incompletos_activos
-    '''
-    libros_activos = Libro.objects.filter(          Q(id__in = libros_incompletos_activos.values('libro_id')) |
-                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now()) |
-                                                    Q(esta_completo=True,fecha_lanzamiento__lte= datetime.datetime.now(),fecha_vencimiento = None)
-                                        ).distinct()
-    if limit is not None:
-        libros_activos = libros_activos[:limit]
-    return paginar(request,libros_activos,10)
 
-def listado_libros_activos_1(limit=None):
-    "limit es un parametro que define cuantas tuplas se van a tomar"
-    #TODO ver listado de libros activos si está incompleto por capitulos
-    #libros = Libro_Completo.objects.exclude(fecha_vencimiento = None)
-    #print('Esto es lo que devolvio' ,(Libro.objects.all().select_related('libro').all().values()))
-
-    #capitulos = Capitulo.objects.exclude(fecha_vencimiento = None)
-    '''Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
-    ()'''
-
-    "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
-    capitulos_activos =  Capitulo.objects.filter(
-                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
-                                                    (
-                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento = None) |
-                                                    Q(fecha_lanzamiento__lte = datetime.datetime.now(),fecha_vencimiento__gt = datetime.datetime.now())
-                                                    )
-                                                )
-
-    "Filtramos los libros_incompletos que esté entre los libros de capitulos activos"
-    libros_incompletos_activos = Libro_Incompleto.objects.filter(id__in = capitulos_activos.values('titulo_id'))
-    #Recordemos que la coma es and
     '''
         Filtra los LIBROS cuya fecha_vencimiento sea menor a la actual O la fecha de vencimiento no es None y está completo (con ult cap cargado )
         o el libro que esté entre los incompletos_activos
@@ -87,7 +37,6 @@ def listado_libros_activos_1(limit=None):
                                         ).distinct()
 
     return libros_activos
-
 
 def cerrar_sesion(request):
     #Cierra la sesion del usuarios, y lo redireccion al /
@@ -193,8 +142,8 @@ class Vista_Iniciar_Sesion(View):
             if usuario is not None: #El usuario se autentica
                 login(request,usuario)
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
-                url = str(id_usuario_logueado)+'/'
                 if not usuario.is_staff:
+                    request.session['perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).id
                     return redirect('/listado_perfiles/')
                 else:
                     return redirect('/home_admin/')
@@ -234,7 +183,7 @@ class Vista_Visitante(View):
             if request.user.is_staff:
                 return redirect('/home_admin/')
             return redirect('/listado_perfiles/')
-        return render(request,'visitante.html',{'objeto_pagina': listado_libros_activos(request,6)})
+        return render(request,'visitante.html', {'objeto_pagina': paginar(request, listado_libros_activos(), 6)})
 
 class Buscar:
     def __init__(self,request = None):
@@ -245,7 +194,7 @@ class Buscar:
             if(self.request.user.is_staff):
                 listado_de_libros=Libro.objects.all()
             else:
-                listado_de_libros= listado_libros_activos_1()
+                listado_de_libros= listado_libros_activos()
             decorado = Listado_decorado(listado_de_libros)
             decoradorGenero = DecoradorGenero(decorado,self.request.GET['genero'])
             decoradorAutor = DecoradorAutor(decoradorGenero,self.request.GET['autor'])
@@ -255,6 +204,7 @@ class Buscar:
         return ()
 
 def listado_libros_buscados(request):
+    "Se usa por el buscar para deolver el contexto de los libros buscados"
     contexto = {}
     if not all(map(lambda x: x == '', request.GET.values())):
         buscar = Buscar(request)
@@ -863,7 +813,6 @@ class Vista_modificar_fechas_libro(View):
             return redirect('/listado_libro/')
         return render(request, 'carga_atributos_libro.html',{'formulario': FormularioCargaFechas(valores_fechas['fecha_de_lanzamiento'],valores_fechas['fecha_de_vencimiento']),'errores': formulario.errors,'modelo':'libro'})
 
-
 class Vista_Alta_Capitulo(View):
     def __init__(self):
         self.contexto = {'modelo': 'libro'}
@@ -933,9 +882,59 @@ class Vista_Alta_Capitulo(View):
         return render(request,'carga_atributos_libro.html',self.contexto)
 
 class Vista_Lectura_Libro(View):
-    def get(self,request):
-        #return render(request,'prueba.html',{'pdf': 'parte2grupo52.pdf'})
-        return FileResponse(open('static/parte2grupo52.pdf', 'rb'), content_type='application/pdf')
+    def __init__(self,*args,**kwargs):
+        self.contexto = {}
+        self.id = None #El id puede ser el id del libro o el id_capitulo
+
+    def get(self,request,id = None):
+        print('ACA')
+        self.id = id
+        if not request.user.is_authenticated:
+            return redirect('/iniciar_sesion/')
+        self.marcar_como_leido(id_perfil = request.session['perfil'])
+        return render(request,'prueba.html',self.contexto)
+
+    def marcar_como_leido(self):
+        pass
+
+class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
+    def __init__(self,*args,**kwargs):
+        super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
+
+    def marcar_como_leido(self):
+        try:
+            capitulo_leido = Lee_Capitulo.objects.get(perfil_id = id_perfil)
+            capitulo_leido.ultimo_acceso = datetime.datetime.now()
+        except:
+            capitulo_leido = Lee_Capitulo(
+                capitulo_id = self.id,
+                perfil_id = id_perfil,
+                ultimo_acceso = datetime.datetime.now()
+            )
+        finally:
+            capitulo_leido.save()
+            self.contexto = {'pdf': Capitulo.objects.get(capitulo_id = self.id).archivo_pdf }
+
+
+class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
+    def __init__(self,*args,**kwargs):
+        super(Vista_Lectura_Libro_Completo,self).__init__(*args,**kwargs)
+
+    def marcar_como_leido(self,id_perfil):
+        try:
+            libro_leido = Lee_libro.objects.get(perfil_id = id_perfil)
+            libro_leido.ultimo_acceso = datetime.datetime.now()
+        except:
+            libro_leido = Lee_libro(
+                libro_id = self.id,
+                perfil_id = id_perfil,
+                terminado = False,
+                ultimo_acceso = datetime.datetime.now()
+            )
+        finally:
+            libro_leido.save()
+            self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
+
 
 
 class Listado_decorado:
@@ -976,13 +975,6 @@ class Decorador:
             return self.libros_del_decorado
         return self.template()
 
-#decorado = Listado_decorado(listado_de_libros)
-#decoradorGenero = DecoradorGenero(decorado,self.request.GET['genero'])
-#decoradorAutor = DecoradorAutor(decoradorGenero,self.request.GET['autor'])
-#decoradorEditorial = DecoradorEditorial(decoradorAutor,self.request.GET['editorial'])
-#decoradorTitulo = DecoradorTitulo(decoradorEditorial,self.request.GET['titulo'])
-#decoradorTitulo.buscar_libro()
-
 class DecoradorTitulo(Decorador):
     def template(self):
         titulos = Libro.objects.filter(titulo__icontains = self.campo).values('titulo')
@@ -995,7 +987,6 @@ class DecoradorGenero(Decorador):
 
     def libros(self):
         return Libro.objects.filter(genero_id = self.campo)
-
 
 class DecoradorAutor(Decorador):
     def template(self):
@@ -1013,3 +1004,5 @@ class DecoradorEditorial(Decorador):
 
     def libros(self):
         return Libro.objects.filter(editorial_id = self.campo)
+
+#TODO de los libros similares, sacar al libro del que se está viendo el detalle
