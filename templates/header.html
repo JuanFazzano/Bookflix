@@ -29,7 +29,7 @@
             {% if not user.is_authenticated %}
               <li style="padding-left:10px; display:inline;"> <a href="/iniciar_sesion/" style="text-decoration: none; color: white;">   Iniciar Sesión  </a>   </li>
               <li style="padding-left:10px; display:inline;"> <a href="/registro/" style="text-decoration: none; color: white;">         Registrarse </a>  </li>
-              <li style="padding-left:10px; display:inline; ">> <a href="#" style="text-decoration: none; color: white;">                Ayuda       </a>  </li>
+              <li style="padding-left:10px; display:inline; "> <a href="#" style="text-decoration: none; color: white;">                Ayuda       </a>  </li>
             {% else %}
             <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.user}} </li>
             {% if not request.user.is_staff%}

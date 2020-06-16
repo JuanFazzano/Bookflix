@@ -56,6 +56,7 @@ urlpatterns = [
     url(r'^logout/',views.cerrar_sesion,name="logout"),
     url(r'^lectura_completo/id=(?P<id>\w+)/$',views.Vista_Lectura_Libro_Completo.as_view()),
     url(r'^lectura_capitulo/id=(?P<id>\w+)/$', views.Vista_Lectura_Capitulo.as_view()),
+    url(r'^cambiar_contrasena/', views.Cambiar_Contraseña.as_view()),
 
 ]
 
