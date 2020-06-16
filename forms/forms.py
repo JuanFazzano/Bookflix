@@ -108,20 +108,6 @@ class FormularioIniciarSesion(forms.Form):
     email = forms.EmailField(max_length=254)
     clave = forms.CharField(widget=forms.PasswordInput)
 
-class FormularioCambiarContraseña(forms.Form):
-    def __init__(self,id_usuario, *args, **kwargs):
-        self.id = id_usuario
-        super(FormularioCambiarContraseña,self).__init__(*args,**kwargs)
-
-    Contraseña_actual = forms.CharField(widget=forms.PasswordInput, max_length=20)
-    Contraseña_nueva = forms.CharField(widget=forms.PasswordInput, max_length=20)
-
-    def clean_Contraseña_actual(self):
-        if not User.objects.get(id=self.id).check_password(self.cleaned_data['Contraseña_actual']):
-            raise forms.ValidationError('Contraseña actual incorrecta')
-        else:
-            return self.cleaned_data['Contraseña_actual']
-
 class FormularioModificarDatosPersonales(forms.Form):
     def __init__(self,*args,**kwargs):
         self.datos_cambiados = {'Email': False, 'DNI': False, 'Numero_de_tarjeta': False}
@@ -217,6 +203,8 @@ class FormularioCargaFechas(forms.Form):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
 
+
+
 class FormularioCargaLibro(forms.Form):
     fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
@@ -237,6 +225,9 @@ class FormularioCargaLibro(forms.Form):
             if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
+
+
+
 
 class FormularioNovedad(forms.Form):
     titulo = forms.CharField(max_length = 255,show_hidden_initial = True)
@@ -346,6 +337,8 @@ class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
                 raise forms.ValidationError('El ISBN ya esta registrado en el sistema')
         return valor_ISBN_actual
 
+
+
 class FormularioTrailer(forms.Form):
     def obtener_libros(self):
         libros = Libro.objects.all()
@@ -441,39 +434,17 @@ class FormularioCapitulo(forms.Form):
         if existe_capitulo:
             raise forms.ValidationError('Ya existe el capitulo para ese libro')
         return self.cleaned_data['numero_capitulo']
-#
-#
-#        field_DNI_titular = self.visible_fields()[5] #Me devuelve una instancia del CharField --> campo DNI
-#        valor_dni_inicial = field_DNI_titular.initial
-#        valor_dni_actual = self.cleaned_data['DNI_titular']
-#        clean_campo(self,'DNI_titular',8)
-#        if (Tarjeta.objects.values('dni_titular').filter(dni_titular = valor_dni_actual).exists()):
-#            raise forms.ValidationError('El DNI ya esta registrado en el sistema')
-#
-#        if self.__cambio(valor_dni_inicial,valor_dni_actual):
-#            self.datos_cambiados['DNI'] = True
-#        else:
-#            self.datos_cambiados['DNI'] = False
-#        return valor_dni_actual
 
-#    def clean_Codigo_de_seguridad(self):
-#        return clean_campo(self,'Codigo_de_seguridad',3)
+class FormularioCambiarContraseña(forms.Form):
+    def __init__(self,id_usuario, *args, **kwargs):
+        self.id = id_usuario
+        super(FormularioCambiarContraseña,self).__init__(*args,**kwargs)
 
-#    def clean_Numero_de_tarjeta(self):
-#        field_Numero_de_tarjeta = self.visible_fields()[4] #Me devuelve una instancia del CharField --> campo Numero_de_tarjeta
-#        valor_numero_inicial=field_Numero_de_tarjeta.initial
-#        valor_Numero_actual=self.cleaned_data['Numero_de_tarjeta']
-#        if self.__cambio(valor_numero_inicial,valor_Numero_actual):
-#            clean_campo(self,'Numero_de_tarjeta',16)
-#            self.datos_cambiados['Numero_de_tarjeta'] = True
-#        else:
-#            self.datos_cambiados['Numero_de_tarjeta'] = False
-#        return valor_Numero_actual
+    Contraseña_actual = forms.CharField(widget=forms.PasswordInput, max_length=20)
+    Contraseña_nueva = forms.CharField(widget=forms.PasswordInput, max_length=20)
 
-#    def clean_Fecha_de_vencimiento(self):
-#        fecha_vencimiento = (self.cleaned_data['Fecha_de_vencimiento'])
-#        fecha_hoy = ((datetime.datetime.now()).date())
-#        vencida = (fecha_hoy >= fecha_vencimiento)
-#        if vencida:
-#            raise forms.ValidationError('Tarjeta vencida')
-#        return self.cleaned_data['Fecha_de_vencimiento']
+    def clean_Contraseña_actual(self):
+        if not User.objects.get(id=self.id).check_password(self.cleaned_data['Contraseña_actual']):
+            raise forms.ValidationError('Contraseña actual incorrecta')
+        else:
+            return self.cleaned_data['Contraseña_actual']

@@ -277,7 +277,7 @@ class Vista_Modificar_Datos_Personales(View):
         return valores_por_defecto
 
     def __cambiar_datos_usuario(self,formulario,id):
-        print(formulario)
+        print('Entre')
         nombre = formulario.cleaned_data['Nombre']
         apellido = formulario.cleaned_data['Apellido']
 
@@ -887,55 +887,70 @@ class Vista_Lectura_Libro(View):
         self.id = None #El id puede ser el id del libro o el id_capitulo
 
     def get(self,request,id = None):
-        print('ACA')
         self.id = id
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         self.marcar_como_leido(id_perfil = request.session['perfil'])
-        return render(request,'prueba.html',self.contexto)
+        return render(request,'lectura_pdf.html',self.contexto)
 
-    def marcar_como_leido(self):
+    def marcar_existente(self):
+        "Hook"
+
+    def marcar_nuevo(self):
+        "Hook"
         pass
+
+    def actualizar_contexto(self):
+        "Hook"
+        pass
+
+
+    def marcar_como_leido(self,id_perfil):
+        try:
+            self.marcar_existente(id_perfil)
+        except:
+            self.marcar_nuevo(id_perfil)
+        self.actualizar_contexto()
 
 class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
 
-    def marcar_como_leido(self):
-        try:
-            capitulo_leido = Lee_Capitulo.objects.get(perfil_id = id_perfil)
-            capitulo_leido.ultimo_acceso = datetime.datetime.now()
-        except:
-            capitulo_leido = Lee_Capitulo(
-                capitulo_id = self.id,
-                perfil_id = id_perfil,
-                ultimo_acceso = datetime.datetime.now()
-            )
-        finally:
-            capitulo_leido.save()
-            self.contexto = {'pdf': Capitulo.objects.get(capitulo_id = self.id).archivo_pdf }
+    def marcar_existente(self,id_perfil):
+        capitulo_leido = Lee_Capitulo.objects.get(perfil_id=id_perfil,id = self.id)
+        capitulo_leido.ultimo_acceso = datetime.datetime.now()
+        capitulo_leido.save()
 
+    def marcar_nuevo(self,id_perfil):
+        capitulo_leido = Lee_Capitulo(
+            capitulo_id=self.id,
+            perfil_id=id_perfil,
+            ultimo_acceso=datetime.datetime.now()
+        )
+        capitulo_leido.save()
+
+    def actualizar_contexto(self):
+        self.contexto = {'pdf': Capitulo.objects.get(id = self.id).archivo_pdf }
 
 class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Libro_Completo,self).__init__(*args,**kwargs)
 
-    def marcar_como_leido(self,id_perfil):
-        try:
-            libro_leido = Lee_libro.objects.get(perfil_id = id_perfil)
-            libro_leido.ultimo_acceso = datetime.datetime.now()
-        except:
-            libro_leido = Lee_libro(
-                libro_id = self.id,
-                perfil_id = id_perfil,
-                terminado = False,
-                ultimo_acceso = datetime.datetime.now()
-            )
-        finally:
-            libro_leido.save()
-            self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
+    def marcar_existente(self,id_perfil):
+        libro_leido = Lee_libro.objects.get(perfil_id=id_perfil,libro_id = self.id)
+        libro_leido.ultimo_acceso = datetime.datetime.now()
+        libro_leido.save()
 
-
+    def marcar_nuevo(self,id_perfil):
+        libro_leido = Lee_libro(
+            libro_id = self.id,
+            perfil_id = id_perfil,
+            terminado = False,
+            ultimo_acceso = datetime.datetime.now()
+        )
+        libro_leido.save()
+    def actualizar_contexto(self):
+        self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
 
 class Listado_decorado:
     def __init__(self,listado):
