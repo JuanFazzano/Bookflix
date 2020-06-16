@@ -14,7 +14,7 @@ from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor
 from django.db.models import Q
 
 def listado_libros_activos():
-    "limit es un parametro que define cuantas tuplas se van a tomar"
+
     "Filtra los capitulos no vencidos (los que no tienen fecha_vencimiento o la fecha de vencimiento no es la de hoy)"
     capitulos_activos =  Capitulo.objects.filter(
                                                     Q(fecha_lanzamiento__lte = datetime.datetime.now()) &
@@ -26,7 +26,7 @@ def listado_libros_activos():
 
     "Filtramos los libros_incompletos que esté entre los libros de capitulos activos"
     libros_incompletos_activos = Libro_Incompleto.objects.filter(id__in = capitulos_activos.values('titulo_id'))
-    #Recordemos que la coma es and
+
     '''
         Filtra los LIBROS cuya fecha_vencimiento sea menor a la actual O la fecha de vencimiento no es None y está completo (con ult cap cargado )
         o el libro que esté entre los incompletos_activos
@@ -872,6 +872,25 @@ class Vista_Lectura_Libro(View):
     def marcar_como_leido(self):
         pass
 
+class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
+    def __init__(self,*args,**kwargs):
+        super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
+
+    def marcar_como_leido(self):
+        try:
+            capitulo_leido = Lee_Capitulo.objects.get(perfil_id = id_perfil)
+            capitulo_leido.ultimo_acceso = datetime.datetime.now()
+        except:
+            capitulo_leido = Lee_Capitulo(
+                capitulo_id = self.id,
+                perfil_id = id_perfil,
+                ultimo_acceso = datetime.datetime.now()
+            )
+        finally:
+            capitulo_leido.save()
+            self.contexto = {'pdf': Capitulo.objects.get(capitulo_id = self.id).archivo_pdf }
+
+
 class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Libro_Completo,self).__init__(*args,**kwargs)
@@ -890,6 +909,8 @@ class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
         finally:
             libro_leido.save()
             self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
+
+
 
 class Listado_decorado:
     def __init__(self,listado):
