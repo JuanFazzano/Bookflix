@@ -305,7 +305,8 @@ class Vista_Modificar_Datos_Personales(View):
         tarjeta.fecha_vencimiento = formulario.cleaned_data['Fecha_de_vencimiento']
         tarjeta.save()
 
-    def get(self,request):
+    def get(self,request):#import itertools
+
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         formulario = FormularioModificarDatosPersonales(initial = self.__valores_iniciales(request.session['_auth_user_id']))
@@ -335,20 +336,28 @@ class Vista_Detalle(View):
     def get(self,request,id = None):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
+        print(request.GET)
         try:
             #Se pagina porque si en la tabla las fk son ids, es porque el paginador asocia el id con la fila que le corresponde
             tuplas = self.modelo.objects.filter(id = id)
             self.contexto ['id'] = id #El id se usa para pasar entre las vistas, porque se usa en el "detalle.html"
             self.contexto['objeto_pagina'] = paginar(request, tuplas)
             self.cargar_diccionario(id)
+            try:
+                self.verificar_estado_para_terminar(id,request.session['perfil'])
+            except:
+                pass
             return render(request,self.url,self.contexto)
         except:
             return redirect('/')
 
 
-    def cargar_diccionario(self,id):
+    def cargar_diccionario(self,id,id_perfil=None):
         "Hook que sobreescriben los hijos"
         "Este mensaje carga el contexto con lo que requiera un detalle especifico"
+        pass
+
+    def verificar_estado_para_terminar(self,id_libro,id_perfil):
         pass
 
 class Vista_Listado(View):
@@ -683,6 +692,18 @@ class Vista_Formulario_Modificar_Trailer(View):
         self.contexto['formulario'] = FormularioModificarTrailer(initial = self.__get_valores_iniciales(id))
         return render(request,'carga_atributos_libro.html',self.contexto)
 
+
+def marcar_como_terminado(request,id=None):
+    id_perfil= request.session['perfil']
+    libro= Libro.objects.get(id=id)
+    relacion_lee_libro= Lee_libro.objects.get(perfil_id=id_perfil,libro_id=id)
+    relacion_lee_libro.terminado=True
+    relacion_lee_libro.save()
+    path='/detalle_libro/id='+ id
+    return redirect(path)
+
+
+
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
         self.modelo_string = 'libro'
@@ -691,7 +712,7 @@ class Vista_Detalle_libro(Vista_Detalle):
         super(Vista_Detalle_libro, self).__init__(*args, **kwargs)
 
 
-    def cargar_diccionario (self, id):
+    def cargar_diccionario (self,id):
         trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
         libro = Libro.objects.filter(id = id)[0]
         if libro.esta_completo:
@@ -703,7 +724,31 @@ class Vista_Detalle_libro(Vista_Detalle):
         decoradorGenero = DecoradorGenero(libro,libro.genero_id)
         decoradorAutor = DecoradorAutor(decoradorGenero,libro.autor_id)
         decoradorEditorial = DecoradorEditorial(decoradorAutor,libro.editorial_id)
-        self.contexto ['libros_similares'] = decoradorEditorial.buscar_similares()
+        listado_de_libros_similares=decoradorEditorial.buscar_similares()
+        listado_de_libros_similares=list(filter(lambda libro2:libro2.id != int(id),listado_de_libros_similares))   #saca el libro de donde estoy parado.
+        self.contexto ['libros_similares'] = listado_de_libros_similares
+
+    def verificar_estado_para_terminar(self,id_libro,id_perfil):
+        self.contexto['error']=None
+        libro= Libro.objects.get(id=id_libro)
+        if (libro.fecha_lanzamiento):  #en este caso el libro esta completo por capitulos o con un solo archivo
+            print('entre')
+            perfil_leyo_libro = Lee_libro.objects.filter(perfil_id=id_perfil, libro_id=id_libro)
+            if(perfil_leyo_libro.exists()):
+                if(not perfil_leyo_libro.values()[0]['terminado']):
+                    if(not libro.esta_completo) :                                  # si el libro tiene un solo archivo
+                        libro_incompleto= Libro_Incompleto.objects.get(libro_id=id_libro)
+                        capitulos_del_libro=Capitulo.objects.filter(titulo_id= libro_incompleto.id)
+                        if( not capitulos_del_libro.count()== Lee_Capitulo.objects.filter(perfil_id=id_perfil, capitulo_id__in= capitulos_del_libro.values('id')).count()):
+                            self.contexto['error']='Primero debe leer todos los capítulos'
+                    return
+                else:
+                    self.contexto['error'] = 'Usted ya termino el libro'
+
+            else:
+                self.contexto['error'] = 'Primero debe leer el libro'
+        else:
+            self.contexto['error']='El libro no esta completo todavia'
 
 class Vista_Carga_Metadatos_Libro(View):
     def __init__(self, *args, **kwargs):
@@ -907,9 +952,10 @@ class Vista_Lectura_Libro(View):
 
     def marcar_como_leido(self,id_perfil):
         try:
-            self.marcar_existente(id_perfil)
-        except:
             self.marcar_nuevo(id_perfil)
+        except:
+            self.marcar_existente(id_perfil)
+
         self.actualizar_contexto()
 
 class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
@@ -917,9 +963,16 @@ class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
         super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
 
     def marcar_existente(self,id_perfil):
-        capitulo_leido = Lee_Capitulo.objects.get(perfil_id=id_perfil,id = self.id)
+        capitulo_leido = Lee_Capitulo.objects.get(perfil_id=id_perfil,capitulo_id = self.id)
         capitulo_leido.ultimo_acceso = datetime.datetime.now()
         capitulo_leido.save()
+
+        "Lo guardo en la tabla Lee_libro"
+        id_libro_incompleto = Capitulo.objects.get(id = capitulo_leido.capitulo_id).titulo_id
+        libro_id = Libro_Incompleto.objects.get(id = id_libro_incompleto).libro_id
+        libro_leido = Lee_libro.objects.get(libro_id = libro_id)
+        libro_leido.ultimo_acceso = datetime.datetime.now()
+        libro_leido.save()
 
     def marcar_nuevo(self,id_perfil):
         capitulo_leido = Lee_Capitulo(
@@ -929,9 +982,19 @@ class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
         )
         capitulo_leido.save()
 
+        "Lo guardo en la tabla Lee_Libro"
+        id_libro_incompleto = Capitulo.objects.get(id=capitulo_leido.capitulo_id).titulo_id
+        libro_id = Libro_Incompleto.objects.get(id = id_libro_incompleto).libro_id
+        libro_leido = Lee_libro(
+            terminado = False,
+            ultimo_acceso = datetime.datetime.now(),
+            perfil_id = id_perfil,
+            libro_id = libro_id
+        )
+        libro_leido.save()
+
     def actualizar_contexto(self):
         self.contexto = {'pdf': Capitulo.objects.get(id = self.id).archivo_pdf }
-
 class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Libro_Completo,self).__init__(*args,**kwargs)
@@ -969,15 +1032,28 @@ class Decorador:
         lista = list()
         lista.append(self.libros())
         lista.append(self.decorado.buscar_similares())
+
         lista_a_retornar=list()
+
         for lista_de_libros in lista:
             if lista_de_libros is not None: #Puede ser None por el archivo base
                 for i in range(0,len(lista_de_libros)):
                     #Se saca el repetido
                     if lista_de_libros[i] not in lista_a_retornar:
                         lista_a_retornar.append(lista_de_libros[i])
+
         return lista_a_retornar
 
+    '''def buscar_similares_1(self):
+        lista = list()
+        lista.append(self.libros())
+        lista.append(self.decorado.buscar_similares())
+        print('La lista',lista)
+        try:
+            lista_flattCollected = list(itertools.chain.from_iterable(lista))
+            return lista_flattCollected
+        except:
+            return lista'''
 
     def buscar_libro(self):
         '''
@@ -995,13 +1071,16 @@ class DecoradorTitulo(Decorador):
         titulos = Libro.objects.filter(titulo__icontains = self.campo).values('titulo')
         return self.libros_del_decorado.filter(titulo__in = titulos)
 
+    def libros(self):
+        return listado_libros_activos().filter(titulo__icontains =self.campo)   #por si lo pide mariano
+
 class DecoradorGenero(Decorador):
     def template(self):
         generos = Genero.objects.filter(nombre__icontains = self.campo).values('id')
         return self.libros_del_decorado.filter(genero_id__in = generos)
 
     def libros(self):
-        return Libro.objects.filter(genero_id = self.campo)
+        return listado_libros_activos().filter(genero_id = self.campo)
 
 class DecoradorAutor(Decorador):
     def template(self):
@@ -1010,7 +1089,7 @@ class DecoradorAutor(Decorador):
 
 
     def libros(self):
-        return Libro.objects.filter(autor_id = self.campo)
+        return listado_libros_activos().filter(autor_id = self.campo)
 
 class DecoradorEditorial(Decorador):
     def template(self):
@@ -1018,6 +1097,6 @@ class DecoradorEditorial(Decorador):
         return self.libros_del_decorado.filter(editorial_id__in = editoriales)
 
     def libros(self):
-        return Libro.objects.filter(editorial_id = self.campo)
+        return listado_libros_activos().filter(editorial_id = self.campo)
 
 #TODO de los libros similares, sacar al libro del que se está viendo el detalle

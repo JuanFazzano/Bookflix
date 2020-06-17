@@ -17,7 +17,7 @@
         }
     {% endblock %}
 {% block detalle %}
-    <ul style="list-style:none;">
+    < style="list-style:none;">
         {% if objeto_pagina %}
             {% for libro in objeto_pagina %}
                 <li>
@@ -56,7 +56,24 @@
                             <a href="#"> Ver listado de capítulos</a>
                         </button>
                     {% endif %}
+                    {% if not error %}
+                        <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
+                            <input type="submit" value="marcar como terminado" >
+                        </form>
+                     {%else%}
 
+                               <button onclick="alerta_error()" id="terminar" value="{{error}}">
+                                   marcar como terminado
+                             </button>
+
+                            <script>
+                                    function alerta_error(){
+                                        let error = document.getElementById('terminar').value;
+                                        alert(error);
+                                    }
+                            </script>
+
+                     {% endif %}
                      <h2>Trailers del libro</h2>
                     {% for trailer in trailers %}
                         <li>
