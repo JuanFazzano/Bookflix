@@ -370,12 +370,14 @@ class Vista_Listado(View):
             return render(request, 'listado_libro.html', contexto)
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        tuplas = self.modelo.objects.all()
+        tuplas = self.retornar_tuplas(request.user.is_staff)
         #self.contexto = {'objeto_pagina': paginar(request,tuplas,10),'modelo': self.modelo_string}
         self.contexto['objeto_pagina']=paginar(request,tuplas,10)
         self.contexto['modelo']=self.modelo_string
         #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
         return render(request,self.url,self.contexto)
+    def retornar_tuplas(self,es_staff=None):
+        return self.modelo.objects.all()
 
 class Vista_Listado_Libro(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -384,6 +386,11 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
         #TODO agregar fecha de vencimiento (Checkear si está por capitulos o completo)
+
+    def retornar_tuplas(self,es_staff):
+        if es_staff:
+            return super(Vista_listado_libro,self).retornar_tuplas()
+        return listado_libros_activos()
 
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -712,7 +719,7 @@ class Vista_Detalle_libro(Vista_Detalle):
         super(Vista_Detalle_libro, self).__init__(*args, **kwargs)
 
 
-    def cargar_diccionario (self,id):
+    def cargar_diccionario_1 (self,id): #TODO eliminar este mensaje antes de la demo
         trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
         libro = Libro.objects.filter(id = id)[0]
         if libro.esta_completo:
@@ -727,6 +734,22 @@ class Vista_Detalle_libro(Vista_Detalle):
         listado_de_libros_similares=decoradorEditorial.buscar_similares()
         listado_de_libros_similares=list(filter(lambda libro2:libro2.id != int(id),listado_de_libros_similares))   #saca el libro de donde estoy parado.
         self.contexto ['libros_similares'] = listado_de_libros_similares
+
+    def cargar_diccionario(self, id):
+        trailers = Trailer.objects.filter(libro_asociado_id=id).values('titulo', 'id')
+        libro = Libro.objects.filter(id=id)[0]
+        if libro.esta_completo:
+            # libro_completo =  Libro_Completo.objects.values().filter(libro_id = libro.id)
+            libro_completo = Libro_Completo.objects.get(libro_id=libro.id)
+            print('VALORES COMPLETO ', libro_completo)
+            self.contexto['completo'] = libro_completo
+        self.contexto['trailers'] = trailers
+        decoradorGenero = DecoradorGenero(libro, libro.genero_id)
+        decoradorAutor = DecoradorAutor(decoradorGenero, libro.autor_id)
+        decoradorEditorial = DecoradorEditorial(decoradorAutor, libro.editorial_id)
+        listado_de_libros_similares = set(list(itertools.chain.from_iterable(decoradorEditorial.buscar_similares())))
+        listado_de_libros_similares = list(filter(lambda libro2: libro2.id != int(id),listado_de_libros_similares))  # saca el libro de donde estoy parado.
+        self.contexto['libros_similares'] = listado_de_libros_similares
 
     def verificar_estado_para_terminar(self,id_libro,id_perfil):
         self.contexto['error']=None
@@ -1015,6 +1038,13 @@ class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
     def actualizar_contexto(self):
         self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
 
+
+
+class Vista_Historial(View):
+
+    def get(self,request):
+        return render(request,'historial.html')
+
 class Listado_decorado:
     def __init__(self,listado):
         self.listado = listado
@@ -1028,7 +1058,7 @@ class Decorador:
         self.decorado = decorado
         self.libros_del_decorado=None
 
-    def buscar_similares(self):
+    def buscar_similares_1(self): #TODO eliminar este mensaje antes de la demo
         lista = list()
         lista.append(self.libros())
         lista.append(self.decorado.buscar_similares())
@@ -1043,6 +1073,15 @@ class Decorador:
                         lista_a_retornar.append(lista_de_libros[i])
 
         return lista_a_retornar
+
+    def buscar_similares(self):
+        lista = list()
+        lista.append(self.libros())
+        try:
+            lista.append(list(itertools.chain.from_iterable(self.decorado.buscar_similares())))
+        except:
+            pass
+        return lista
 
     '''def buscar_similares_1(self):
         lista = list()
