@@ -185,11 +185,11 @@ class Vista_Visitante(View):
             return redirect('/listado_perfiles/')
         return render(request,'visitante.html', {'objeto_pagina': paginar(request, listado_libros_activos(), 6)})
 
-class Buscar:
-    def __init__(self,request = None):
-        self.request = request
+class Buscar(View):
 
-    def tuplas(self):
+    def get(self,request):
+        contexto={}
+        paginado=None
         if not all(map(lambda x: x == '', self.request.GET.values())):
             if(self.request.user.is_staff):
                 listado_de_libros=Libro.objects.all()
@@ -200,8 +200,10 @@ class Buscar:
             decoradorAutor = DecoradorAutor(decoradorGenero,self.request.GET['autor'])
             decoradorEditorial = DecoradorEditorial(decoradorAutor,self.request.GET['editorial'])
             decoradorTitulo = DecoradorTitulo(decoradorEditorial,self.request.GET['titulo'])
-            return decoradorTitulo.buscar_libro()
-        return ()
+            paginado= paginar(request,decoradorTitulo.buscar_libro(),10)
+        contexto['objeto_pagina'] = paginado
+        contexto['modelo'] = 'libro'
+        return render(request,'listado_libro.html',contexto)
 
 def listado_libros_buscados(request):
     "Se usa por el buscar para deolver el contexto de los libros buscados"
@@ -218,9 +220,6 @@ def listado_libros_buscados(request):
 
 class Home_Admin(View):
     def get(self,request):
-        contexto = listado_libros_buscados(request)
-        if contexto != {}:
-            return render(request, 'listado_libro.html', contexto)
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         return render(request,'home_admin.html',{})
@@ -365,14 +364,11 @@ class Vista_Listado(View):
         self.contexto = {}
 
     def get(self,request):
-        contexto = listado_libros_buscados(request)
-        if contexto != {}:
-            return render(request, 'listado_libro.html', contexto)
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         tuplas = self.retornar_tuplas(request.user.is_staff)
         #self.contexto = {'objeto_pagina': paginar(request,tuplas,10),'modelo': self.modelo_string}
-        self.contexto['objeto_pagina']=paginar(request,tuplas,10)
+        self.contexto['objeto_pagina']=paginar(request,tuplas,2)
         self.contexto['modelo']=self.modelo_string
         #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
         return render(request,self.url,self.contexto)
@@ -389,7 +385,7 @@ class Vista_Listado_Libro(Vista_Listado):
 
     def retornar_tuplas(self,es_staff):
         if es_staff:
-            return super(Vista_listado_libro,self).retornar_tuplas()
+            return super(Vista_Listado_Libro,self).retornar_tuplas()
         return listado_libros_activos()
 
 class Vista_Listado_Novedad(Vista_Listado):
@@ -845,8 +841,7 @@ class Vista_Modificar_Metadatos_Libro(View):
             libro.editorial_id= formulario.cleaned_data['editorial']
             libro.save()
             return redirect('/listado_libro/')
-        formulario.initial["titulo"]= 'hola'
-        return render(request,'carga_atributos_libro.html',{'formulario':formulario,'modelo':'libro'})
+        return render(request,'carga_atributos_libro.html',{'formulario':Formulario_modificar_metadatos_libro(initial = self.__get_valores_inicials(id)),'modelo':'libro','errores':formulario.errors})
 
 class Vista_modificar_fechas_libro(View):
     def __init__(self, *args, **kwargs):
@@ -949,7 +944,7 @@ class Vista_Alta_Capitulo(View):
         self.contexto['formulario'] = formulario
         return render(request,'carga_atributos_libro.html',self.contexto)
 
-class Vista_Lectura_Libro(View):
+class Vista_Lectura_Libro(View):   #TODO validar que el libro este activo
     def __init__(self,*args,**kwargs):
         self.contexto = {}
         self.id = None #El id puede ser el id del libro o el id_capitulo
@@ -981,7 +976,7 @@ class Vista_Lectura_Libro(View):
 
         self.actualizar_contexto()
 
-class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
+class Vista_Lectura_Capitulo(Vista_Lectura_Libro):          #TODO validar que el libro este activo
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
 
@@ -1043,7 +1038,58 @@ class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
 class Vista_Historial(View):
 
     def get(self,request):
-        return render(request,'historial.html')
+        contexto={}
+        #objeto_pagina=paginar(reques,obtener_libros_leidos)
+        #capitulos_leidos=self.obtener_capitulos_leidos(request.session['perfil'])
+        #contexto['objeto_pagina']=objeto_pagina
+        #self.obtener_libros_leidos(request.session['perfil'])
+        return render(request,'historial.html',self.obtener_libros_leidos(request.session['perfil'],request))
+
+    def obtener_capitulos_de_libro(self,request,libro,perfil):
+        libro_actual=Libro.objects.get(id=libro.libro_id)
+        if(not libro_actual.esta_completo):
+            libro_incompleto=Libro_Incompleto.objects.get(libro_id=libro.libro_id)
+            capitulos_del_libro = Capitulo.objects.filter(titulo_id = libro_incompleto.id)
+            capitulos_leidos=Lee_Capitulo.objects.filter(perfil_id=perfil,capitulo_id__in = capitulos_del_libro.values('id')).order_by('-ultimo_acceso')
+            return paginar(request,capitulos_leidos,capitulos_leidos.count())
+        return None
+
+    def obtener_libro(self,libro):
+        return Libro.objects.get(id = libro.libro_id)
+
+    def obtener_libros_leidos(self,id_perfil,request):
+        id_autoincremental = 0
+        contexto = {'libros': []}
+        '''
+                for libro in (Lee_libro.objects.filter(perfil_id = id_perfil).order_by('-ultimo_acceso')):
+                    libro1 = Libro.objects.get(id=libro.libro_id)
+                    contexto['libros'].append({
+                            'libro':  libro1,
+                            'lee_libro': Lee_libro.objects.get(libro_id = libro1.id),
+                            'capitulos': self.obtener_capitulos_de_libro(request,libro,id_perfil)
+                    })
+                contexto['libros'] = paginar(request,contexto['libros'],2)
+        '''
+        contexto={'objeto_pagina':paginar(request,(Lee_libro.objects.filter(perfil_id = id_perfil)),2)}
+        for libro in (Lee_libro.objects.filter(perfil_id = id_perfil).order_by('-ultimo_acceso')):
+            libro1 = Libro.objects.get(id=libro.libro_id)
+            contexto[libro] = self.obtener_capitulos_de_libro(request,libro,id_perfil)
+        contexto['nombre_perfil'] = Perfil.objects.get(id = id_perfil).nombre_perfil
+
+        return contexto
+
+
+
+#contexto={'libro':paginar(request,(Lee_libro.objects.filter(perfil_id = id_perfil)),'libro1':capitulos}
+#contexto[libro1.id] = self.obtener_capitulos_de_libro(request,libro_id,perfil)
+
+
+
+
+
+
+
+
 
 class Listado_decorado:
     def __init__(self,listado):

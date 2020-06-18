@@ -328,15 +328,18 @@ class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
         return valor_titulo_actual
 
     def clean_ISBN(self):
+        isbn = self.cleaned_data['ISBN']
         field_ISBN = self.visible_fields()[1]  # Me devuelve una instancia del Charfield --> campo titulo
-        valor_ISBN_inicial = field_ISBN.initial
-        valor_ISBN_actual = self.cleaned_data['ISBN']
-        if self.__cambio(valor_ISBN_inicial, valor_ISBN_actual):
-            if (Libro.objects.filter(ISBN = valor_ISBN_actual).exists()):
-                print('HOLA entre aca papa ')
-                raise forms.ValidationError('El ISBN ya esta registrado en el sistema')
-        return valor_ISBN_actual
-
+        valor_isbn_inicial = field_ISBN.initial
+        if self.__cambio(valor_isbn_inicial,isbn):
+            if isbn.isdigit():  # verifica si un string tiene unicamente digitos
+                if (len(isbn) not in (10, 13)):
+                    raise forms.ValidationError("Deben ingresarse 10 o 13 dígitos")
+                if Libro.objects.filter(ISBN=isbn).exists():
+                    raise forms.ValidationError("El ISBN ya se encuentra registrado en el sistema")
+            else:
+                raise forms.ValidationError(" En ISBN solo debe ingresarse digitos numericos")
+        return isbn
 
 
 class FormularioTrailer(forms.Form):

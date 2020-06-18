@@ -1,79 +1,140 @@
-<html></html>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!--<!DOCTYPE html>
+<html>
 
-<table class="table table-responsive table-hover">
-  <thead>
-    <tr>
-      <th></th>
-      <th></th>
-      <th align="center">CUMPLIMIENTO (%)</th>
-      <th align="center">NO CUMPLIMIENTO (%)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-1">
-      <td><i class="fa fa-plus" aria-hidden="true"></i></td>
-      <td align="center">COCINAS A GAS</td>
-      <td align="center">63.97</td>
-      <td align="center">36.03</td>
-    </tr>
-  </tbody>
-  <tbody id="group-of-rows-1" class="collapse">
-    <tr>
-      <td></td>
-      <td align="center">Campo / Carpa</td>
-      <td></td>
-      <td align="center">0.40</td>
-    </tr>
-    <tr>
-      <td></td>
-      <td align="center">No hay stock</td>
-      <td></td>
-      <td align="center">7.69</td>
-    </tr>
-    <tr class="clickable" data-toggle="collapse" data-target=".group-of-cau-1">
-      <td></td>
-      <td align="center">Se encuentra en otro lugar exhibido</td>
-      <td></td>
-      <td align="center">25.51</td>
-    </tr>
-    <tr class="group-of-cau-1 collapse">
-      <td></td>
-      <td>Solucionado</td>
-      <td>data 1</td>
-      <td>data 1</td>
-    </tr>
-    <tr class="group-of-cau-1 collapse">
-      <td></td>
-      <td>No Solucionado</td>
-      <td>data 1</td>
-      <td>data 1</td>
-    </tr>
-  </tbody>
-  <tbody>
-    <tr class="clickable" data-toggle="collapse" data-target="#group-of-cau-2">
-      <td></td>
-      <td align="center">Stock en almacén</td>
-      <td></td>
-      <td align="center">2.43</td>
-    </tr>
-  </tbody>
-  <tbody id="group-of-cau-2" class="collapse">
-    <tr>
-      <td></td>
-      <td>Solucionado</td>
-      <td>data 1</td>
-      <td>data 1</td>
-    </tr>
-    <tr>
-      <td></td>
-      <td>No Solucionado</td>
-      <td>data 1</td>
-      <td>data 1</td>
-    </tr>
-  </tbody>
-</table>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  {%for libro in libros %}
+    titulo del libro {{libro.libro.titulo}} {{libro.lee_libro.ultimo_acceso}}<br>
+    {% if libro.capitulos %}
+    <ul>
+      {% for capitulo in libro.capitulos %}
+        <li>{{capitulo.capitulo.capitulo}}  {{capitulo.ultimo_acceso}}</li>
+
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+
+    {%endfor%}
+<br><br>
+
+
+  <table class="table table-responsive table-hover">
+
+    <thead>
+      <tr>
+        <th></th>
+        <th></th>
+        <th align="center">Libro </th>
+        <th align="center">Terminado</th>
+        <th align="center">Ultimo Acceso</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+  </table>
+</body>
 </html>
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+  {% if objeto_pagina %}
+    <ul style="list-style:none; margin-left:500px">
+      <li>
+        {% if objeto_pagina.has_previous %}
+          <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
+        {% endif %}
+        <span>  {{ objeto_pagina.number }}  </span>
+        {% if objeto_pagina.has_next %}
+          <a href="?page={{objeto_pagina.next_page_number}}">  {{objeto_pagina.next_page_number}}  </a>
+        {% endif%}
+      </li>
+    </ul>
+    <div class="container">
+      <h2>Historial de {{nombre_perfil}}</h2>
+      {% for libro in objeto_pagina %}
+      {{libro}}
+        <div class="panel-group">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse{{libro.libro.id}}">Titulo: {{libro.libro.titulo}}                     {% if libro.terminado %} Terminado {% else %} No terminado{% endif %}  </a>
+              </h4>
+            </div>
+            <!-- Los que se colapsan -->
+            {{libro}}
+            {% if libro.libro_id %} <!-- Si tiene capitulos -->
+            <div id="collapse{{libro.libro.id}}" class="panel-collapse collapse">
+
+            </div>
+            {% endif %}
+        </div>
+      {%endfor %}
+  {% else %}
+    <h1> No hay {{modelo}} </h1>
+  {% endif %}
+
+
+  <div class="panel-group">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" href="#collapse2">Collapsible panel</a>
+        </h4>
+      </div>
+      <!-- Los que se colapsan -->
+      <div id="collapse2" class="panel-collapse collapse">
+        <div class="panel-body">Panel Body</div>
+        <div class="panel-footer">Panel Footer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
+<!--
+
+    {% for libro in libros %}
+    {{libro}}
+      <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-{{libro.id}}">
+        <td><i class="fa fa-plus" aria-hidden="true"></i></td>
+        <td align="center">{{libro.libro.titulo}}</td>
+        <td align="center">{{libro.lee_libro.terminado}} </td>
+        <td align="center">{{libro.lee_libro.ultimo_acceso}}</td>
+      </tr>
+      {% if libro.capitulos %}
+      <tbody id="group-of-rows-{{libro.id}}" class="collapse">
+        {% for capitulo in libro.capitulos %}
+        <tr class="clickable" data-toggle="collapse" >
+        </tr>
+
+          <td> </td>
+          <td align="center"> {{capitulo.capitulo.capitulo}} </td>
+          <td> </td>
+          <td align="center"> {{capitulo.ultimo_acceso}} </td>
+          <td> </td>
+        {% endfor %}
+      </tbody>
+      {% endif %}
+    </tbody>
+
+  {% endfor %}
+-->
