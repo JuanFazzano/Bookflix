@@ -58,7 +58,7 @@ urlpatterns = [
     url(r'^lectura_completo/id=(?P<id>\w+)/$',views.Vista_Lectura_Libro_Completo.as_view()),
     url(r'^lectura_capitulo/id=(?P<id>\w+)/$', views.Vista_Lectura_Capitulo.as_view()),
     url(r'^cambiar_contrasena/', views.Cambiar_Contraseña.as_view()),
-    url(r'^historial/',views.Vista_Historial.as_view()),
+    url(r'^historial/pagina=(?P<pagina>\w+)/$',views.Vista_Historial.as_view()),
     url(r'^buscar/', views.Buscar.as_view())
 
 ]

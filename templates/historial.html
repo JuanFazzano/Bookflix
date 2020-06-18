@@ -1,140 +1,39 @@
-<!--<!DOCTYPE html>
-<html>
-
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-</head>
-
-<body>
-  {%for libro in libros %}
-    titulo del libro {{libro.libro.titulo}} {{libro.lee_libro.ultimo_acceso}}<br>
-    {% if libro.capitulos %}
-    <ul>
-      {% for capitulo in libro.capitulos %}
-        <li>{{capitulo.capitulo.capitulo}}  {{capitulo.ultimo_acceso}}</li>
-
-      {% endfor %}
-    </ul>
-    {% endif %}
-
-
-    {%endfor%}
-<br><br>
-
-
-  <table class="table table-responsive table-hover">
-
-    <thead>
-      <tr>
-        <th></th>
-        <th></th>
-        <th align="center">Libro </th>
-        <th align="center">Terminado</th>
-        <th align="center">Ultimo Acceso</th>
-      </tr>
-    </thead>
-
-    <tbody>
-
-  </table>
-</body>
-</html>
--->
-
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends "header.html" %}
+  {% block link %}
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-</head>
-<body>
+  {% endblock %}
 
-  {% if objeto_pagina %}
-    <ul style="list-style:none; margin-left:500px">
-      <li>
-        {% if objeto_pagina.has_previous %}
-          <a href="?page={{objeto_pagina.previous_page_number}}"> {{objeto_pagina.previous_page_number}}    </a>
-        {% endif %}
-        <span>  {{ objeto_pagina.number }}  </span>
-        {% if objeto_pagina.has_next %}
-          <a href="?page={{objeto_pagina.next_page_number}}">  {{objeto_pagina.next_page_number}}  </a>
-        {% endif%}
-      </li>
-    </ul>
+{% block contenido%}
+    {% if es_pagina_inicial %}
+      <a href="#"> {{numero_pagina}} </a>
+    {% else %}
+      <a href="/historial/pagina={{numero_pagina|add:-1}}"> {{numero_pagina}} </a>
+    {% endif %}
+    {% if tiene_siguiente %}
+        <a href="/historial/pagina={{numero_pagina|add:1}}"> {{numero_pagina|add:1}} </a>
+    {% endif %}
+
     <div class="container">
       <h2>Historial de {{nombre_perfil}}</h2>
-      {% for libro in objeto_pagina %}
-      {{libro}}
+      {% for libro in libros %}
         <div class="panel-group">
           <div class="panel panel-default">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <a data-toggle="collapse" href="#collapse{{libro.libro.id}}">Titulo: {{libro.libro.titulo}}                     {% if libro.terminado %} Terminado {% else %} No terminado{% endif %}  </a>
+
+                <a data-toggle="collapse" href="#collapse{{forloop.counter}}">Titulo: {{libro.libro.titulo}}                 Estado:    {% if libro.lee_libro.terminado %} Terminado {% else %} No terminado{% endif %}  Ultimo Acceso: {{libro.lee_libro.ultimo_acceso }}</a>
               </h4>
             </div>
             <!-- Los que se colapsan -->
-            {{libro}}
-            {% if libro.libro_id %} <!-- Si tiene capitulos -->
-            <div id="collapse{{libro.libro.id}}" class="panel-collapse collapse">
-
-            </div>
+            {% if libro.capitulos %} <!-- Si tiene capitulos -->
+              <div id="collapse{{forloop.counter}}" class="panel-collapse collapse">
+                {% for capitulo in libro.capitulos %}
+                <div class="panel-body"> Capitulo {{capitulo.capitulo.capitulo}}</div>
+                {% endfor %}
+              </div>
             {% endif %}
-        </div>
-      {%endfor %}
-  {% else %}
-    <h1> No hay {{modelo}} </h1>
-  {% endif %}
-
-
-  <div class="panel-group">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-          <a data-toggle="collapse" href="#collapse2">Collapsible panel</a>
-        </h4>
-      </div>
-      <!-- Los que se colapsan -->
-      <div id="collapse2" class="panel-collapse collapse">
-        <div class="panel-body">Panel Body</div>
-        <div class="panel-footer">Panel Footer</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
-
-<!--
-
-    {% for libro in libros %}
-    {{libro}}
-      <tr class="clickable" data-toggle="collapse" data-target="#group-of-rows-{{libro.id}}">
-        <td><i class="fa fa-plus" aria-hidden="true"></i></td>
-        <td align="center">{{libro.libro.titulo}}</td>
-        <td align="center">{{libro.lee_libro.terminado}} </td>
-        <td align="center">{{libro.lee_libro.ultimo_acceso}}</td>
-      </tr>
-      {% if libro.capitulos %}
-      <tbody id="group-of-rows-{{libro.id}}" class="collapse">
-        {% for capitulo in libro.capitulos %}
-        <tr class="clickable" data-toggle="collapse" >
-        </tr>
-
-          <td> </td>
-          <td align="center"> {{capitulo.capitulo.capitulo}} </td>
-          <td> </td>
-          <td align="center"> {{capitulo.ultimo_acceso}} </td>
-          <td> </td>
-        {% endfor %}
-      </tbody>
-      {% endif %}
-    </tbody>
-
-  {% endfor %}
--->
+          </div>
+      {% endfor %}
+{% endblock %}

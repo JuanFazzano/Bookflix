@@ -368,7 +368,7 @@ class Vista_Listado(View):
             return redirect('/iniciar_sesion/')
         tuplas = self.retornar_tuplas(request.user.is_staff)
         #self.contexto = {'objeto_pagina': paginar(request,tuplas,10),'modelo': self.modelo_string}
-        self.contexto['objeto_pagina']=paginar(request,tuplas,2)
+        self.contexto['objeto_pagina']=paginar(request,tuplas,10)
         self.contexto['modelo']=self.modelo_string
         #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
         return render(request,self.url,self.contexto)
@@ -1037,12 +1037,11 @@ class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
 
 class Vista_Historial(View):
 
-    def get(self,request):
-        contexto={}
-        #objeto_pagina=paginar(reques,obtener_libros_leidos)
-        #capitulos_leidos=self.obtener_capitulos_leidos(request.session['perfil'])
-        #contexto['objeto_pagina']=objeto_pagina
-        #self.obtener_libros_leidos(request.session['perfil'])
+    def __init__(self):
+        self.pagina = None
+
+    def get(self,request,pagina = None):
+        self.pagina = int(pagina)
         return render(request,'historial.html',self.obtener_libros_leidos(request.session['perfil'],request))
 
     def obtener_capitulos_de_libro(self,request,libro,perfil):
@@ -1060,22 +1059,24 @@ class Vista_Historial(View):
     def obtener_libros_leidos(self,id_perfil,request):
         id_autoincremental = 0
         contexto = {'libros': []}
-        '''
-                for libro in (Lee_libro.objects.filter(perfil_id = id_perfil).order_by('-ultimo_acceso')):
-                    libro1 = Libro.objects.get(id=libro.libro_id)
-                    contexto['libros'].append({
-                            'libro':  libro1,
-                            'lee_libro': Lee_libro.objects.get(libro_id = libro1.id),
-                            'capitulos': self.obtener_capitulos_de_libro(request,libro,id_perfil)
-                    })
-                contexto['libros'] = paginar(request,contexto['libros'],2)
-        '''
-        contexto={'objeto_pagina':paginar(request,(Lee_libro.objects.filter(perfil_id = id_perfil)),2)}
         for libro in (Lee_libro.objects.filter(perfil_id = id_perfil).order_by('-ultimo_acceso')):
             libro1 = Libro.objects.get(id=libro.libro_id)
-            contexto[libro] = self.obtener_capitulos_de_libro(request,libro,id_perfil)
-        contexto['nombre_perfil'] = Perfil.objects.get(id = id_perfil).nombre_perfil
+            contexto['libros'].append({
+                                'libro':  libro1,
+                                'lee_libro': Lee_libro.objects.get(libro_id = libro1.id),
+                                'capitulos': self.obtener_capitulos_de_libro(request,libro,id_perfil)
+                                })
 
+        cantidad_libro = 3
+
+        cantidad_libros_leidos = Lee_libro.objects.filter(perfil_id = id_perfil).count()
+        paginas = (cantidad_libros_leidos // cantidad_libro)+1 if(cantidad_libros_leidos % cantidad_libro)>0 else (cantidad_libros_leidos // cantidad_libro)
+
+        contexto['es_pagina_inicial'] = True if (self.pagina == 1) else False
+        contexto['tiene_siguiente'] = self.pagina   < paginas
+        contexto['libros'] = contexto['libros'][((self.pagina - 1) * cantidad_libro):((self.pagina - 1)* cantidad_libro + cantidad_libro)]
+        contexto['numero_pagina'] = self.pagina
+        contexto['nombre_perfil'] = Perfil.objects.get(id = id_perfil).nombre_perfil
         return contexto
 
 
