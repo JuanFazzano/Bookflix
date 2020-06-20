@@ -971,13 +971,23 @@ class Vista_Lectura_Libro(View):   #TODO validar que el libro este activo
 
     def get(self,request,id = None):
         self.id = id
+        if self.esta_vencido():
+            return redirect(self.url_redirect())
+
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         self.marcar_como_leido(id_perfil = request.session['perfil'])
         return render(request,'lectura_pdf.html',self.contexto)
 
+    def esta_vencido(self):
+        return Libro.objects.get(id = self.id).esta_vencido()
+
+    def url_redirect(self):
+        return '/listado_libro/'
+
     def marcar_existente(self):
         "Hook"
+        pass
 
     def marcar_nuevo(self):
         "Hook"
@@ -999,6 +1009,12 @@ class Vista_Lectura_Libro(View):   #TODO validar que el libro este activo
 class Vista_Lectura_Capitulo(Vista_Lectura_Libro):          #TODO validar que el libro este activo
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
+
+    def url_redirect(self):
+        return '/listado_capitulo/id='+str(Libro_Incompleto.objects.get(id =Capitulo.objects.get(id=self.id).titulo_id).id)
+
+    def esta_vencido(self):
+        return Capitulo.objects.get(id=self.id).esta_vencido()
 
     def marcar_existente(self,id_perfil):
         capitulo_leido = Lee_Capitulo.objects.get(perfil_id=id_perfil,capitulo_id = self.id)

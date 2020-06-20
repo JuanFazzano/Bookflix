@@ -109,6 +109,7 @@ class Libro(models.Model):
         if self.fecha_vencimiento is not None:
            return self.fecha_vencimiento.date() <= datetime.datetime.today().date()
         return False
+
     def esta_lanzado(self):
         if self.fecha_lanzamiento is not None:
            return self.fecha_lanzamiento.date() >= datetime.datetime.today().date()
@@ -166,6 +167,7 @@ class Capitulo(models.Model):
         if self.fecha_vencimiento is not None:
            return self.fecha_vencimiento.date() <= datetime.datetime.today().date()
         return False
+
     def esta_lanzado(self):
         if self.fecha_lanzamiento is not None:
            return self.fecha_lanzamiento.date() <= datetime.datetime.today().date()
