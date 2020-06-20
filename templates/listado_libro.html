@@ -69,7 +69,7 @@
                 {% if libro.fecha_vencimiento is none  %}
                     <td> - </td>
                 {% else %}
-                  <td> {{libro.fecha_vencimiento|date:"D d M Y"}} </td>
+                <td> {{libro.fecha_vencimiento|date:"D d M Y"}} </td>
                 {% endif %}
                 <td>{{libro.ISBN}}</td>
                 <td> <a id="boton_personalizado" href="/detalle_libro/id={{libro.id}}"> Ver </a>     <!--

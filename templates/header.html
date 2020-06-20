@@ -56,6 +56,9 @@
             <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.user}} </li>
             {% if not request.user.is_staff%}
                 <li style="padding-left:10px; display:inline;">
+                    <a href="/historial/pagina=1" style="text-decoration: none; color: white;"> Ver Historial </a>
+                </li>
+                <li style="padding-left:10px; display:inline;">
                     <a href="/listado_novedad/" style="text-decoration: none; color: white;"> Ver novedades </a>
                 </li>
                 <li style="padding-left:10px; display:inline;">

@@ -144,7 +144,7 @@ class Vista_Iniciar_Sesion(View):
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
                 if not usuario.is_staff:
                     request.session['perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).id
-                    return redirect('/listado_perfiles/')
+                    return redirect('/listado_libro/')
                 else:
                     return redirect('/home_admin/')
             else:
@@ -447,6 +447,26 @@ class Vista_Listado_Trailer(Vista_Listado):
         self.modelo  = Trailer
         self.modelo_string = 'trailer'
         super(Vista_Listado_Trailer,self).__init__(*args,**kwargs)
+
+
+class Vista_Listado_Capitulo(Vista_Listado):
+    def __init__(self, *args, **kwargs):
+        self.id_libro=None
+        self.url = 'listado_capitulo.html'
+        self.modelo = Capitulo
+        self.modelo_string = 'capitulo'
+        super(Vista_Listado_Capitulo, self).__init__(*args, **kwargs)
+
+
+    def get(self,request,id):
+        self.id_libro=id
+        return super(Vista_Listado_Capitulo, self).get(request)
+
+
+    def retornar_tuplas(self, es_staff):
+        id_libro_incompleto=Libro_Incompleto.objects.get(libro_id=self.id_libro).id
+        return Capitulo.objects.filter(titulo_id=id_libro_incompleto)
+
 
 class Vista_Formulario_Libro_Completo(View):
     def get(self,request,id=None):
@@ -1063,7 +1083,7 @@ class Vista_Historial(View):
             libro1 = Libro.objects.get(id=libro.libro_id)
             contexto['libros'].append({
                                 'libro':  libro1,
-                                'lee_libro': Lee_libro.objects.get(libro_id = libro1.id),
+                                'lee_libro': Lee_libro.objects.get(libro_id = libro1.id,perfil_id=id_perfil),
                                 'capitulos': self.obtener_capitulos_de_libro(request,libro,id_perfil)
                                 })
 
@@ -1083,11 +1103,6 @@ class Vista_Historial(View):
 
 #contexto={'libro':paginar(request,(Lee_libro.objects.filter(perfil_id = id_perfil)),'libro1':capitulos}
 #contexto[libro1.id] = self.obtener_capitulos_de_libro(request,libro_id,perfil)
-
-
-
-
-
 
 
 

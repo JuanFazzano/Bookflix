@@ -17,7 +17,7 @@
         }
     {% endblock %}
 {% block detalle %}
-    < style="list-style:none;">
+    <ul style="list-style:none;">
         {% if objeto_pagina %}
             {% for libro in objeto_pagina %}
                 <li>
@@ -53,7 +53,7 @@
                          <br> <br>
                     {% else %}
                         <button>
-                            <a href="#"> Ver listado de capítulos</a>
+                            <a href="/listado_capitulo/id={{libro.id}}"> Ver listado de capítulos</a>
                         </button>
                     {% endif %}
                     {% if not error %}

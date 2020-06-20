@@ -6,6 +6,7 @@
   {% endblock %}
 
 {% block contenido%}
+{% if libros %}
     {% if es_pagina_inicial %}
       <a href="#"> {{numero_pagina}} </a>
     {% else %}
@@ -36,4 +37,11 @@
             {% endif %}
           </div>
       {% endfor %}
+{% else %}
+
+    <div class="container">
+        <h2>Historial vacio</h2>
+    </div>
+
+{% endif %}
 {% endblock %}

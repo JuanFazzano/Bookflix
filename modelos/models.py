@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-
+import datetime
 
 class Tarjeta(models.Model):
     nro_tarjeta = models.CharField(max_length = 16)
@@ -105,6 +105,14 @@ class Libro(models.Model):
     def buscar_similares(self):
         pass
 
+    def esta_vencido(self):
+        if self.fecha_vencimiento is not None:
+           return self.fecha_vencimiento.date() <= datetime.datetime.today().date()
+        return False
+    def esta_lanzado(self):
+        if self.fecha_lanzamiento is not None:
+           return self.fecha_lanzamiento.date() >= datetime.datetime.today().date()
+        return False
 
 class Perfil(models.Model):
     class Meta:
@@ -152,6 +160,17 @@ class Capitulo(models.Model):
     fecha_lanzamiento = models.DateTimeField()
     fecha_vencimiento = models.DateTimeField(null=True)
     archivo_pdf = models.FileField(null = False)
+
+
+    def esta_vencido(self):
+        if self.fecha_vencimiento is not None:
+           return self.fecha_vencimiento.date() <= datetime.datetime.today().date()
+        return False
+    def esta_lanzado(self):
+        if self.fecha_lanzamiento is not None:
+           return self.fecha_lanzamiento.date() <= datetime.datetime.today().date()
+        return False
+
 
 class Lee_Capitulo(models.Model):
     class Meta:
