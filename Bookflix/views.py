@@ -144,6 +144,10 @@ class Vista_Iniciar_Sesion(View):
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
                 if not usuario.is_staff:
                     request.session['perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).id
+                    request.session['nombre_perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).nombre_perfil
+
+
+
                     return redirect('/listado_libro/')
                 else:
                     return redirect('/home_admin/')
@@ -1011,8 +1015,8 @@ class Vista_Lectura_Capitulo(Vista_Lectura_Libro):          #TODO validar que el
         super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
 
     def url_redirect(self):
-        return '/listado_capitulo/id='+str(Libro_Incompleto.objects.get(id =Capitulo.objects.get(id=self.id).titulo_id).id)
-
+        #3return '/listado_capitulo/id='+str(Libro.objects.get(id = Libro_Incompleto.objects.get(id =Capitulo.objects.get(id=self.id).titulo_id).libro_id))
+        return '/listado_capitulo/id='+str(Libro_Incompleto.objects.get(id =Capitulo.objects.get(id=self.id).titulo_id).libro_id)
     def esta_vencido(self):
         return Capitulo.objects.get(id=self.id).esta_vencido()
 
@@ -1024,7 +1028,8 @@ class Vista_Lectura_Capitulo(Vista_Lectura_Libro):          #TODO validar que el
         "Lo guardo en la tabla Lee_libro"
         id_libro_incompleto = Capitulo.objects.get(id = capitulo_leido.capitulo_id).titulo_id
         libro_id = Libro_Incompleto.objects.get(id = id_libro_incompleto).libro_id
-        libro_leido = Lee_libro.objects.get(libro_id = libro_id)
+        libro_leido = Lee_libro.objects.get(libro_id = libro_id,perfil_id=id_perfil)
+        print(libro_leido)
         libro_leido.ultimo_acceso = datetime.datetime.now()
         libro_leido.save()
 

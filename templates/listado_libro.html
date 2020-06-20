@@ -46,10 +46,10 @@
     <thead>
       <tr>
         <th>Titulo</th>
-        {% if request.user.is_staff %}
         <th>Genero</th>
         <th>Autor</th>
         <th>Editorial</th>
+        {% if request.user.is_staff %}
         <th>Fecha de Vencimiento</th>
         <th>ISBN</th>
         <th>Opciones</th>
@@ -103,6 +103,9 @@
             {% else %}
             <tbody>
               <td><a href="/detalle_libro/id={{libro.id}}"> {{libro.titulo}}</a></td>
+              <td>{{libro.genero}}</td>
+              <td>{{libro.autor}}</td>
+              <td>{{libro.editorial}}</td>
             </tbody>
             {% endif %}
     </li>

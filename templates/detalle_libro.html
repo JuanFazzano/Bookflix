@@ -75,7 +75,7 @@
 
                      {% endif %}
                      <h2>Trailers del libro</h2>
-                    {% for trailer in trailers %}
+                    {% for trailer in libro.trailers %}
                         <li>
                              {{trailer.titulo}} <a href="/detalle_trailer/id={{trailer.id}}"> Ver trailer</a>
                         </li>

@@ -37,44 +37,66 @@
 
   <div class="row" style=" height: 70px; background-color: #1c1c1f;">
 
-      <div class="col-sm-5">
+      <div class="col-sm-5 col-md-2">
          {% if request.user.is_staff%}
             <a href="/home_admin/">
          {% else %}
-            <a href="/listado_perfiles/" >
+            <a href="/listado_libro/" >
           {% endif %}
               <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; margin-right:2px;">
           </a>
       </div>
-      <div class="col-sm-7">
-        <ul style="list-style:none; padding-top: 20px;">
-            {% if not user.is_authenticated %}
-              <li style="padding-left:10px; display:inline;"> <a href="/iniciar_sesion/" style="text-decoration: none; color: white;">   Iniciar Sesión  </a>   </li>
-              <li style="padding-left:10px; display:inline;"> <a href="/registro/" style="text-decoration: none; color: white;">         Registrarse </a>  </li>
-              <li style="padding-left:10px; display:inline; ">> <a href="#" style="text-decoration: none; color: white;">                Ayuda       </a>  </li>
-            {% else %}
-            <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.user}} </li>
-            {% if not request.user.is_staff%}
-                <li style="padding-left:10px; display:inline;">
-                    <a href="/historial/pagina=1" style="text-decoration: none; color: white;"> Ver Historial </a>
-                </li>
-                <li style="padding-left:10px; display:inline;">
-                    <a href="/listado_novedad/" style="text-decoration: none; color: white;"> Ver novedades </a>
-                </li>
-                <li style="padding-left:10px; display:inline;">
-                    <a href="/listado_libro/" style="text-decoration: none; color: white;"> Ver libros </a>
-                </li>
-                <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none; color: white;">  Ver datos suscripcion     </a>  </li>
-            {% endif %}
-            <li style="padding-left:10px; display:inline;"> <a href="{% url 'logout' %}" style="text-decoration: none; color: white;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
-        </ul>
-      </div>
+      {% if not user.is_authenticated %}
+        <div class="col-md-10">
+            <ul style="list-style:none; padding-top: 20px; padding-left: 700px">
+                <li style="padding-left:10px; display:inline;"> <a href="/iniciar_sesion/" style="text-decoration: none; color: white;">   Iniciar Sesión  </a>   </li>
+                <li style="padding-left:10px; display:inline;"> <a href="/registro/" style="text-decoration: none; color: white;">         Registrarse </a>  </li>
+                <li style="padding-left:10px; display:inline; "> <a href="#" style="text-decoration: none; color: white;">Ayuda </a> </li>
+
+            </ul>
+        </div>
+
+      {% else %}
+                {% if not request.user.is_staff%}
+                <div class="col-sm-7 col-md-4">
+                    <ul style="list-style:none; padding-top: 20px; float:right;">
+
+                        <li style=" display:inline;">
+                            <a href="/listado_trailer/" style="text-decoration: none; color: white;"> Ver trailers </a>
+                        </li>
+                        <li style="padding-left:10px; display:inline;">
+                            <a href="/listado_novedad/" style="text-decoration: none; color: white;"> Ver novedades </a>
+                        </li>
+                        <li style="padding-left:10px; display:inline;">
+                            <a href="/listado_libro/" style="text-decoration: none; color: white;"> Ver libros </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul style="list-style:none; padding-top: 20px; ">
+                        <li style=" padding-left:60px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.session.nombre_perfil}} </li>
+
+                       <li style="padding-left:10px; display:inline;">
+                        <a href="/historial/pagina=1" style="text-decoration: none; color: white;"> Ver Historial </a>
+                        </li>
+                        <li style="padding-left:10px; display:inline;"> <a href="/datos_suscriptor/" style="text-decoration: none; color: white;">  Ver datos suscripcion     </a>  </li>
+                        <li style="padding-left:10px; display:inline;"> <a href="{% url 'logout' %}" style="text-decoration: none; color: white;" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
+                    </ul>
+                </div>
+
+                {% else %}
+                <div class="col-md-10">
+                    <li style="padding-left:10px; display:inline;"> <a href="{% url 'logout' %}" style="text-decoration: none; color: white; padding-top:20px; float: right" onclick="return confirm('Estás seguro?')"> Cerrar Sesión  </a>   </li>
+                </div>
+                {% endif %}
+
       {% endif %}
   </div>
 </div>
-<div class="btn-group dropleft"  style="float:right ;margin:0px ; padding:0px" >
-                    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-search"></i>
+    {% if request.user.is_authenticated %}
+          <div class="btn-group dropleft"  style="float:right ;margin:0px ; padding:0px" >
+              <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fas fa-search"></i>
                     </button>
                         <form method="GET" action="/buscar/" style="padding-right:50px;background:#E50914 " class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                <strong class=dropdown-item" style="padding-left:15px"> Puede buscar libro por los siguientes citerios:</strong>
@@ -84,7 +106,8 @@
                               <input class="dropdown-item" type="search" name="editorial" placeholder="Editorial">
                               <input id="boton_personalizado" style="margin-left:15px" class="dropdown-item" type="submit" value="Buscar">
                         </form>
-</div>
+        </div>
+    {% endif %}
 
 
 

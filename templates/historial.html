@@ -24,14 +24,14 @@
             <div class="panel-heading">
               <h4 class="panel-title">
 
-                <a data-toggle="collapse" href="#collapse{{forloop.counter}}">Titulo: {{libro.libro.titulo}}                 Estado:    {% if libro.lee_libro.terminado %} Terminado {% else %} No terminado{% endif %}  Ultimo Acceso: {{libro.lee_libro.ultimo_acceso }}</a>
+                <a data-toggle="collapse" href="#collapse{{forloop.counter}}"> Titulo: {{libro.libro.titulo}}  &nbsp;&nbsp;&nbsp;&nbsp      &nbsp;&nbsp;&nbsp;&nbsp      Estado:    {% if libro.lee_libro.terminado %}&nbsp;&nbsp;&nbsp;&nbsp      &nbsp;&nbsp;&nbsp;&nbsp Terminado {% else %} No terminado{% endif %}  Ultimo Acceso: {{libro.lee_libro.ultimo_acceso }}</a>
               </h4>
             </div>
             <!-- Los que se colapsan -->
             {% if libro.capitulos %} <!-- Si tiene capitulos -->
               <div id="collapse{{forloop.counter}}" class="panel-collapse collapse">
                 {% for capitulo in libro.capitulos %}
-                <div class="panel-body"> Capitulo {{capitulo.capitulo.capitulo}}</div>
+                <div class="panel-body"> Capitulo {{capitulo.capitulo.capitulo}}   &nbsp;&nbsp;&nbsp;&nbsp      &nbsp;&nbsp;&nbsp;&nbsp  Ultimo acceso     {{capitulo.ultimo_acceso}}</div>
                 {% endfor %}
               </div>
             {% endif %}

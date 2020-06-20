@@ -114,6 +114,8 @@ class Libro(models.Model):
         if self.fecha_lanzamiento is not None:
            return self.fecha_lanzamiento.date() >= datetime.datetime.today().date()
         return False
+    def trailers(self):
+        return Trailer.objects.filter(libro_asociado_id=self.id)
 
 class Perfil(models.Model):
     class Meta:
@@ -172,7 +174,6 @@ class Capitulo(models.Model):
         if self.fecha_lanzamiento is not None:
            return self.fecha_lanzamiento.date() <= datetime.datetime.today().date()
         return False
-
 
 class Lee_Capitulo(models.Model):
     class Meta:

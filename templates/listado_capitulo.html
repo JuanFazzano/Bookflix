@@ -21,8 +21,9 @@
     {% for capitulo in objeto_pagina %}
         {% if capitulo.esta_lanzado %}
             {% if capitulo.esta_vencido %}
-                capitulo: {{capitulo.capitulo}} (capitulo vencido) <br>
+                capitulo: {{capitulo.capitulo}} el capitulo vencio el {{capitulo.fecha_vencimiento|date:"D d M Y"}} <br>
             {% else %}
+                {{capitulo.id}}
                 <a  href="/lectura_capitulo/id={{capitulo.id}} ">capitulo: {{capitulo.capitulo}} </a><br>
             {%endif%}
         {% else %}
