@@ -63,16 +63,19 @@ class FormularioRegistro(forms.Form):
         ('premium','Premium(4 perfiles maximo)')
     ]
 
-    Nombre = forms.CharField(max_length = 25)
-    Apellido =forms.CharField(max_length = 25)
-    Email = forms.EmailField(max_length = 254)
-    Contrasena = forms.CharField(widget=forms.PasswordInput,max_length = 20)
-    DNI = forms.CharField(max_length = 8)
-    Numero_de_tarjeta = forms.CharField(max_length = 16)
+    Nombre = forms.CharField(max_length = 25, widget=forms.TextInput(attrs={'class':'form-control','type':'Nombre'}))
+
+    Apellido =forms.CharField(max_length = 25, widget=forms.TextInput(attrs={'class':'form-control'}))
+    Email = forms.EmailField(max_length = 254, widget=forms.TextInput(attrs={'class':'form-control'}))
+    Contrasena = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}),max_length = 20)
+    DNI = forms.CharField(max_length = 8, widget=forms.TextInput(attrs={'class':'form-control'}))
+    Numero_de_tarjeta = forms.CharField(max_length = 16, widget=forms.TextInput(attrs={'class':'form-control'}))
+
     Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]))
-    Empresa= forms.CharField(max_length = 254)
-    Codigo_de_seguridad = forms.CharField(max_length = 3)
-    Suscripcion=forms.CharField(widget=forms.Select(choices=tipo_suscripcion))
+
+    Empresa= forms.CharField(max_length = 254, widget=forms.TextInput(attrs={'class':'form-control'}))
+    Codigo_de_seguridad = forms.CharField(max_length=3, widget=forms.TextInput(attrs={'class':'form-control'}))
+    Suscripcion=forms.CharField(widget=forms.Select(choices=tipo_suscripcion,attrs={'class':'form-control'}))
 
     def clean_Email(self):
         email = self.cleaned_data['Email']
@@ -179,7 +182,7 @@ class FormularioCargaFechas(forms.Form):
         self.fecha_vencimiento_inicial=vencimiento
         self.fecha_lanzamiento_inicial = lanzamiento
         self.fields['fecha_de_lanzamiento'] =forms.DateField(widget=forms.DateInput(attrs={'type':'date','value': lanzamiento}))
-        self.fields['fecha_de_vencimiento'] =forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'value': vencimiento}))
+        self.fields['fecha_de_vencimiento'] =forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'value': vencimiento}), required=False)
     '''fecha_de_lanzamiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True)
     fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]),show_hidden_initial=True,required=False)
     '''

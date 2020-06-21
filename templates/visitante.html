@@ -1,27 +1,52 @@
 {% extends "header.html" %}
-{% load static %}
-{% block link %}
-   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-{% endblock%}
-
-{% block estilos %}
-    img {
-        width: 250px;
-    }
-{% endblock %}
 
 {% block contenido %}
-  <div>
-      {% if objeto_pagina %}
-        <ul style="list-style:none;">
-          {% for libro in objeto_pagina %}
-          <li>
-              <label> Titulo </label>
-              <a href="/registro/"> {{libro.titulo}} </a>
-          </li>
+
+<body background="/static/fondo.jpg">
+
+{% if objeto_pagina %}
+
+<br><br>
+
+<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+        <li data-target="#carouselExampleIndicators" data-slide-to="1" class="active"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+    </ol>
+
+    <div class="carousel-inner">
+        {% for libro in objeto_pagina %}
+            {% if forloop.counter == 1 %}
+                <div class="carousel-item active"  align="center">
+                    <a href="/registro/" style="color:white">
+                        <img class="d-block w-"  src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpg{% endif %}" style="width:214; height:340"/>
+                        {{libro.titulo}} de {{libro.autor}}
+                    </a>
+                </div>
+            {% else %}
+                <div class="carousel-item"  align="center">
+                    <a href="/registro/" style="color:white">
+                        <img class="d-block w-" alt="{{libro.titulo}} de {{libro.autor}}" src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpg{% endif %}" style="width:214; height:340"/>
+                        {{libro.titulo}} de {{libro.autor}}
+                    </a>
+                </div>
+            {% endif %}
         {% endfor %}
-        </ul>
-      {% endif %}
-  </div>
+    </div>
+
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+
+</div>
+
+{% endif %}
+</body>
+
 {% endblock %}

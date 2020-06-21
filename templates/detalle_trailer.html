@@ -13,10 +13,24 @@
                 </li>
 
                 {% if trailer.libro_asociado %}
-                  <li>
-                      <h1>Asociado a libro:</h1>
-                      <a href="/detalle_libro/id={{trailer.libro_asociado.id}}"> {{trailer.libro_asociado}} </a>
-                  </li>
+                    <h3>Asociado a libro:</h3>
+                    {% if trailer.libro_asociado.esta_activo %}
+                        <li>
+                            <a href="/detalle_libro/id={{trailer.libro_asociado.id}}" class="list-group-item list-group-item-action"> {{trailer.libro_asociado}} </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="#" class="list-group-item list-group-item-action disabled"> {{trailer.libro_asociado}}
+                                {% if trailer.libro_asociado.esta_vencido %}
+                                    (libro vencido)
+                                {% else %}
+                                    sera lanzado el {{trailer.libro_asociado.fecha_lanzamiento|date:"D d M Y"}}
+                                {% endif %}
+                            </a>
+                        </li>
+
+
+                    {% endif %}
                 {% endif %}
 
                 {% if trailer.video %}

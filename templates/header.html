@@ -44,7 +44,8 @@
             <a href="/listado_libro/" >
           {% endif %}
               <img src="{% static 'bookflix.png' %}" style="width:200px; padding-top:10px; margin-right:2px;">
-          </a>
+              <button type="button" class="btn btn-outline-light">Volver</button>
+            </a>
       </div>
       {% if not user.is_authenticated %}
         <div class="col-md-10">
@@ -74,7 +75,7 @@
                 </div>
                 <div class="col-md-6">
                     <ul style="list-style:none; padding-top: 20px; ">
-                        <li style=" padding-left:60px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.session.nombre_perfil}} </li>
+                        <li style=" padding-left:60px; display:inline;"> <a href="#" style="text-decoration: none;color:white;"> {{request.session.nombre_perfil}}</a> </li>
 
                        <li style="padding-left:10px; display:inline;">
                         <a href="/historial/pagina=1" style="text-decoration: none; color: white;"> Ver Historial </a>

@@ -1,112 +1,102 @@
 {% extends "header.html" %}
 {% load i18n admin_urls static admin_modify %}
 
-<!DOCTYPE html>
-<html>
-<head>
+{% block contenido %}
+<div>
+<table class="table table-striped">
+    <div class="p-3 mb-2 bg-danger text-white"><h4> Datos personales</h4></div>
+  <tbody>
+    <tr>
+        <th scope="row">Nombre:</th>
+        <td>{{nombre}}</td>
+    </tr>
 
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    {% block link %}
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    {% endblock%}
-    {% block estilos %}
-        #boton_personalizado{
-            text-decoration: none;
-            padding: 4px;
-            font-weight: 400;
-            font-size: 12px;
-            color: #ffffff;
-            background-color: black;
-            border-radius: 4px;
-            font-family: "Roboto";
-        }
-    {% endblock %}
-    <title>Datos de la cuenta</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <script src='main.js'></script>
+    <tr>
+        <th scope="row">Apellido:</th>
+        <td>{{apellido}}</td>
+    </tr>
 
-</head>
-<body>
-  {% block listado_opciones %}
-  <div class="col-sm-5">
-    <ul style="list-style:none; padding-top: 20px;">
-      <li style=" padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none;color:white;">                                                            {{request.user}}          </a>  </li>
-      <li style="padding-left:10px; display:inline;"> <a href="#" style="text-decoration: none; color:white;">                                                            Ver datos suscripcion     </a>  </li>
-      <li style="padding-left:10px; display:inline;"> <a href="/" style="text-decoration: none; color:white;" onclick="return confirm('Estás seguro?')">                  Cerrar Sesión             </a>  </li>
-    </ul>
-  </div>
+    <tr>
+        <th scope="row">Email:</th>
+        <td>{{email}}</td>
+    </tr>
 
-  {% endblock %}
-    {% block contenido %}
-    <!-- Seccion Datos Personales -->
-    <section>
-        <h2> Datos Personales </h2>
-        <table style="width:50%">
-            <tr>
-                <td> Nombre: {{nombre}} </td>
-            </tr>
-            <tr>
-                <td> Apellido: {{apellido}} </td>
-            </tr>
-            <tr>
-                <td> Email: {{email}} </td>
-            </tr>
-            <tr>
-                <td> DNI: {{dni}}</td>
-            </tr>
-            <tr>
-                <td> Fecha Suscripcion: {{fecha_suscripcion}} </td>
-            </tr>
-            <tr>
-                <td> Tipo Suscripcion: {{tipo_suscripcion.capitalize}} </td>
-            </tr>
-                <!--  DATOS PERFILES -->
-            <tr>
-                <td> Numero de tarjeta: {{numero_tarjeta}} </td>
-            </tr>
-            <tr>
-                <td> Fecha Vencimiento: {{fecha_vencimiento}} </td>
-            </tr>
-            <tr>
-                <td> Empresa de tarjeta: {{empresa}} </td>
-            </tr>
-        </table>
-        <!-- ------------------------------------------------------->
-      </section>
+    <tr>
+        <th scope="row">DNI:</th>
+        <td>{{dni}}</td>
+    </tr>
 
+    <tr>
+        <th scope="row">Fecha de suscripción:</th>
+        <td>{{fecha_suscripcion}}</td>
+    </tr>
+
+    <tr>
+        <th scope="row">Tipo de suscripción:</th>
+        <td>{{tipo_suscripcion.capitalize}}</td>
+    </tr>
+
+    </tbody>
+</table>
+</div>
+
+
+
+    <!-- Cambiar contraseña y datos personales ------------------------------------------------->
     <hr>
+    <div>
+        <a href="/modificar_datos_personales/" class="badge badge-secondary">Cambiar Datos Personales</a>
+        <a href="/cambiar_contrasena/" class="badge badge-secondary"> Cambiar Contraseña </a>
+    </div>
+
+
+
+
+
+
+<div>
+<table class="table table-striped">
+    <div class="p-3 mb-2 bg-danger text-white"><h4> Datos de la Tarjeta</h4></div>
+  <tbody>
+    <tr>
+        <th scope="row">Numero de tarjeta:</th>
+        <td>{{numero_tarjeta}}</td>
+    </tr>
+
+    <tr>
+        <th scope="row">Fecha de vencimiento:</th>
+        <td>{{fecha_vencimiento|date:"M Y"}}</td>
+    </tr>
+
+    <tr>
+        <th scope="row">Empresa:</th>
+        <td>{{empresa}}</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
 
     <!-- Seccion de perfiles -------------------------->
-    <div>
-      <h2> Perfiles </h2>
-      <a id="boton_personalizado" href="#" style="margin-left:10px;"> Crear perfil </a>
-      <table>
-        {% for perfil in perfiles %}
-        <tr>
-            <td style="padding-top:10px;"> {{perfil}} </td>
-            <td>
-                <a id="boton_personalizado" href="#" style="margin-left:10px;"> Modificar </a>
-                <a id = "boton_personalizado" href="#" class="boton_personalizado" style="margin-left: 10px;"> Eliminar </a>
-            </td>
-        </tr>
-        {%endfor %}
-      </table>
-    </div>
-    <!-- ------------------------------------------------->
+<div class="p-3 mb-2 bg-dark"><h4 style="color:red; black:white"> Perfiles </h4></div>
 
-    <br> <br>
+    <a href="#" class="badge badge-success"> Crear perfil </a>
 
-    <hr>
-    <div>
-        <a  href="/modificar_datos_personales/"> Cambiar Datos Personales </a>
-        <br> <br>
-        <a href="/cambiar_contrasena/"> Cambiar Contraseña </a>
-    </div>
+    <ul style="list-style:none">
+    {% for perfil in perfiles %}
+        <li style="padding-left:10px; display:inline">
+            <div class="card" style="width: 150;">
+                <img  class="card-img-top" id="imagen" src="{% static 'avatar.jpeg' %}" alt="" style="width:150; height:150">
+                <div class="card-body">
+                    <h6>{{perfil}}</h6>
+                    <a href="" class="badge badge-secondary">Modificar</a>
+                    <a href="" class="badge badge-danger">Eliminar</a>
+                </div>
+            </div>
+        </li>
+    {%endfor %}
+    </ul>
 
-    <footer></footer>
+
     {% endblock %}
-</body>
-</html>
+

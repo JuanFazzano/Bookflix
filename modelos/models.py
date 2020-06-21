@@ -112,8 +112,12 @@ class Libro(models.Model):
 
     def esta_lanzado(self):
         if self.fecha_lanzamiento is not None:
-           return self.fecha_lanzamiento.date() >= datetime.datetime.today().date()
+           return self.fecha_lanzamiento.date() <= datetime.datetime.today().date()
         return False
+
+    def esta_activo(self):
+        return self.esta_lanzado() and not self.esta_vencido()
+
     def trailers(self):
         return Trailer.objects.filter(libro_asociado_id=self.id)
 
@@ -216,6 +220,6 @@ class Trailer(models.Model):
         if self.descripcion == '':
             raise ValidationError('el campo descripcion es obligatorio')
 
-
     def __str__(self):
         return self.titulo
+

@@ -14,11 +14,11 @@
   </thead>
 
   <tbody>
-  {% for genero in objeto_pagina %}
+  {% for autor in objeto_pagina %}
   <tr>
-      <th scope="row">{{genero.nombre}}</th>
+      <th scope="row">{{autor.nombre}}</th>
       <td>
-          <a href="/modificar_gener/id={{autor.id}}/" class="badge badge-secondary"> Modificar </a>
+          <a href="/modificar_autor/id={{autor.id}}/" class="badge badge-secondary"> Modificar </a>
           <a href="#" class="badge badge-danger"> Eliminar </a>
       </td>
 
