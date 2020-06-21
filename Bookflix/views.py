@@ -464,6 +464,7 @@ class Vista_Listado_Capitulo(Vista_Listado):
 
     def get(self,request,id):
         self.id_libro=id
+        self.contexto['libro'] = Libro.objects.get(id=(Libro_Incompleto.objects.get(libro_id=self.id_libro).libro_id))
         return super(Vista_Listado_Capitulo, self).get(request)
 
 

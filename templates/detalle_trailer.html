@@ -1,24 +1,24 @@
 {% extends "detalle.html" %}
 {% load static %}
 {% block detalle %}
-    <ul style="list-style:none;">
+    <ul style="list-style:none">
         {% if objeto_pagina %}
             {% for trailer in objeto_pagina %}
                 <li>
-                    <h1> Titulo </h1> {{trailer.titulo}}
+                    <h1> {{trailer.titulo}} </h1>
                 </li>
+
                 <li>
-                    <h1> Descripcion</h1>
-                    {{trailer.descripcion}}
+                    <p class="font-weight-light">{{trailer.descripcion}}.</p>
                 </li>
+
                 {% if trailer.libro_asociado %}
                   <li>
-
                       <h1>Asociado a libro:</h1>
                       <a href="/detalle_libro/id={{trailer.libro_asociado.id}}"> {{trailer.libro_asociado}} </a>
-
                   </li>
                 {% endif %}
+
                 {% if trailer.video %}
                 <li>
                     <video width="320" height="240" controls>
@@ -26,7 +26,9 @@
                     </video>
                   </li>
                 {% endif %}
-        {% endfor %}
+
+            {% endfor %}
         {% endif %}
+    </ul>
 
 {% endblock %}

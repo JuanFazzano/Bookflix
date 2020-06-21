@@ -1,17 +1,18 @@
 {% extends "detalle.html" %}
 {% load static %}
 {% block detalle %}
-    <ul style="list-style:none;">
+    <ul style="list-style:none">
         {% if objeto_pagina %}
-            {% for novedad in objeto_pagina %}
-                <li> <h1> Novedad {{novedad.titulo}} </h1> </li>
-                {% if novedad.descripcion %}
-                  <li> Descripcion: {{novedad.descripcion }} </li>
-                {% endif %}
-                {% if novedad.foto %}
-                  <li> <img src="{{novedad.foto.url}}"> </li>
-                {% endif %}
-            {% endfor %}
+        {% for novedad in objeto_pagina %}
+            <li> <h1> {{novedad.titulo}} </h1> </li>
+            {% if novedad.descripcion %}
+                <li><p class="font-weight-light">{{novedad.descripcion}}.</p></li>
+            {% endif %}
+            {% if novedad.foto %}
+                <li> <img src="{{novedad.foto.url}}"> </li>
+            {% endif %}
+        {% endfor %}
 
         {% endif %}
+    </ul>
 {% endblock %}

@@ -1,18 +1,5 @@
 {% extends "header.html" %}
 
-    {% block estilos %}
-        #boton_personalizado{
-          text-decoration: none;
-          padding: 10px;
-          font-weight: 400;
-          font-size: 12px;
-          color: #ffffff;
-          background-color: black;
-          border-radius: 4px;
-          font-family: "Roboto";
-        }
-
-    {% endblock %}
 
     {% block contenido %}
       {% if request.user.is_staff %}
@@ -36,7 +23,14 @@
         </ul>
 
       {% else %}
-        <h1> No hay {{modelo}} </h1>
+
+        <div class="jumbotron jumbotron-fluid">
+          <div class="container">
+            <h1 class="display-4" style="padding-left:35%">No hay {{modelo}}</h1>
+          </div>
+        </div>
+
+
       {% endif %}
     {% endblock %}
 

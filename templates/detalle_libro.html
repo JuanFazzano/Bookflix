@@ -1,94 +1,102 @@
 {% extends "detalle.html" %}
 {% load static %}
-  {% block estilos %}
-        #boton_personalizado{
-          text-decoration: none;
-          padding: 10px;
-          font-weight: 400;
-          font-size: 12px;
-          color: #ffffff;
-          background-color: black;
-          border-radius: 4px;
-          font-family: "Roboto";
-        }
-        #imagen_detalle {
-            width:250px;
-            height: 250px;
-        }
-    {% endblock %}
 {% block detalle %}
-    <ul style="list-style:none;">
-        {% if objeto_pagina %}
-            {% for libro in objeto_pagina %}
-                <li>
-                    <h1> Titulo: </h1> {{libro.titulo}}
-                </li>
-                <li>
-                    <h1> ISBN: </h1> {{libro.ISBN}}
-                </li>
-                {% if libro.descripcion %}
-                <li>
-                    <h1> Descripcion </h1> {{libro.descripcion}}
-                </li>
-                {% endif %}
 
-                <li>
-                    <h1> Autor </h1> {{libro.autor}}
-                </li>
-                <li>
-                    <h1> Editorial </h1> {{libro.editorial}}
-                </li>
-                <li>
-                    <h1> Genero </h1> {{libro.genero}}
-                </li>
-                {% if libro.foto %}
-                <li>
-                   <img id="imagen_detalle" src="{{MEDIA_URL}}{{libro.foto.url}}" />
-                </li>
-                <br>
-                {% endif %}
-                {% if not request.user.is_staff %}
-                    {% if libro.esta_completo %}
-                         <a id="boton_personalizado" href="/lectura_completo/id={{libro.id}}"> Leer libro completo</a>
-                         <br> <br>
-                    {% else %}
-                        <button>
-                            <a href="/listado_capitulo/id={{libro.id}}"> Ver listado de capítulos</a>
-                        </button>
-                    {% endif %}
-                    {% if not error %}
-                        <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
-                            <input type="submit" value="marcar como terminado" >
-                        </form>
-                     {%else%}
+{% if objeto_pagina %}
+{% for libro in objeto_pagina %}
+<div class="container">
+    <div class="row">
 
-                               <button onclick="alerta_error()" id="terminar" value="{{error}}">
-                                   marcar como terminado
-                             </button>
 
-                            <script>
-                                    function alerta_error(){
-                                        let error = document.getElementById('terminar').value;
-                                        alert(error);
-                                    }
-                            </script>
+        <div class="col-lg-4 ">
 
-                     {% endif %}
-                     <h2>Trailers del libro</h2>
-                    {% for trailer in libro.trailers %}
-                        <li>
-                             {{trailer.titulo}} <a href="/detalle_trailer/id={{trailer.id}}"> Ver trailer</a>
-                        </li>
-                    {% endfor %}
+                <img src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}"style="width:214; height:340"/>
 
-                    <h2> Libros similares que podrian gustarte</h2>
-                    {% for libro_similar in libros_similares %}
-                        <li>
-                            {{libro_similar.titulo}} <a href="/detalle_libro/id={{libro_similar.id}}"> Ver libro_similar</a>
-                        </li>
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
 
+        </div>
+
+
+        <div class="col-lg-8">
+        <ul style="list-style:none">
+            <li><h1>{{libro.titulo}}</h1></li>
+            <li><h6>{{libro.autor}}</h6></li>
+            {% if libro.descripcion %}
+            <li><p class="font-weight-light">{{libro.descripcion}}.</p></li>
+            {% endif %}
+            <li>
+            <table class="table table-hover table-dark">
+                <tbody>
+                <tr>
+                    <td>ISBN:</td>
+                    <td>{{libro.ISBN}}</td>
+                </tr>
+
+                <tr>
+                    <td>Editorial:</td>
+                    <td>{{libro.editorial}}</td>
+                </tr>
+
+                <tr>
+                    <td>Genero:</td>
+                    <td>{{libro.genero}}</td>
+                </tr>
+                </tbody>
+            </table>
+            </li>
+        </ul>
+        </div>
+    </div>
+</div>
+
+
+<br>
+    {% if not request.user.is_staff %}
+        {% if libro.esta_completo %}
+            <button type="button" class="btn btn-dark">
+                <a href="/lectura_completo/id={{libro.id}}" style="color:white"> Leer libro completo</a>
+            </button>
+        {% else %}
+                <button type="button" class="btn btn-dark">
+                    <a href="/listado_capitulo/id={{libro.id}}" style="color:white"> Ver listado de capítulos</a>
+                </button>
         {% endif %}
+    {% if not error %}
+        <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
+            <input type="submit" value="marcar como terminado" >
+        </form>
+    {%else%}
+        <button type="button" class="btn btn-light" onclick="alerta_error()" id="terminar" value="{{error}}" >
+            <a href="#" style="color:black"> Marcar como terminado</a>
+        </button>
+
+        <script>
+            function alerta_error(){
+                let error = document.getElementById('terminar').value;
+                alert(error);
+            }
+        </script>
+
+    {% endif %}
+
+    <br>
+    <hr>
+
+    <div class="list-group">
+        <div class="p-3 mb-2 bg-danger text-white"><h2>Trailers del libro</h2></div>
+        {% for trailer in trailers %}
+            <a href="/detalle_trailer/id={{trailer.id}}" class="list-group-item list-group-item-action">{{trailer.titulo}}</a>
+        {% endfor %}
+    </div>
+
+    <div class="list-group">
+        <div class="p-3 mb-2 bg-danger text-white"><h2> Libros similares que podrian gustarte</h2></div>
+        {% for libro_similar in libros_similares %}
+            <a href="/detalle_libro/id={{libro_similar.id}}" class="list-group-item list-group-item-action">Ver {{libro_similar.titulo}}</a>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
 {% endblock %}

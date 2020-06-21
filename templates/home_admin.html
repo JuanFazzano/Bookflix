@@ -1,27 +1,12 @@
 {% extends "header.html"%}
+{% block contenido %}
 
-
-
-{% block estilos %}
-        #boton_personalizado{
-          text-decoration: none;
-          padding: 10px;
-          font-weight: 400;
-          font-size: 12px;
-          color: #ffffff;
-          background-color: black;
-          border-radius: 4px;
-          font-family: "Roboto";
-        }
+<div class="list-group">
+    <a  href="/listado_trailer/" class="list-group-item list-group-item-action">Ver listado Trailers</a>
+    <a href="/listado_novedad/" class="list-group-item list-group-item-action">Ver listado Novedades</a>
+    <a href="/listado_libro/" class="list-group-item list-group-item-action">Ver listado Libros</a>
+    <a href="/listado_autor/" class="list-group-item list-group-item-action">Ver listado Autores</a>
+    <a href="/listado_genero/" class="list-group-item list-group-item-action">Ver listado Genero</a>
+    <a href="/listado_editorial/" class="list-group-item list-group-item-action">Ver listado Editoriales</a>
+</div>
 {% endblock %}
-
-      {% block contenido %}
-        <ul style="margin-top: 10px">
-          <li style="margin-left:60px; display:inline;"> <a id="boton_personalizado"   href="/listado_trailer/">   Ver listado Trailer        </a> </li>
-            <li style="margin-top: 10px; margin-left:120px; display:inline;"> <a id="boton_personalizado"   href="/listado_novedad/">   Ver listado Novedades        </a> </li>
-            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado"   href="/listado_libro/">      Ver listado Libros           </a> </li>
-            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_autor/">     Ver listado Autores          </a> </li>
-            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_genero/">     Ver listado Generos          </a> </li>
-            <li style="margin-top: 10px; margin-left:70px; display:inline;"> <a id="boton_personalizado" href="/listado_editorial/"> Ver listado Editoriales      </a> </li>
-        </ul>
-      {% endblock %}

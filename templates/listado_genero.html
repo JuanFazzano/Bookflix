@@ -1,33 +1,31 @@
 {% extends "listado.html" %}
-{% block estilos %}
-      #boton_personalizado{
-        text-decoration: none;
-        top:50px;
-        padding: 5px;
-        font-weight: 400;
-        font-size: 12px;
-        color: #ffffff;
-        background-color: black;
-        border-radius: 4px;
-        font-family: "Roboto";
-        margin-left: 5px;
-      }
-{% endblock %}
 {% block agregar_atributo %}
-  <p style="margin-top: 10px";> <a id="boton_personalizado"  href="/cargar_genero/"> Agregar Genero </a></p>
+    <a href="/cargar_genero/" class="badge badge-success" style="padding:20; font-size:20">Agregar Genero</a>
 {% endblock %}
+
 {% block listado %}
-    <table>
-    {% for genero in objeto_pagina %}
-      <tr>
-        <td style="padding-top: 10px">
-          {{genero.nombre}}
-        </td>
-        <td>
-            <a id="boton_personalizado" href="/modificar_genero/id={{genero.id}}"> Modificar </a>
-            <a id="boton_personalizado" href="#"> Eliminar </a>
-        </td>
-      </tr>
-      {% endfor %}
-    </table>
+<table class="table">
+
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Nombre</th>
+      <th scope="col">Opciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  {% for genero in objeto_pagina %}
+  <tr>
+      <th scope="row">{{genero.nombre}}</th>
+      <td>
+          <a href="/modificar_genero/id={{genero.id}}/" class="badge badge-secondary"> Modificar </a>
+          <a href="#" class="badge badge-danger"> Eliminar </a>
+      </td>
+
+    </tr>
+  {% endfor %}
+
+  </tbody>
+</table>
+
 {% endblock %}
