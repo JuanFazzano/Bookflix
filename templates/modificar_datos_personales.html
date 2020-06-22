@@ -8,17 +8,6 @@
         label{
             font-family: Arial;
         }
-        #boton_personalizado{
-            text-decoration: none;
-            width: 399px;
-            height: 35px;
-            font-weight: 400;
-            font-size: 18px;
-            color: #ffffff;
-            background-color: black;
-            border-radius: 4px;
-            font-family: 'Roboto'";
-        }
         #id_Nombre,#id_Apellido,#id_Email,#id_Contrasena,#id_Numero_de_Tarjeta,#id_Fecha_de_vencimiento,
         #id_DNI,#id_Empresa,#id_Codigo_de_seguridad,#id_Suscripcion{
             display: block;
@@ -32,7 +21,8 @@
         <form method="POST">
             {% csrf_token %}
             {{formulario.as_p }}
-            <input id="boton_personalizado" type="submit" value= "Enviar">
+            <input class="btn btn-success" type="submit" value= "Enviar">
+            <a href="/datos_suscriptor/" class="badge badge-danger" style="padding:13px"> Cancelar</a>
        </form>
     </div>
    {% endblock %}

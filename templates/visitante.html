@@ -9,24 +9,20 @@
 <br><br>
 
 <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
-    <ol class="carousel-indicators">
-        <li data-target="#carouselExampleIndicators" data-slide-to="1" class="active"></li>
-        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
-    </ol>
 
     <div class="carousel-inner">
         {% for libro in objeto_pagina %}
             {% if forloop.counter == 1 %}
                 <div class="carousel-item active"  align="center">
                     <a href="/registro/" style="color:white">
-                        <img class="d-block w-"  src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpg{% endif %}" style="width:214; height:340"/>
+                        <img class="d-block w-"  src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}" style="width:214; height:340"/>
                         {{libro.titulo}} de {{libro.autor}}
                     </a>
                 </div>
             {% else %}
                 <div class="carousel-item"  align="center">
                     <a href="/registro/" style="color:white">
-                        <img class="d-block w-" alt="{{libro.titulo}} de {{libro.autor}}" src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpg{% endif %}" style="width:214; height:340"/>
+                        <img class="d-block w-" alt="{{libro.titulo}} de {{libro.autor}}" src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}" style="width:214; height:340"/>
                         {{libro.titulo}} de {{libro.autor}}
                     </a>
                 </div>

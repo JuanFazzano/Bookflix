@@ -334,9 +334,11 @@ def paginar(request,tuplas,cantidad_maxima_paginado=1):
 
 class Vista_Detalle(View):
     def __init__(self,*args, **kwargs):
+        self.request=None
         self.contexto = {'modelo': self.modelo_string}
 
     def get(self,request,id = None):
+        self.request=request
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         print(request.GET)
@@ -385,7 +387,6 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo = Libro
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
-        #TODO agregar fecha de vencimiento (Checkear si está por capitulos o completo)
 
     def retornar_tuplas(self,es_staff):
         if es_staff:
@@ -470,7 +471,7 @@ class Vista_Listado_Capitulo(Vista_Listado):
 
     def retornar_tuplas(self, es_staff):
         id_libro_incompleto=Libro_Incompleto.objects.get(libro_id=self.id_libro).id
-        return Capitulo.objects.filter(titulo_id=id_libro_incompleto)
+        return Capitulo.objects.filter(titulo_id=id_libro_incompleto).order_by('capitulo')
 
 
 class Vista_Formulario_Libro_Completo(View):
@@ -757,14 +758,15 @@ class Vista_Detalle_libro(Vista_Detalle):
         self.contexto ['libros_similares'] = listado_de_libros_similares
 
     def cargar_diccionario(self, id):
-        trailers = Trailer.objects.filter(libro_asociado_id=id).values('titulo', 'id')
+        trailers = Trailer.objects.filter(libro_asociado_id=id)
         libro = Libro.objects.filter(id=id)[0]
         if libro.esta_completo:
             # libro_completo =  Libro_Completo.objects.values().filter(libro_id = libro.id)
             libro_completo = Libro_Completo.objects.get(libro_id=libro.id)
             print('VALORES COMPLETO ', libro_completo)
             self.contexto['completo'] = libro_completo
-        self.contexto['trailers'] = trailers
+        self.contexto['trailers'] = paginar(self.request,trailers,10)
+        print('pagine bien')
         decoradorGenero = DecoradorGenero(libro, libro.genero_id)
         decoradorAutor = DecoradorAutor(decoradorGenero, libro.autor_id)
         decoradorEditorial = DecoradorEditorial(decoradorAutor, libro.editorial_id)
@@ -879,12 +881,33 @@ class Vista_modificar_fechas_libro(View):
             'fecha_de_lanzamiento': libro.fecha_lanzamiento.date(),
             'fecha_de_vencimiento': libro.fecha_vencimiento if libro.fecha_vencimiento is None else libro.fecha_vencimiento.date(),
         }
+
+    def cambiamos_fechas_capitulos(self, id, fecha_lanzamiento, fecha_vencimiento):
+        "Cambia las fechas de los capitulos del libro para mantener la consistencia"
+        try:
+            capitulos = Capitulo.objects.filter(titulo_id=id)
+            for capitulo in capitulos:
+                capitulo.fecha_lanzamiento = fecha_lanzamiento
+                capitulo.fecha_vencimiento = fecha_vencimiento
+                capitulo.save()
+
+        except:
+            return None
+
     def cambiar_fechas(self,id,formulario):
         "Cambia las fechas del libro (el boton se habilita cuando esté completo o tenga el último capitulo cargado"
         libro = Libro.objects.get(id=id)
-        libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
-        libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+        fecha_lanzamiento=formulario.cleaned_data['fecha_de_lanzamiento']
+        fecha_vencimiento=formulario.cleaned_data['fecha_de_vencimiento']
+        libro.fecha_lanzamiento = fecha_lanzamiento
+        libro.fecha_vencimiento = fecha_vencimiento
         libro.save()
+        try:
+            self.cambiamos_fechas_capitulos((Libro_Incompleto.objects.get(libro_id=id).id),fecha_lanzamiento,fecha_vencimiento)
+
+        except:
+            pass
+
 
     def get(self, request, id=None):
         #TODO hacer que la fecha de vencimiento sea opcional. Actualmentee

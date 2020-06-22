@@ -1,5 +1,5 @@
-{% extends "admin/base.html" %}
-{% block content %}
+{% extends "header.html" %}
+{% block contenido %}
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{formulario.as_p}}

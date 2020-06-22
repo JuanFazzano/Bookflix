@@ -32,7 +32,8 @@
         <form method="POST">
             {% csrf_token %}
             {{formulario.as_p }}
-            <input id="boton_personalizado" type="submit" value= "Enviar">
+            <input class="btn btn-success" type="submit" value= "Enviar">
+            <a href="/datos_suscriptor/" class="badge badge-danger" style="padding:13px">Cancelar</a>
        </form>
     </div>
    {% endblock %}

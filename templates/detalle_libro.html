@@ -10,7 +10,7 @@
 
         <div class="col-lg-4 ">
 
-                <img src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpg{% endif %}"style="width:214; height:340"/>
+                <img src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}"style="width:214; height:340"/>
 
 
         </div>
@@ -83,17 +83,70 @@
 
     <div class="list-group">
         <div class="p-3 mb-2 bg-danger text-white"><h2>Trailers del libro</h2></div>
-        {% for trailer in trailers %}
-            <a href="/detalle_trailer/id={{trailer.id}}" class="list-group-item list-group-item-action">{{trailer.titulo}}</a>
-        {% endfor %}
+        {% if trailers %}
+            <ul style="list-style:none; margin-left:500px">
+              <li>
+                {% if trailers.has_previous %}
+                  <a href="?page={{trailers.previous_page_number}}"> {{trailers.previous_page_number}}    </a>
+                {% endif %}
+                <span>  {{ trailers.number }}  </span>
+                {% if trailers.has_next %}
+                  <a href="?page={{trailers.next_page_number}}">  {{trailers.next_page_number}}  </a>
+                {% endif%}
+              </li>
+            </ul>
+            <ul style="list-style:none;">
+            {% for trailer in trailers %}
+
+               <li><a href="/detalle_trailer/id={{trailer.id}}" class="list-group-item list-group-item-action">{{trailer.titulo}}</a></li>
+            {% endfor %}
+            </ul>
+         {% endif %}
     </div>
 
-    <div class="list-group">
+    <!--<div class="list-group">
         <div class="p-3 mb-2 bg-danger text-white"><h2> Libros similares que podrian gustarte</h2></div>
         {% for libro_similar in libros_similares %}
             <a href="/detalle_libro/id={{libro_similar.id}}" class="list-group-item list-group-item-action">Ver {{libro_similar.titulo}}</a>
         {% endfor %}
+    </div> -->
+    <div class="p-3 mb-2 bg-danger text-white"><h2> Libros similares que podrian gustarte</h2></div>
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+
+    <div class="carousel-inner">
+        {% for libro in libros_similares %}
+            {% if forloop.counter == 1 %}
+                <div class="carousel-item active"  align="center">
+                    <a href="/detalle_libro/id={{libro.id}}"style="color:white">
+                        <img class="d-block w-"  src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}" style="width:214; height:340"/>
+                        <label style="color:black">{{libro.titulo}} de {{libro.autor}}</label>
+                    </a>
+                </div>
+            {% else %}
+                <div class="carousel-item"  align="center">
+                    <a href="/detalle_libro/id={{libro.id}}" style="color:white">
+                        <img class="d-block w-" alt="{{libro.titulo}} de {{libro.autor}}" src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}" style="width:214; height:340"/>
+                        <label style="color:black">{{libro.titulo}} de {{libro.autor}}</label>
+                    </a>
+                </div>
+            {% endif %}
+        {% endfor %}
     </div>
+
+   <a style=" height: 100px;  width: 100px;  outline: red;  background-size: 100%, 100%;  border-radius: 50%;  border: 1px solid red;  background-image: none; color:red" class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span style="  content: '<';  font-size: 55px;  color: red;background-color:black;border-color:red;" class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span style="  content: '<';  font-size: 55px;  color: red;background-color:black;border-color:red;" class="sr-only">Previous</span>
+    </a>
+
+    <a style=" height: 100px;  width: 100px; outline: red;  background-size: 100%, 100%;  border-radius: 50%;  border: 1px solid red;  background-image: none;color:red" class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+      <span style="  content: '>';  font-size: 55px;  color: red;background-color:black" class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span style="  content: '>';  font-size: 55px;  color: red;background-color:black" class="sr-only">Next</span>
+    </a>
+
+</div>
+
+
+
 {% endif %}
 
 {% endfor %}

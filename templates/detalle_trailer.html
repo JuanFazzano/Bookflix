@@ -12,6 +12,7 @@
                     <p class="font-weight-light">{{trailer.descripcion}}.</p>
                 </li>
 
+            <!--
                 {% if trailer.libro_asociado %}
                     <h3>Asociado a libro:</h3>
                     {% if trailer.libro_asociado.esta_activo %}
@@ -24,7 +25,11 @@
                                 {% if trailer.libro_asociado.esta_vencido %}
                                     (libro vencido)
                                 {% else %}
-                                    sera lanzado el {{trailer.libro_asociado.fecha_lanzamiento|date:"D d M Y"}}
+                                    {% if trailer.libro_asociado.fecha_lanzamiento%}
+                                        sera lanzado el {{trailer.libro_asociado.fecha_lanzamiento|date:"D d M Y"}}
+                                    {%else%}
+                                        Proximamente
+                                    {% endif %}
                                 {% endif %}
                             </a>
                         </li>
@@ -32,7 +37,11 @@
 
                     {% endif %}
                 {% endif %}
-
+                -->
+        <h3>Asociado a libro:</h3>
+        <li>
+                    {{trailer.libro_asociado}}
+        </li>
                 {% if trailer.video %}
                 <li>
                     <video width="320" height="240" controls>
