@@ -128,6 +128,8 @@ class Vista_Iniciar_Sesion(View):
         self.__contexto['formulario'] = FormularioIniciarSesion()
 
     def get(self,request):
+        if(request.user.is_authenticated):
+            return redirect('/')
         self.__contextualizar_formulario()
         return render(request,self.__vista_html,self.__contexto)
 

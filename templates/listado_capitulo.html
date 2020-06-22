@@ -12,7 +12,11 @@
                 {% if capitulo.esta_vencido %}
                     <a href="#" class="list-group-item list-group-item-action disabled">capitulo: {{capitulo.capitulo}} (capitulo vencido)</a>
                 {% else %}
-                    <a href="/lectura_capitulo/id={{capitulo.id}}" class="list-group-item list-group-item-action">capitulo: {{capitulo.capitulo}}</a>
+                    {% if not request.user.is_staff %}
+                        <a href="/lectura_capitulo/id={{capitulo.id}}" class="list-group-item list-group-item-action">capitulo: {{capitulo.capitulo}}</a>
+                    {% else %}
+                        <a href="#" class="list-group-item list-group-item-action">capitulo: {{capitulo.capitulo}}</a>
+                    {% endif %}
                 {%endif%}
             {% else %}
                 <a href="#" class="list-group-item list-group-item-action disabled">capitulo: {{capitulo.capitulo}} sera lanzado el {{capitulo.fecha_lanzamiento|date:"D d M Y"}}</a>

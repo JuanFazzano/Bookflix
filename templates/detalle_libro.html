@@ -50,40 +50,40 @@
 
 
 <br>
+    {% if not libro.esta_completo %}
+        <button type="button" class="btn btn-dark">
+                    <a href="/listado_capitulo/id={{libro.id}}" style="color:white"> Ver listado de capítulos</a>
+        </button>
+    {% endif %}
     {% if not request.user.is_staff %}
         {% if libro.esta_completo %}
             <button type="button" class="btn btn-dark">
                 <a href="/lectura_completo/id={{libro.id}}" style="color:white"> Leer libro completo</a>
             </button>
-        {% else %}
-                <button type="button" class="btn btn-dark">
-                    <a href="/listado_capitulo/id={{libro.id}}" style="color:white"> Ver listado de capítulos</a>
-                </button>
         {% endif %}
-    {% if not error %}
-        <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
-            <input type="submit" value="marcar como terminado" >
-        </form>
-    {%else%}
-        <button type="button" class="btn btn-light" onclick="alerta_error()" id="terminar" value="{{error}}" >
-            <a href="#" style="color:black"> Marcar como terminado</a>
-        </button>
+        {% if not error %}
+            <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
+                <input type="submit" value="marcar como terminado" >
+            </form>
+        {%else%}
+            <button type="button" class="btn btn-light" onclick="alerta_error()" id="terminar" value="{{error}}" >
+                <a href="#" style="color:black"> Marcar como terminado</a>
+            </button>
 
-        <script>
-            function alerta_error(){
-                let error = document.getElementById('terminar').value;
-                alert(error);
-            }
-        </script>
+            <script>
+                function alerta_error(){
+                    let error = document.getElementById('terminar').value;
+                    alert(error);
+                }
+            </script>
 
-    {% endif %}
+        {% endif %}
 
     <br>
     <hr>
-
+    {% if trailers %}
     <div class="list-group">
         <div class="p-3 mb-2 bg-danger text-white"><h2>Trailers del libro</h2></div>
-        {% if trailers %}
             <ul style="list-style:none; margin-left:500px">
               <li>
                 {% if trailers.has_previous %}
@@ -110,6 +110,7 @@
             <a href="/detalle_libro/id={{libro_similar.id}}" class="list-group-item list-group-item-action">Ver {{libro_similar.titulo}}</a>
         {% endfor %}
     </div> -->
+{% if libros_similares %}
     <div class="p-3 mb-2 bg-danger text-white"><h2> Libros similares que podrian gustarte</h2></div>
     <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
 
@@ -144,8 +145,7 @@
     </a>
 
 </div>
-
-
+{% endif %}
 
 {% endif %}
 
