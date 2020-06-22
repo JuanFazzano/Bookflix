@@ -38,11 +38,24 @@
                     {% endif %}
                 {% endif %}
                 -->
-        <h3>Asociado a libro:</h3>
-        <li>
-                    {{trailer.libro_asociado}}
-        </li>
-                {% if trailer.video %}
+        {% if trailer.libro_asociado %}
+            <h3>Asociado a libro:</h3>
+            <li>
+                        {{trailer.libro_asociado}}
+            </li>
+        {% endif %}
+        {% if trailer.pdf %}
+            <button type="button" class="btn btn-dark">
+                    <a href="/media/{{trailer.pdf}}#toolbar=0" style="color:white"> Ver Pdf</a>
+            </button>
+
+        {% endif %}
+
+
+
+
+
+        {% if trailer.video %}
                 <li>
                     <video width="320" height="240" controls>
                         <source src="{{trailer.video.url}}" type="video/mp4">
