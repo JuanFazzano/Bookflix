@@ -121,6 +121,13 @@ class Libro(models.Model):
     def trailers(self):
         return Trailer.objects.filter(libro_asociado_id=self.id)
 
+    def tiene_capitulos(self):
+        "devuelve si un libro tiene capitulos"
+        try:
+            return Libro_Incompleto.objects.get(libro_id=self.id)
+        except:
+            return False
+
 class Perfil(models.Model):
     class Meta:
         unique_together = (('nombre_perfil','auth'),)
