@@ -1,49 +1,49 @@
 {% extends "header.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-  <head>
-  {% block link %}
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-  {% endblock%}
-  {% block estilos %}
-      #imagen {
-        transition: transform .1s;
-      }
-      #imagen:hover{
-        transform: scale(0.5);
-      }
-      #estilo-ul {
-        margin-left: 200px;
-        margin-top: 100px;
-        list-style:none;
-      }
-      #estilo-li {
-        position: relative;
-        display: inline-block;
-        margin-left: 35px;
-      }
-      span {
-        margin-top: 3px;
-        margin-left: 15px;
-        font-family: Arial;
-        display: block;
-      }
-  {% endblock %}
-  </head>
-  <body>
-    {% block contenido %}
-        <ul id="estilo-ul">
-        {% for perfil in perfiles%}
-        <li id="estilo-li">
-              <a href="#">
-                <img id="imagen" src="{% static 'avatar.jpeg' %}" alt="">
-                <span>{{perfil.nombre_perfil}} </span>
-              </a>
-         </li>
-        {% endfor %}
-      </ul>
-    {% endblock %}
-  </body>
-</html>
+
+{% block link %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+{% endblock%}
+{% block estilos %}
+#imagen {
+transition: transform .1s;
+}
+#imagen:hover{
+transform: scale(0.5);
+}
+#estilo-ul {
+margin-left: 200px;
+margin-top: 100px;
+list-style:none;
+}
+#estilo-li {
+position: relative;
+display: inline-block;
+margin-left: 35px;
+}
+span {
+margin-top: 3px;
+margin-left: 15px;
+font-family: Arial;
+display: block;
+}
+{% endblock %}
+
+{% block contenido %}
+<ul id="estilo-ul">
+    {% for perfil in perfiles%}
+    <li id="estilo-li">
+        <a href="/listado_libro/">
+            <img id="imagen" src="{% static 'avatar.jpeg' %}" alt="">
+            <span>{{perfil.nombre_perfil}} </span>
+        </a>
+    </li>
+
+    {% endfor %}
+</ul>
+{% endblock %}
+

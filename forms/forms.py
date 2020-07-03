@@ -63,16 +63,13 @@ class FormularioRegistro(forms.Form):
         ('premium','Premium(4 perfiles maximo)')
     ]
 
-    Nombre = forms.CharField(max_length = 25, widget=forms.TextInput(attrs={'class':'form-control','type':'Nombre'}))
-
+    Nombre = forms.CharField(max_length = 25, widget=forms.TextInput(attrs={'class':'form-control'}))
     Apellido =forms.CharField(max_length = 25, widget=forms.TextInput(attrs={'class':'form-control'}))
     Email = forms.EmailField(max_length = 254, widget=forms.TextInput(attrs={'class':'form-control'}))
     Contrasena = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}),max_length = 20)
     DNI = forms.CharField(max_length = 8, widget=forms.TextInput(attrs={'class':'form-control'}))
     Numero_de_tarjeta = forms.CharField(max_length = 16, widget=forms.TextInput(attrs={'class':'form-control'}))
-
     Fecha_de_vencimiento = forms.DateField(widget = forms.SelectDateWidget(years = [x for x in range(1990,2051)]))
-
     Empresa= forms.CharField(max_length = 254, widget=forms.TextInput(attrs={'class':'form-control'}))
     Codigo_de_seguridad = forms.CharField(max_length=3, widget=forms.TextInput(attrs={'class':'form-control'}))
     Suscripcion=forms.CharField(widget=forms.Select(choices=tipo_suscripcion,attrs={'class':'form-control'}))
@@ -106,8 +103,8 @@ class FormularioRegistro(forms.Form):
         return self.cleaned_data['Fecha_de_vencimiento']
 
 class FormularioIniciarSesion(forms.Form):
-    email = forms.EmailField(max_length=254)
-    clave = forms.CharField(widget=forms.PasswordInput)
+    email = forms.EmailField(max_length=254,widget=forms.TextInput(attrs={'class':'form-control'}))
+    clave = forms.CharField(max_length=254,widget=forms.PasswordInput(attrs={'class':'form-control'}))
 
 class FormularioModificarDatosPersonales(forms.Form):
     def __init__(self,*args,**kwargs):
@@ -452,3 +449,15 @@ class FormularioCambiarContraseña(forms.Form):
             raise forms.ValidationError('Contraseña actual incorrecta')
         else:
             return self.cleaned_data['Contraseña_actual']
+
+class FormularioCrearPerfil(forms.Form):
+    nombre = forms.CharField(max_length = 25,show_hidden_initial=True)
+    foto = forms.FileField(required=False, show_hidden_initial = True)
+
+    def clean_nombre(self):
+        if True: #( BUSCAR EN EL USUARIO SI TIENE UN USUARIO CON ESE NOMBRE ):
+            raise forms.ValidationError('Ya exista un perfil con ese nombre en la cuenta')
+        return self.cleaned_data['nombre']
+
+
+

@@ -121,6 +121,14 @@ class Libro(models.Model):
     def trailers(self):
         return Trailer.objects.filter(libro_asociado_id=self.id)
 
+    def tiene_capitulos(self):
+        "Devuelve de un libro si tiene capítulos"
+        try:
+            "Intenta ver si está como libro completo"
+            return Libro_Incompleto.objetcs.get(libro_id=self.id)
+        except:
+            return False
+
 class Perfil(models.Model):
     class Meta:
         unique_together = (('nombre_perfil','auth'),)
@@ -167,7 +175,7 @@ class Capitulo(models.Model):
     fecha_lanzamiento = models.DateTimeField()
     fecha_vencimiento = models.DateTimeField(null=True)
     archivo_pdf = models.FileField(null = False)
-
+    #ultimo = models.BooleanField(defaul=0, null=True)
 
     def esta_vencido(self):
         if self.fecha_vencimiento is not None:

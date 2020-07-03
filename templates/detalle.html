@@ -1,14 +1,16 @@
 {% extends "header.html" %}
 {% block contenido %}
-
-{% block detalle %} {% endblock %}
-
+<div align="center">
+    <div id="primary" class="content-area col-sm-12 col-md-8 full-width">
+        {% block detalle %} {% endblock %}
+    </div>
+</div>
 {% if request.user.is_staff %}
-   <hr>
-   <div style="background-color:#EFEDED">
-      <a href="/modificar_{{modelo}}/id={{id}}" class="badge badge-secondary">Modificar</a>
-      <a href="/admin/modelos/{{modelo}}/{{id}}/delete/" class="badge badge-danger">Eliminar</a>
-   </div>
+<hr>
+<div style="background-color:#EFEDED">
+    <a href="/modificar_{{modelo}}/id={{id}}" class="badge badge-secondary">Modificar</a>
+    <a href="/admin/modelos/{{modelo}}/{{id}}/delete/" class="badge badge-danger">Eliminar</a>
+</div>
 {% endif %}
 
 {% endblock %}

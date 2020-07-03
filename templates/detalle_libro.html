@@ -50,7 +50,9 @@
 
 
 <br>
-    {% if not libro.esta_completo %}
+    <!-- Si no tiene caps -->
+
+    {% if libro.tiene_capitulos %}
         <button type="button" class="btn btn-dark">
                     <a href="/listado_capitulo/id={{libro.id}}" style="color:white"> Ver listado de capítulos</a>
         </button>

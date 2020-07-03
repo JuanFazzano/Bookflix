@@ -1,6 +1,7 @@
 {% extends "detalle.html" %}
 {% load static %}
 {% block detalle %}
+
     <ul style="list-style:none">
         {% if objeto_pagina %}
         {% for novedad in objeto_pagina %}
@@ -9,10 +10,11 @@
                 <li><p class="font-weight-light">{{novedad.descripcion}}.</p></li>
             {% endif %}
             {% if novedad.foto %}
-                <li> <img src="{{novedad.foto.url}}"width="50%" height="50%"> </li>
+                <li> <img src="{{novedad.foto.url}}" width="50%" height="50%"> </li>
             {% endif %}
         {% endfor %}
 
         {% endif %}
     </ul>
+
 {% endblock %}

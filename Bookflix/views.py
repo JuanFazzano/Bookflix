@@ -128,7 +128,7 @@ class Vista_Iniciar_Sesion(View):
         self.__contexto['formulario'] = FormularioIniciarSesion()
 
     def get(self,request):
-        if(request.user.is_authenticated):
+        if request.user.is_authenticated:
             return redirect('/')
         self.__contextualizar_formulario()
         return render(request,self.__vista_html,self.__contexto)
@@ -984,6 +984,7 @@ class Vista_Alta_Capitulo(View):
                 libro = Libro.objects.get(id=id)
                 libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
                 libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+                #capitulo.ultimo = True
                 libro.save()
                 incompleto.esta_completo = True
                 incompleto.save()
