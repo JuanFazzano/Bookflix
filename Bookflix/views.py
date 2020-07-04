@@ -10,7 +10,7 @@ from django.contrib.auth            import authenticate,login, logout
 from django.core.files.storage      import FileSystemStorage
 from django.http                    import HttpResponseRedirect
 from forms.forms                    import *
-from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad
+from modelos.models                 import Libro_Incompleto,Libro_Completo,Autor,Genero,Editorial,Suscriptor,Tarjeta,Tipo_Suscripcion,Trailer,Libro,Perfil,Novedad,Calificacion
 from django.db.models import Q
 
 def listado_libros_activos():
@@ -42,6 +42,13 @@ def cerrar_sesion(request):
     #Cierra la sesion del usuarios, y lo redireccion al /
     logout(request)
     return HttpResponseRedirect('/')
+
+def eleccion_perfil(request,id = None):
+    id_usuario_logueado = request.session['_auth_user_id']
+    perfil =  Perfil.objects.get(auth_id=id_usuario_logueado,id = id)
+    request.session['perfil'] = perfil.id
+    request.session['nombre_perfil'] = perfil.nombre_perfil
+    return redirect('/listado_libro/')
 
 class Vista_Registro(View):
     def __init__(self,*args,**kwargs):
@@ -117,6 +124,51 @@ class Vista_Registro(View):
         self.contexto['formulario'] =  formulario
         return render(request,'registro.html',self.contexto)
 
+class Vista_Crear_Perfil(View):
+    def __init__(self):
+        self.contexto = dict()
+
+    def get(self,request):
+        self.contexto['formulario'] = FormularioCrearPerfil()
+        return render(request,'crear_perfil.html',self.contexto)
+
+    def post(self,request):
+        formulario = FormularioCrearPerfil(data = request.POST,files = request.FILES,id_suscriptor = request.session['_auth_user_id'])
+        if formulario.is_valid():
+            nombre_perfil = formulario.cleaned_data['nombre']
+            imagen = formulario.cleaned_data['foto']
+            if imagen is not None:
+                fs = FileSystemStorage()
+                fs.save(imagen.name, imagen)
+
+            "Creamos el perfil"
+            perfil = Perfil(
+                auth_id = request.session['_auth_user_id'],
+                nombre_perfil = nombre_perfil,
+                foto = imagen
+            )
+            perfil.save()
+
+            return redirect('/')
+
+        self.contexto['formulario'] = formulario
+        return render(request,'crear_perfil.html',self.contexto)
+
+class Vista_Eliminar(View):
+    def eliminar_tupla(self,id):
+        self.modelo.objects.get(id = id).delete()
+
+    def get(self,request,id = None):
+        print(id)
+        self.eliminar_tupla(id)
+        return redirect(self.ruta_redireccion)
+
+class Vista_Eliminar_Perfil(Vista_Eliminar):
+    def __init__(self):
+        self.modelo = Perfil
+        self.ruta_redireccion = '/'
+
+
 class Vista_Iniciar_Sesion(View):
     def __init__(self,*args,**kwargs):
         self.__vista_html = 'iniciar_sesion.html'
@@ -145,12 +197,10 @@ class Vista_Iniciar_Sesion(View):
                 login(request,usuario)
                 id_usuario_logueado = (User.objects.values('id').get(username=email))['id']
                 if not usuario.is_staff:
-                    request.session['perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).id
-                    request.session['nombre_perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).nombre_perfil
-
-
-
-                    return redirect('/listado_libro/')
+                    "Se guarda el perfil"
+                    #request.session['perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).id
+                    #request.session['nombre_perfil'] = Perfil.objects.get(auth_id = id_usuario_logueado).nombre_perfil
+                    return redirect('/listado_perfiles/')
                 else:
                     return redirect('/home_admin/')
             else:
@@ -159,28 +209,22 @@ class Vista_Iniciar_Sesion(View):
         return render(request,self.__vista_html,self.__contexto)
 
 class Vista_Datos_Usuario(View):
-    def get(self,request,*args, **kwargs):
+    def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
         id = request.session['_auth_user_id']
         datos_suscriptor = (Suscriptor.objects.filter(auth_id=id)).values()[0]
-        datos_tarjeta = Tarjeta.objects.filter(id = datos_suscriptor['nro_tarjeta_id']).values()[0]
-        email_usuario = (User.objects.values('username').filter(id = id)[0])['username']
-        perfiles = Perfil.objects.values('nombre_perfil').filter(auth_id = id)
-        suscripcion = (Tipo_Suscripcion.objects.filter(id = datos_suscriptor['tipo_suscripcion_id']).values()[0])['tipo_suscripcion']
-        contexto={
-                'nombre': datos_suscriptor['nombre'],
-                'apellido': datos_suscriptor['apellido'],
-                'email': email_usuario,
-                'dni': datos_suscriptor['dni'],
-                'fecha_suscripcion': datos_suscriptor['fecha_suscripcion'],
-                'tipo_suscripcion': suscripcion,
-                'numero_tarjeta': datos_tarjeta['nro_tarjeta'],
-                'fecha_vencimiento': datos_tarjeta['fecha_vencimiento'],
-                'empresa': datos_tarjeta['empresa'],
-                'perfiles': [str(clave['nombre_perfil']) for clave in list(perfiles)]
-
+        datos_tarjeta = Tarjeta.objects.filter(id=datos_suscriptor['nro_tarjeta_id']).values()[0]
+        perfiles = Perfil.objects.values('nombre_perfil').filter(auth_id=id)
+        suscriptor = Suscriptor.objects.get(auth_id=request.session['_auth_user_id'])
+        contexto = {
+            'suscriptor': suscriptor,
+            'numero_tarjeta': datos_tarjeta['nro_tarjeta'],
+            'fecha_vencimiento': datos_tarjeta['fecha_vencimiento'],
+            'empresa': datos_tarjeta['empresa'],
+            'perfiles': [str(clave['nombre_perfil']) for clave in list(perfiles)]
         }
+
         return render(request,'datos_usuario.html',contexto)
 
 class Vista_Visitante(View):
@@ -434,12 +478,8 @@ class Vista_Listado_Perfiles(View):
     def get(self, request):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        return render(request,'listado_perfiles.html',{'perfiles': self.__obtener_perfiles(request.session['_auth_user_id'])})
-
-    def __obtener_perfiles(self,id):
-        #lista_nombre_perfiles=list()
-        lista_perfiles=Perfil.objects.values('nombre_perfil','id').filter(auth_id = id)
-        return [diccionario for diccionario in lista_perfiles]
+        suscriptor = Suscriptor.objects.get(auth_id = request.session['_auth_user_id'])
+        return render(request,'listado_perfiles.html',{'suscriptor': suscriptor})
 
 class Vista_Detalle_Trailer(Vista_Detalle):
     def __init__(self,*args,**kwargs):
@@ -454,7 +494,6 @@ class Vista_Listado_Trailer(Vista_Listado):
         self.modelo  = Trailer
         self.modelo_string = 'trailer'
         super(Vista_Listado_Trailer,self).__init__(*args,**kwargs)
-
 
 class Vista_Listado_Capitulo(Vista_Listado):
     def __init__(self, *args, **kwargs):
@@ -474,7 +513,6 @@ class Vista_Listado_Capitulo(Vista_Listado):
     def retornar_tuplas(self, es_staff):
         id_libro_incompleto=Libro_Incompleto.objects.get(libro_id=self.id_libro).id
         return Capitulo.objects.filter(titulo_id=id_libro_incompleto).order_by('capitulo')
-
 
 class Vista_Formulario_Libro_Completo(View):
     def get(self,request,id=None):
@@ -723,7 +761,6 @@ class Vista_Formulario_Modificar_Trailer(View):
         self.contexto['formulario'] = FormularioModificarTrailer(initial = self.__get_valores_iniciales(id))
         return render(request,'carga_atributos_libro.html',self.contexto)
 
-
 def marcar_como_terminado(request,id=None):
     id_perfil= request.session['perfil']
     libro= Libro.objects.get(id=id)
@@ -733,7 +770,17 @@ def marcar_como_terminado(request,id=None):
     path='/detalle_libro/id='+ id
     return redirect(path)
 
+def cambiar_tipo_suscripcion(request):
+    id_usuario = request.session['_auth_user_id']
+    usuario = Suscriptor.objects.get(auth_id=id_usuario)
 
+    if usuario.tipo_suscripcion.tipo_suscripcion == 'premium':
+        usuario.tipo_suscripcion = Tipo_Suscripcion.objects.get(tipo_suscripcion='regular')
+    else:
+        usuario.tipo_suscripcion = Tipo_Suscripcion.objects.get(tipo_suscripcion='premium')
+    usuario.save()
+
+    return redirect('/datos_suscriptor/')
 
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
@@ -1081,6 +1128,7 @@ class Vista_Lectura_Capitulo(Vista_Lectura_Libro):          #TODO validar que el
 
     def actualizar_contexto(self):
         self.contexto = {'pdf': Capitulo.objects.get(id = self.id).archivo_pdf }
+
 class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Libro_Completo,self).__init__(*args,**kwargs)
@@ -1100,8 +1148,6 @@ class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
         libro_leido.save()
     def actualizar_contexto(self):
         self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
-
-
 
 class Vista_Historial(View):
 
@@ -1146,14 +1192,6 @@ class Vista_Historial(View):
         contexto['numero_pagina'] = self.pagina
         contexto['nombre_perfil'] = Perfil.objects.get(id = id_perfil).nombre_perfil
         return contexto
-
-
-
-#contexto={'libro':paginar(request,(Lee_libro.objects.filter(perfil_id = id_perfil)),'libro1':capitulos}
-#contexto[libro1.id] = self.obtener_capitulos_de_libro(request,libro_id,perfil)
-
-
-
 
 class Listado_decorado:
     def __init__(self,listado):
@@ -1247,5 +1285,3 @@ class DecoradorEditorial(Decorador):
 
     def libros(self):
         return listado_libros_activos().filter(editorial_id = self.campo)
-
-#TODO de los libros similares, sacar al libro del que se está viendo el detalle

@@ -16,6 +16,9 @@ class Tipo_Suscripcion(models.Model):
     cantidad_maxima_perfiles = models.IntegerField(default = 0,null=False)
     tipo_suscripcion = models.CharField(unique = True, max_length = 16)
 
+    def tiene_maximo_permitido(self,cantidad_perfiles):
+        return cantidad_perfiles == self.cantidad_maxima_perfiles
+
 class Suscriptor(models.Model):
     class Meta:
         verbose_name = 'Suscriptor'
@@ -28,6 +31,20 @@ class Suscriptor(models.Model):
     apellido = models.CharField(max_length = 25, blank=False, null=False)
     dni = models.CharField(unique = True, max_length = 8, null=False)
 
+    def tiene_maximo_permitido(self):
+        return self.suscripcion().tiene_maximo_permitido(self.cantidad_perfiles())
+
+    def suscripcion(self):
+        return Tipo_Suscripcion.objects.get(id=self.tipo_suscripcion_id)
+
+    def perfiles(self):
+        return Perfil.objects.filter(auth_id=self.auth_id)
+
+    def cantidad_perfiles(self):
+        return len(self.perfiles())
+
+    def es_regular(self):
+        return self.tipo_suscripcion.tipo_suscripcion == "regular"
 
 class Autor (models.Model):
     class Meta:
@@ -134,22 +151,24 @@ class Perfil(models.Model):
         unique_together = (('nombre_perfil','auth'),)
     auth = models.ForeignKey(Suscriptor, on_delete=models.CASCADE)
     nombre_perfil = models.CharField(max_length = 25)
+    foto = models.FileField(blank=True, null=True)
     listado_favoritos = models.ManyToManyField(Libro)
 
 
 class Calificacion(models.Model):
     class Meta:
-        unique_together = (('libro','perfil'),)
+        unique_together = (('libro', 'perfil'),)
     libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
-    perfil =models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    perfil = models.ForeignKey(Perfil,null=True,blank=True,on_delete=models.SET_NULL)
     valoracion=models.IntegerField(default=0,null=False)
+    fecha_calificacion = models.DateTimeField()
 
 class Comentario(models.Model):
-    class Meta:
-        unique_together = (('fecha_hora','calificacion'),)
-    calificacion = models.ForeignKey(Calificacion, on_delete=models.CASCADE)
-    fecha_hora = models.DateTimeField()
+        #class Meta:
+    #    unique_together = (('fecha_hora','calificacion'),)
+    calificacion = models.ForeignKey(Calificacion,unique = True,on_delete=models.CASCADE)
     texto = models.TextField(blank = False, null = False)
+    spoiler = models.BooleanField(default=0)
 
 class Lee_libro(models.Model):
     class Meta:
@@ -175,7 +194,7 @@ class Capitulo(models.Model):
     fecha_lanzamiento = models.DateTimeField()
     fecha_vencimiento = models.DateTimeField(null=True)
     archivo_pdf = models.FileField(null = False)
-    #ultimo = models.BooleanField(defaul=0, null=True)
+    ultimo = models.BooleanField(default=0, null=True)
 
     def esta_vencido(self):
         if self.fecha_vencimiento is not None:

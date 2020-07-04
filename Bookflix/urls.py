@@ -16,7 +16,6 @@ Including another URLconf
 from Bookflix import views
 from django.conf.urls import url
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -26,8 +25,12 @@ urlpatterns = [
     url(r'^home_admin/',views.Home_Admin.as_view()),
     url(r'^iniciar_sesion/',views.Vista_Iniciar_Sesion.as_view()),
     url(r'^datos_suscriptor/',views.Vista_Datos_Usuario.as_view()),
+    url(r'^crear_perfil/',views.Vista_Crear_Perfil.as_view()),
+    url(r'^eliminar_perfil/id=(?P<id>\w+)/$', views.Vista_Eliminar_Perfil.as_view()),
+    url(r'^eleccion_perfil/id=(?P<id>\w+)/$',views.eleccion_perfil),
     url(r'^registro/',views.Vista_Registro.as_view()),
     url(r'^modificar_datos_personales/',views.Vista_Modificar_Datos_Personales.as_view()),
+    url(r'^cambiar_tipo_suscripcion/', views.cambiar_tipo_suscripcion, name="cambiar_suscripcion"),
     url(r'^detalle_novedad/id=(?P<id>\w+)/$',views.Vista_Detalle_Novedad.as_view()),
     url(r'^detalle_trailer/id=(?P<id>\w+)/$', views.Vista_Detalle_Trailer.as_view()),
     url(r'^listado_novedad/',views.Vista_Listado_Novedad.as_view()),

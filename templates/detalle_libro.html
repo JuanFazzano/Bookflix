@@ -9,12 +9,8 @@
 
 
         <div class="col-lg-4 ">
-
                 <img src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}"style="width:214; height:340"/>
-
-
         </div>
-
 
         <div class="col-lg-8">
         <ul style="list-style:none">
@@ -50,11 +46,6 @@
 
 
 <br>
-<<<<<<< HEAD
-    <!-- Si no tiene caps -->
-
-=======
->>>>>>> ecf09f41650a3ccbc62e20055e87b2f84366a19d
     {% if libro.tiene_capitulos %}
         <button type="button" class="btn btn-dark">
                     <a href="/listado_capitulo/id={{libro.id}}" style="color:white"> Ver listado de capítulos</a>

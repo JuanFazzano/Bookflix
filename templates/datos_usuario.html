@@ -2,101 +2,121 @@
 {% load i18n admin_urls static admin_modify %}
 
 {% block contenido %}
-<div>
-<table class="table table-striped">
-    <div class="p-3 mb-2 bg-danger text-white"><h4> Datos personales</h4></div>
-  <tbody>
-    <tr>
-        <th scope="row">Nombre:</th>
-        <td>{{nombre}}</td>
-    </tr>
 
-    <tr>
-        <th scope="row">Apellido:</th>
-        <td>{{apellido}}</td>
-    </tr>
-
-    <tr>
-        <th scope="row">Email:</th>
-        <td>{{email}}</td>
-    </tr>
-
-    <tr>
-        <th scope="row">DNI:</th>
-        <td>{{dni}}</td>
-    </tr>
-
-    <tr>
-        <th scope="row">Fecha de suscripción:</th>
-        <td>{{fecha_suscripcion}}</td>
-    </tr>
-
-    <tr>
-        <th scope="row">Tipo de suscripción:</th>
-        <td>{{tipo_suscripcion.capitalize}}</td>
-    </tr>
-
-    </tbody>
-</table>
-</div>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="popover"]').popover();
+});
 
 
-
-    <!-- Cambiar contraseña y datos personales ------------------------------------------------->
-    <hr>
-    <div>
-        <a href="/modificar_datos_personales/" class="badge badge-secondary">Cambiar Datos Personales</a>
-        <a href="/cambiar_contrasena/" class="badge badge-secondary"> Cambiar Contraseña </a>
-    </div>
-
-
-
-
+</script>
 
 
 <div>
-<table class="table table-striped">
-    <div class="p-3 mb-2 bg-danger text-white"><h4> Datos de la Tarjeta</h4></div>
-  <tbody>
-    <tr>
-        <th scope="row">Numero de tarjeta:</th>
-        <td>{{numero_tarjeta}}</td>
-    </tr>
+    <table class="table table-striped">
+        <div class="p-3 mb-2 bg-danger text-white"><h4> Datos personales</h4></div>
+        <tbody>
+        <tr>
+            <th scope="row">Nombre:</th>
+            <td>{{suscriptor.nombre}}</td>
+        </tr>
 
-    <tr>
-        <th scope="row">Fecha de vencimiento:</th>
-        <td>{{fecha_vencimiento|date:"M Y"}}</td>
-    </tr>
+        <tr>
+            <th scope="row">Apellido:</th>
+            <td>{{suscriptor.apellido}}</td>
+        </tr>
 
-    <tr>
-        <th scope="row">Empresa:</th>
-        <td>{{empresa}}</td>
-    </tr>
-  </tbody>
-</table>
+        <tr>
+            <th scope="row">Email:</th>
+            <td>{{suscriptor.auth}}</td>
+        </tr>
+
+        <tr>
+            <th scope="row">DNI:</th>
+            <td>{{suscriptor.dni}}</td>
+        </tr>
+
+        <tr>
+            <th scope="row">Fecha de suscripción:</th>
+            <td>{{suscriptor.fecha_suscripcion}}</td>
+        </tr>
+
+        <tr>
+            <th scope="row">Tipo de suscripción:</th>
+            <td>
+                {{suscriptor.suscripcion.tipo_suscripcion|capfirst}}
+
+                {% if suscriptor.es_regular %}
+                    <form method="GET" action="/cambiar_tipo_suscripcion/">
+                        <input type="submit" value="Cambiar a Premium">
+                    </form>
+                {% else %}
+                    {% if suscriptor.cantidad_perfiles > 2 %}
+                       <a tabindex="0" class="btn btn-lg btn-danger" role="button" data-toggle="popover" data-trigger="focus" title="OLEEEE PUTOOO" data-content="YAQUI NO?">Cambiar a Normal</a>
+                    {% else %}
+                        <form method="GET" action="/cambiar_tipo_suscripcion/">
+                            <input type="submit" value="Cambiar a Regular">
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </td>
+        </tr>
+
+        </tbody>
+    </table>
 </div>
 
 
-    <!-- Seccion de perfiles -------------------------->
+<!-- Cambiar contraseña y datos personales ------------------------------------------------->
+<hr>
+<div>
+    <a href="/modificar_datos_personales/" class="badge badge-secondary">Cambiar Datos Personales</a>
+    <a href="/cambiar_contrasena/" class="badge badge-secondary"> Cambiar Contraseña </a>
+</div>
+
+
+<div>
+    <table class="table table-striped">
+        <div class="p-3 mb-2 bg-danger text-white"><h4> Datos de la Tarjeta</h4></div>
+        <tbody>
+        <tr>
+            <th scope="row">Numero de tarjeta:</th>
+            <td>{{numero_tarjeta}}</td>
+        </tr>
+
+        <tr>
+            <th scope="row">Fecha de vencimiento:</th>
+            <td>{{fecha_vencimiento|date:"M Y"}}</td>
+        </tr>
+
+        <tr>
+            <th scope="row">Empresa:</th>
+            <td>{{empresa}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Seccion de perfiles -------------------------->
 <div class="p-3 mb-2 bg-dark"><h4 style="color:red; black:white"> Perfiles </h4></div>
 
-    <a href="#" class="badge badge-success"> Crear perfil </a>
+<a href="#" class="badge badge-success"> Crear perfil </a>
 
-    <ul style="list-style:none">
+<ul style="list-style:none">
     {% for perfil in perfiles %}
-        <li style="padding-left:10px; display:inline">
-            <div class="card" style="width: 150;">
-                <img  class="card-img-top" id="imagen" src="{% static 'avatar.jpeg' %}" alt="" style="width:150; height:150">
-                <div class="card-body">
-                    <h6>{{perfil}}</h6>
-                    <a href="" class="badge badge-secondary">Modificar</a>
-                    <a href="" class="badge badge-danger">Eliminar</a>
-                </div>
+    <li style="padding-left:10px; display:inline">
+        <div class="card" style="width: 150;">
+            <img class="card-img-top" id="imagen" src="{% static 'avatar.jpeg' %}" alt="" style="width:150; height:150">
+            <div class="card-body">
+                <h6>{{perfil}}</h6>
+                <a href="" class="badge badge-secondary">Modificar</a>
+                <a href="" class="badge badge-danger">Eliminar</a>
             </div>
-        </li>
+        </div>
+    </li>
     {%endfor %}
-    </ul>
+</ul>
 
 
-    {% endblock %}
-
+{% endblock %}

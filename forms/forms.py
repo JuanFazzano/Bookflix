@@ -412,7 +412,6 @@ class FormularioCapitulo(forms.Form):
         self.fields['fecha_de_vencimiento'] = forms.DateField(widget=DateInput,required=False)
         self.fields['ultimo_capitulo'] = forms.BooleanField(required=False,widget=forms.CheckboxInput)
 
-
     def clean_fecha_de_lanzamiento(self):
         fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
         if(fecha_de_lanzamiento1 < datetime.date.today()):
@@ -436,6 +435,7 @@ class FormularioCapitulo(forms.Form):
             raise forms.ValidationError('Ya existe el capitulo para ese libro')
         return self.cleaned_data['numero_capitulo']
 
+
 class FormularioCambiarContraseña(forms.Form):
     def __init__(self,id_usuario, *args, **kwargs):
         self.id = id_usuario
@@ -451,11 +451,16 @@ class FormularioCambiarContraseña(forms.Form):
             return self.cleaned_data['Contraseña_actual']
 
 class FormularioCrearPerfil(forms.Form):
-    nombre = forms.CharField(max_length = 25,show_hidden_initial=True)
-    foto = forms.FileField(required=False, show_hidden_initial = True)
+    def __init__(self,id_suscriptor=None,*args,**kwargs):
+        super(FormularioCrearPerfil,self).__init__(*args,**kwargs)
+        self.perfiles = Perfil.objects.filter(auth_id = id_suscriptor).values('nombre_perfil')
+        self.perfiles = [perfil['nombre_perfil'] for perfil in list(self.perfiles)]
+        self.id_suscriptor = id_suscriptor
+        self.fields['nombre'] = forms.CharField(max_length = 25)
+        self.fields['foto'] = forms.FileField(required=False)
 
     def clean_nombre(self):
-        if True: #( BUSCAR EN EL USUARIO SI TIENE UN USUARIO CON ESE NOMBRE ):
+        if self.cleaned_data['nombre'] in self.perfiles: #( BUSCAR EN EL USUARIO SI TIENE UN USUARIO CON ESE NOMBRE ):
             raise forms.ValidationError('Ya exista un perfil con ese nombre en la cuenta')
         return self.cleaned_data['nombre']
 
