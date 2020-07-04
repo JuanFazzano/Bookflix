@@ -17,6 +17,9 @@
     {% endblock %}
 
 {% block contenido %}
+    {% if libro_asociado %}
+        <h1> Capitulo asociado a libro {{libro_asociado.titulo}}</h1>
+    {% endif %}
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{errores}}

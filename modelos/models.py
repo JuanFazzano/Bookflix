@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models import Max
 import datetime
 
 class Tarjeta(models.Model):
@@ -161,7 +162,7 @@ class Calificacion(models.Model):
     libro = models.ForeignKey(Libro, on_delete=models.CASCADE)
     perfil = models.ForeignKey(Perfil,null=True,blank=True,on_delete=models.SET_NULL)
     valoracion=models.IntegerField(default=0,null=False)
-    fecha_calificacion = models.DateTimeField()
+    fecha_calificacion = models.DateTimeField(null=False)
 
 class Comentario(models.Model):
         #class Meta:
@@ -185,6 +186,12 @@ class Libro_Completo(models.Model):
 class Libro_Incompleto(models.Model):
     libro = models.OneToOneField(Libro,unique = True, on_delete=models.CASCADE)
     esta_completo=models.BooleanField(default = 0,null = True)
+
+
+    def numero_maximo_capitulo(self):
+        numero_maximo=Capitulo.objects.filter(titulo=self.id).aggregate(Max('capitulo'))
+        return numero_maximo['capitulo__max']
+        # devuelve {'capitulo__max':599 }
 
 class Capitulo(models.Model):
     class Meta:

@@ -434,6 +434,11 @@ class FormularioCapitulo(forms.Form):
         if existe_capitulo:
             raise forms.ValidationError('Ya existe el capitulo para ese libro')
         return self.cleaned_data['numero_capitulo']
+    def clean_ultimo_capitulo(self):
+        if(self.cleaned_data['ultimo_capitulo']):
+            if(self.cleaned_data['numero_capitulo'] < Libro_Incompleto.objects.get(libro_id=self.id_libro).numero_maximo_capitulo()):
+                raise forms.ValidationError('El numero de capitulo debe ser el mas grande que: ' + str(Libro_Incompleto.objects.get(libro_id=self.id_libro).numero_maximo_capitulo()) )
+        return self.cleaned_data['ultimo_capitulo']
 
 
 class FormularioCambiarContraseña(forms.Form):
@@ -449,6 +454,8 @@ class FormularioCambiarContraseña(forms.Form):
             raise forms.ValidationError('Contraseña actual incorrecta')
         else:
             return self.cleaned_data['Contraseña_actual']
+
+
 
 class FormularioCrearPerfil(forms.Form):
     def __init__(self,id_suscriptor=None,*args,**kwargs):

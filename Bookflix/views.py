@@ -1011,6 +1011,7 @@ class Vista_Alta_Capitulo(View):
     def get(self,request,id = None):
         self.cargar_incompleto(id)
         self.contexto['formulario'] = FormularioCapitulo(id = id,initial={'numero_capitulo':self.get_capitulo_mas_grande(id)})
+        self.contexto['libro_asociado']=Libro.objects.get(id=id)
         return render(request,'carga_atributos_libro.html',self.contexto)
 
     def post(self,request,id = None):

@@ -52,7 +52,7 @@ $(document).ready(function(){
                     </form>
                 {% else %}
                     {% if suscriptor.cantidad_perfiles > 2 %}
-                       <a tabindex="0" class="btn btn-lg btn-danger" role="button" data-toggle="popover" data-trigger="focus" title="OLEEEE PUTOOO" data-content="YAQUI NO?">Cambiar a Normal</a>
+                       <a tabindex="0" class="btn btn-lg btn-danger" role="button" data-toggle="popover" data-trigger="focus" title="No puede cambiar de Suscripcion" data-content="Debe tener como maximo 2(dos) perfiles">Cambiar a Normal</a>
                     {% else %}
                         <form method="GET" action="/cambiar_tipo_suscripcion/">
                             <input type="submit" value="Cambiar a Regular">
@@ -104,10 +104,14 @@ $(document).ready(function(){
 <a href="#" class="badge badge-success"> Crear perfil </a>
 
 <ul style="list-style:none">
-    {% for perfil in perfiles %}
+    {% for perfil in suscriptor.perfiles %}
     <li style="padding-left:10px; display:inline">
         <div class="card" style="width: 150;">
-            <img class="card-img-top" id="imagen" src="{% static 'avatar.jpeg' %}" alt="" style="width:150; height:150">
+            {% if not perfil.foto %}
+                <img id="imagen" src="/static/avatar.jpeg" alt="">
+            {% else %}
+                <img id="imagen" style="width:200px; height:140px"src="/static/{{perfil.foto}}" alt="">
+            {% endif %}
             <div class="card-body">
                 <h6>{{perfil}}</h6>
                 <a href="" class="badge badge-secondary">Modificar</a>
