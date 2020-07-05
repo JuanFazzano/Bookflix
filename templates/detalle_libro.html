@@ -75,6 +75,18 @@
                 </button>
             {% endif %}
 
+
+             {% if not lo_tengo_como_favorito %}
+                <a href="/agregar_favorito/id={{libro.id}}" style="color:black">
+                    agregar a favoritos
+                </a>
+            {% else %}
+                <a href="/quitar_de_favorito/id={{libro.id}}" style="color:black">
+                    quitar de favoritos
+                </a>
+            {% endif %}
+
+
             <!-------------- Resena ------------------------------->
             Esta {{terminado}}
             {% if terminado %}
@@ -178,7 +190,9 @@
          {% if not request.user.is_staff %}
             {% if resena_perfil %}
                 <ul>
-                    Tu reseña <a href="#"> Modificar </a> <a href="#">Eliminar</a>
+                    Tu reseña <a href="/modificar_reseña/id={{resena_perfil.id}}"> Modificar </a>
+                    <a onclick="return confirm('Desea eliminar esta reseña')" href="/eliminar_reseña/id={{resena_perfil.id}}" class="badge badge-danger"> Eliminar </a>
+
                     <br>
                     Valoracion: {{resena_perfil.valoracion}}
                     {% if resena_perfil.comentario %}
@@ -225,12 +239,12 @@
                     {% else %}
                         <label id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
                         {% if request.user.is_staff %}
-                            <a href=""> Marcar como spoiler </a>
+                            <a href="/marcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Marcar como spoiler </a>
                         {% endif %}
                     {% endif %}
                 {% endif %}
                 {% if request.user.is_staff %}
-                   <a href="#"> Eliminar </a>
+                   <a href="/admin/modelos/calificacion/{{resena.comentario.id}}/delete/"> Eliminar </a>
                 {% endif %}
             {% endfor %}
             </ul>

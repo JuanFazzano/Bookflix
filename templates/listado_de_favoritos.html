@@ -1,0 +1,30 @@
+{% extends "listado.html" %}
+
+
+{% block listado %}
+<table class="table">
+
+  <thead class="thead-light">
+    <tr>
+      <th scope="col">Titulo</th>
+      <th scope="col">Opciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  {% for libro in objeto_pagina %}
+  <tr>
+      <th scope="row"><a href="/detalle_libro/id={{libro.id}}" style="color: black"> <strong>{{libro.titulo}}</strong>  </a></th>
+      <td>
+          <!--<a href="/modificar_editorial/id={{editorial.id}}/" class="badge badge-secondary"> Modificar </a>-->
+          <a href="/quitar_de_favorito_desde_listado/id={{libro.id}}" class="badge badge-secondary"> Quitar de favoritos </a>
+
+      </td>
+
+    </tr>
+  {% endfor %}
+
+  </tbody>
+</table>
+
+{% endblock %}

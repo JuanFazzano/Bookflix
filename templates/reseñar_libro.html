@@ -1,6 +1,10 @@
 {% extends 'header.html' %}
 {% block contenido %}
-<h1> Reseña para libro {{libro.titulo}} </h1>
+{% if calificacion %}
+    <h1> Modificacion de reseña para libro {{calificacion.libro}} </h1>
+{% else %}
+    <h1> Reseña para libro {{libro.titulo}} </h1>
+{% endif %}
     <form method="POST">
         {% csrf_token %}
         {{formulario.as_p}}

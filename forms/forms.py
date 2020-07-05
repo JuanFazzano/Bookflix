@@ -537,12 +537,11 @@ class FormularioReseña(forms.Form):
             (4,4),
             (5,5)
         )))
-        self.fields['comentario'] = forms.CharField(widget=forms.Textarea, required=False)
-        self.fields['spoiler'] = forms.BooleanField(required=False, widget=forms.CheckboxInput)
+        self.fields['comentario'] = forms.CharField(widget=forms.Textarea, required=False,show_hidden_initial=True)
+        self.fields['spoiler'] = forms.BooleanField(required=False, widget=forms.CheckboxInput,show_hidden_initial=True)
 
     def clean_spoiler(self):
-        print(self.cleaned_data['spoiler'])
-        print(self.cleaned_data['comentario'])
+        print('Holaa 1')
         if self.cleaned_data['spoiler'] and self.cleaned_data['comentario'] == '':
             raise forms.ValidationError('Si marca como spoiler, el comentario no puede estar vacio')
         return self.cleaned_data['spoiler']

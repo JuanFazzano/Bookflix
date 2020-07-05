@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
-from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad,Trailer
+from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad,Trailer,Calificacion
 
 class NovedadAdmin(admin.ModelAdmin):
     list_display=('titulo',)
@@ -108,6 +108,16 @@ class TrailerAdmin(admin.ModelAdmin):
         form.base_fields['libro_asociado'].widget.can_add_related = False
         form.base_fields['libro_asociado'].widget.can_change_related = False
         return form
+
+class CalificacionAdmin(admin.ModelAdmin):
+    id_libro = None
+    def delete_view(self, request, object_id, extra_context=None):
+        self.id_libro = Calificacion.objects.get(id=object_id).libro_id
+        return super(CalificacionAdmin, self).delete_view(request, object_id, extra_context)
+
+    def response_delete(self, request, obj_display, obj_id):
+        return redirect('/detalle_libro/id='+str(self.id_libro))
+
 admin.site.site_header = 'Panel de Administracion Bookflix'
 
 #Saca los modelos que no queremos que se interactúen
@@ -116,6 +126,7 @@ admin.site.unregister(Group)
 
 #Registra que modelos se pueden interactuar
 #admin.site.register(Libro,LibroAdmin)
+admin.site.register(Calificacion,CalificacionAdmin)
 admin.site.register(Novedad,NovedadAdmin)
 admin.site.register(Libro,LibroAdmin)
 admin.site.register(Genero,GeneroAdmin)

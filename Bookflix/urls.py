@@ -41,6 +41,7 @@ urlpatterns = [
     url(r'^listado_autor/',views.Vista_Listado_Autor.as_view()),
     url(r'^listado_libro/',views.Vista_Listado_Libro.as_view()),
     url(r'^listado_perfiles/',views.Vista_Listado_Perfiles.as_view()),
+    url(r'^listado_de_favoritos/', views.Vista_Listado_Favoritos.as_view()),
     url(r'^carga_libro_completo/id=(?P<id>\w+)/$', views.Vista_Formulario_Libro_Completo.as_view()),
     url(r'^detalle_libro/id=(?P<id>\w+)/$',views.Vista_Detalle_libro.as_view()),
     url(r'^cargar_genero',views.Vista_Formulario_Genero.as_view()),
@@ -60,12 +61,18 @@ urlpatterns = [
     url(r'^modificar_capitulo/id=(?P<id>\w+)/$', views.Vista_Modificar_Capitulo.as_view()),
     url(r'^logout/',views.cerrar_sesion,name="logout"),
     url(r'^marcar_como_terminado/id=(?P<id>\w+)/$', views.marcar_como_terminado, name="marcar_como_terminado"),
+    url(r'^agregar_favorito/id=(?P<id>\w+)/$', views.Agregar_a_favoritos.as_view()),
+    url(r'^quitar_de_favorito/id=(?P<id>\w+)/$', views.Quitar_de_favoritos.as_view()),
+    url(r'^quitar_de_favorito_desde_listado/id=(?P<id>\w+)/$', views.Quitar_de_favoritos_desde_listado.as_view()),
     url(r'^lectura_completo/id=(?P<id>\w+)/$',views.Vista_Lectura_Libro_Completo.as_view()),
     url(r'^lectura_capitulo/id=(?P<id>\w+)/$', views.Vista_Lectura_Capitulo.as_view()),
     url(r'^cambiar_contrasena/', views.Cambiar_Contraseña.as_view()),
     url(r'^historial/pagina=(?P<pagina>\w+)/$',views.Vista_Historial.as_view()),
     url(r'^buscar/', views.Buscar.as_view()),
     url(r'^resenar_libro/id=(?P<id>\w+)/$', views.Vista_Resenar_libro.as_view()),
+    url(r'^eliminar_reseña/id=(?P<id>\w+)/$', views.Vista_Eliminar_Resena.as_view()),
+    url(r'^modificar_reseña/id=(?P<id>\w+)/$', views.Vista_Modificar_Resena_libro.as_view()),
+    url(r'^marcar_comentario_spoiler/(?P<id_comentario>\w+)/(?P<id_libro>\w+)/$', views.marcar_comentario_spoiler),
 
 ]
 

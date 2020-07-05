@@ -84,6 +84,53 @@ class Vista_Resenar_libro(View):
         self.contexto['formulario'] = formulario
         return render(request,'reseñar_libro.html',self.contexto)
 
+class Vista_Modificar_Resena_libro(View):
+    def __init__(self):
+        self.contexto = dict()
+
+    def __valores_iniciales(self,id):
+        calificacion = Calificacion.objects.get(id = id)
+        valores_iniciales = dict()
+        self.contexto['calificacion'] = calificacion
+        valores_iniciales['puntuacion'] = calificacion.valoracion
+        try:
+            comentario = Comentario.objects.get(calificacion_id = calificacion.id)
+            valores_iniciales['comentario'] = comentario.texto
+            valores_iniciales['spoiler'] = comentario.spoiler
+        except:
+            valores_iniciales['comentario'] = ''
+            valores_iniciales['spoiler'] = False
+        return valores_iniciales
+
+    def get(self,request,id):
+        self.contexto['formulario'] = FormularioReseña(initial = self.__valores_iniciales(id))
+        return render(request,'reseñar_libro.html',self.contexto)
+
+    def post(self,request,id):
+        formulario = FormularioReseña(data=request.POST,initial=self.__valores_iniciales(id))
+        if formulario.is_valid():
+
+            calificacion = Calificacion.objects.get(id=id)
+            calificacion.valoracion = formulario.cleaned_data['puntuacion']
+            calificacion.save()
+            try:
+                "Se guarda el comentario si existe para esa calificacion"
+                comentario = Comentario.objects.get(calificacion_id=calificacion.id)
+                comentario.texto = formulario.cleaned_data['comentario']
+                comentario.spoiler = formulario.cleaned_data['spoiler']
+            except:
+                "Si no existe, se crea"
+                comentario = Comentario(
+                    calificacion_id=calificacion.id,
+                    texto=formulario.cleaned_data['comentario'],
+                    spoiler=formulario.cleaned_data['spoiler']
+                )
+            comentario.save()
+            return redirect('/detalle_libro/id='+str(calificacion.libro_id))
+        self.contexto['errores'] = formulario.errors
+        self.contexto['formulario'] =FormularioReseña(initial=self.__valores_iniciales(id))
+        return render(request, 'reseñar_libro.html', self.contexto)
+
 class Vista_Registro(View):
     def __init__(self,*args,**kwargs):
         self.contexto = dict()
@@ -209,6 +256,20 @@ class Vista_Eliminar_Perfil(Vista_Eliminar):
     def cerrar_sesion(self,request):
         request.session['perfil'] = None
         request.session['nombre_perfil'] = None
+
+class Vista_Eliminar_Resena(Vista_Eliminar):
+    def __init__(self):
+        self.ruta_redireccion = None
+
+    def eliminar_tupla(self,id):
+        calificacion = Calificacion.objects.get(id = id)
+        self.ruta_redireccion = '/detalle_libro/id='+str(calificacion.libro_id)
+        try:
+            comentario = Comentario.objects.get(calificacinon_id = calificacion.id)
+            comentario.delete()
+        except:
+            pass
+        calificacion.delete()
 
 class Vista_Iniciar_Sesion(View):
     def __init__(self,*args,**kwargs):
@@ -468,6 +529,22 @@ class Vista_Listado(View):
     def retornar_tuplas(self,request):
         "Este mensaje se puede aprovechar para carrgas cosas extras en el contxto"
         return self.modelo.objects.all()
+
+
+class Vista_Listado_Favoritos(Vista_Listado):
+    def __init__(self,*args,**kwargs):
+        self.url = 'listado_de_favoritos.html'
+        self.modelo = Libro
+        self.modelo_string = 'favoritos'
+        super(Vista_Listado_Favoritos,self).__init__(*args,**kwargs)
+
+    def retornar_tuplas(self,request):
+        perfil=Perfil.objects.get(id=request.session['perfil'])
+        libros_activos=listado_libros_activos()
+        print("abababababba")
+        listado_de_favoritos_activos=perfil.listado_favoritos.filter(id__in=libros_activos.values('id'))
+        return listado_de_favoritos_activos
+
 
 class Vista_Listado_Libro(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -826,6 +903,41 @@ def cambiar_tipo_suscripcion(request):
 
     return redirect('/datos_suscriptor/')
 
+
+class Agregar_a_favoritos(View):
+    def __init__(self,*args,**kwargs):
+       self.path=None
+       super(Agregar_a_favoritos, self).__init__(*args, **kwargs)
+    def get (self,request,id):
+        id_perfil = request.session['perfil']
+        perfil=Perfil.objects.get(id=id_perfil)
+        libro = Libro.objects.get(id=id)
+        self.cambiar_favorito(perfil,libro)
+        return redirect(self.path)
+
+    def cambiar_favorito(self,perfil=None,libro=None):
+        self.path='/detalle_libro/id='+ str(libro.id)
+        perfil.listado_favoritos.add(libro)
+        perfil.save()
+
+
+class Quitar_de_favoritos(Agregar_a_favoritos):
+    def cambiar_favorito(self,perfil=None,libro=None):
+        self.path='/detalle_libro/id='+ str(libro.id)
+        perfil.listado_favoritos.remove(libro)
+
+class Quitar_de_favoritos_desde_listado(Quitar_de_favoritos):
+
+    def cambiar_favorito(self, perfil=None, libro=None):
+        super(Quitar_de_favoritos_desde_listado,self).cambiar_favorito(perfil,libro)
+        self.path = '/listado_de_favoritos/'
+
+def marcar_comentario_spoiler(request,id_comentario=None,id_libro=None):
+    comentario = Comentario.objects.get(id = id_comentario)
+    comentario.spoiler = True
+    comentario.save()
+    return redirect('/detalle_libro/id='+id_libro)
+
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
         self.contexto=dict()
@@ -850,6 +962,7 @@ class Vista_Detalle_libro(Vista_Detalle):
         listado_de_libros_similares=decoradorEditorial.buscar_similares()
         listado_de_libros_similares=list(filter(lambda libro2:libro2.id != int(id),listado_de_libros_similares))   #saca el libro de donde estoy parado.
         self.contexto ['libros_similares'] = listado_de_libros_similares
+
 
     def cargar_diccionario(self, id):
         trailers = Trailer.objects.filter(libro_asociado_id=id)
@@ -885,6 +998,9 @@ class Vista_Detalle_libro(Vista_Detalle):
                 resenas_libro = resenas_libro.exclude(perfil_id=(self.request.session['perfil']))
             else:
                 self.contexto['resena_perfil'] = None
+            id_perfil = self.request.session['perfil']
+            self.contexto['lo_tengo_como_favorito'] = Libro.objects.filter(id=id, perfil__id=id_perfil).exists()
+
         except:
             pass
         self.contexto['resenas'] = paginar(self.request,resenas_libro,4) #Paginarlas
@@ -896,8 +1012,8 @@ class Vista_Detalle_libro(Vista_Detalle):
         decoradorEditorial = DecoradorEditorial(decoradorAutor, libro.editorial_id)
         listado_de_libros_similares = set(list(itertools.chain.from_iterable(decoradorEditorial.buscar_similares())))
         listado_de_libros_similares = list(filter(lambda libro2: libro2.id != int(id),listado_de_libros_similares))  # saca el libro de donde estoy parado.
-
         self.contexto['libros_similares'] = listado_de_libros_similares
+
 
     def verificar_estado_para_terminar(self,id_libro,id_perfil):
         self.contexto['error']=None
