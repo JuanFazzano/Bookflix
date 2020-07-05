@@ -25,7 +25,10 @@
         {{errores}}
         {{formulario.as_p}}
         <input id="boton_personalizado" type="submit" value="Guardar" />
-        <a id=boton_personalizado  href="/listado_{{modelo}}">  Cancelar  </a>
-
+        {% if modelo == capitulo %}
+            <a id=boton_personalizado  href="/listado_capitulo/id={{libro_asociado.id}}">  Cancelar  </a>
+        {% else %}
+            <a id=boton_personalizado  href="/listado_{{modelo}}">  Cancelar  </a>
+        {% endif %}
     </form>
 {% endblock %}

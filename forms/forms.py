@@ -201,8 +201,6 @@ class FormularioCargaFechas(forms.Form):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
 
-
-
 class FormularioCargaLibro(forms.Form):
     fecha_de_lanzamiento = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value':datetime.date.today()}))
     fecha_de_vencimiento = forms.DateField(widget=DateInput,required=False)
@@ -223,9 +221,6 @@ class FormularioCargaLibro(forms.Form):
             if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
-
-
-
 
 class FormularioNovedad(forms.Form):
     titulo = forms.CharField(max_length = 255,show_hidden_initial = True)
@@ -339,7 +334,6 @@ class Formulario_modificar_metadatos_libro(FormularioCargaDeMetadatosLibro):
                 raise forms.ValidationError(" En ISBN solo debe ingresarse digitos numericos")
         return isbn
 
-
 class FormularioTrailer(forms.Form):
     def obtener_libros(self):
         libros = Libro.objects.all()
@@ -434,11 +428,75 @@ class FormularioCapitulo(forms.Form):
         if existe_capitulo:
             raise forms.ValidationError('Ya existe el capitulo para ese libro')
         return self.cleaned_data['numero_capitulo']
+
     def clean_ultimo_capitulo(self):
         if(self.cleaned_data['ultimo_capitulo']):
             if(self.cleaned_data['numero_capitulo'] < Libro_Incompleto.objects.get(libro_id=self.id_libro).numero_maximo_capitulo()):
                 raise forms.ValidationError('El numero de capitulo debe ser el mas grande que: ' + str(Libro_Incompleto.objects.get(libro_id=self.id_libro).numero_maximo_capitulo()) )
         return self.cleaned_data['ultimo_capitulo']
+
+
+class Formulario_Modificar_Capitulo(forms.Form):
+    def __init__(self,capitulo=None,libro_asociado=None,*args, **kwargs):
+        super(Formulario_Modificar_Capitulo,self).__init__(*args,**kwargs)
+        self.capitulo=capitulo
+        self.libro_asociado=libro_asociado
+        self.fields['numero_capitulo'] = forms.IntegerField(initial=capitulo.capitulo)
+        self.fields['archivo_pdf'] = forms.FileField(initial=capitulo.archivo_pdf,required=False)
+        if (not libro_asociado.esta_completo):
+            self.fields['fecha_de_lanzamiento'] = forms.DateField(widget=forms.DateInput(attrs={'type':'date','value': capitulo.fecha_lanzamiento.date()}))
+            if(capitulo.fecha_vencimiento is None):
+                self.fields['fecha_de_vencimiento'] = forms.DateField(
+                    widget=forms.DateInput(attrs={'type': 'date'}),required=False)
+            else:
+                self.fields['fecha_de_vencimiento'] = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'value': capitulo.fecha_vencimiento.date()}))
+            self.fields['ultimo_capitulo'] = forms.BooleanField(required=False, widget=forms.CheckboxInput)
+        else:
+            if(capitulo.ultimo):
+                print('entre')
+                self.fields['ultimo_capitulo'] = forms.BooleanField(required=False, widget=forms.CheckboxInput,initial=True)
+
+
+    def clean_numero_capitulo(self):
+        "Checkea que no exista el capítulo para el mismo libro"
+        if(self.cleaned_data['numero_capitulo'] != self.capitulo.capitulo):
+            capitulos_libro = Capitulo.objects.filter(titulo_id = self.libro_asociado.id).values('capitulo')
+            existe_capitulo = capitulos_libro.filter(capitulo = self.cleaned_data['numero_capitulo']).exists()
+            if existe_capitulo:
+                raise forms.ValidationError('Ya existe el capitulo para ese libro')
+            else:
+                if( self.libro_asociado.esta_completo)and(self.cleaned_data['numero_capitulo'] > self.libro_asociado.numero_maximo_capitulo()):
+                    raise forms.ValidationError('El numero de capitulo no puede ser mas grande que: ' + str(self.libro_asociado.numero_maximo_capitulo()))
+        return self.cleaned_data['numero_capitulo']
+
+
+
+
+    def clean_ultimo_capitulo(self):
+        if(self.cleaned_data['ultimo_capitulo']):
+            if(self.cleaned_data['numero_capitulo'] < self.libro_asociado.numero_maximo_capitulo()):
+                raise forms.ValidationError('El numero de capitulo debe ser el mas grande que: ' + str(self.libro_asociado.numero_maximo_capitulo()) )
+        return self.cleaned_data['ultimo_capitulo']
+
+    def clean_fecha_de_lanzamiento(self):
+        fecha_de_lanzamiento1 = self.cleaned_data['fecha_de_lanzamiento']
+        if( self.capitulo.fecha_lanzamiento != fecha_de_lanzamiento1):
+            if(fecha_de_lanzamiento1 < datetime.date.today()):
+                print('tire alto error')
+                raise forms.ValidationError('La fecha de lanzamiento no puede ser anterior a la fecha de hoy')
+            return fecha_de_lanzamiento1
+        return  self.fecha_lanzamiento_inicial
+
+    def clean_fecha_de_vencimiento(self):
+        fecha_de_vencimiento1 =None
+        if 'fecha_de_lanzamiento' in self.cleaned_data.keys():
+            fecha_de_lanzamiento1= self.cleaned_data['fecha_de_lanzamiento']
+            fecha_de_vencimiento1= self.cleaned_data['fecha_de_vencimiento']
+            if((fecha_de_vencimiento1 is not None)and(fecha_de_lanzamiento1 > fecha_de_vencimiento1)):
+                raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
+        return fecha_de_vencimiento1
+
+
 
 
 class FormularioCambiarContraseña(forms.Form):
@@ -455,8 +513,6 @@ class FormularioCambiarContraseña(forms.Form):
         else:
             return self.cleaned_data['Contraseña_actual']
 
-
-
 class FormularioCrearPerfil(forms.Form):
     def __init__(self,id_suscriptor=None,*args,**kwargs):
         super(FormularioCrearPerfil,self).__init__(*args,**kwargs)
@@ -471,5 +527,22 @@ class FormularioCrearPerfil(forms.Form):
             raise forms.ValidationError('Ya exista un perfil con ese nombre en la cuenta')
         return self.cleaned_data['nombre']
 
+class FormularioReseña(forms.Form):
+    def __init__(self,*args,**kwargs):
+        super(FormularioReseña, self).__init__(*args, **kwargs)
+        self.fields['puntuacion'] = forms.CharField(widget = forms.Select(choices=(
+            (1,1),
+            (2,2),
+            (3,3),
+            (4,4),
+            (5,5)
+        )))
+        self.fields['comentario'] = forms.CharField(widget=forms.Textarea, required=False)
+        self.fields['spoiler'] = forms.BooleanField(required=False, widget=forms.CheckboxInput)
 
-
+    def clean_spoiler(self):
+        print(self.cleaned_data['spoiler'])
+        print(self.cleaned_data['comentario'])
+        if self.cleaned_data['spoiler'] and self.cleaned_data['comentario'] == '':
+            raise forms.ValidationError('Si marca como spoiler, el comentario no puede estar vacio')
+        return self.cleaned_data['spoiler']

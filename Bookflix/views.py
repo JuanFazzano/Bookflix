@@ -50,6 +50,40 @@ def eleccion_perfil(request,id = None):
     request.session['nombre_perfil'] = perfil.nombre_perfil
     return redirect('/listado_libro/')
 
+class Vista_Resenar_libro(View):
+    def __init__(self):
+        self.contexto = dict()
+
+    def get(self,request,id=None):
+        self.contexto['formulario'] = FormularioReseña()
+        self.contexto['libro'] = Libro.objects.get(id = id)
+        return render(request,'reseñar_libro.html',self.contexto)
+
+    def post(self,request,id=None):
+        formulario = FormularioReseña(request.POST)
+        if formulario.is_valid():
+            calificacion = Calificacion(
+                valoracion = formulario.cleaned_data['puntuacion'],
+                libro_id = id,
+                perfil_id = request.session['perfil'],
+                fecha_calificacion = datetime.datetime.now()
+            )
+            calificacion.save()
+            "Vemos si tiene comentario y lo guardamos en su correspondiente tabla"
+            comentario = formulario.cleaned_data['comentario']
+            if comentario != '':
+                print(calificacion)
+                comentario = Comentario(
+                    texto = comentario,
+                    spoiler = formulario.cleaned_data['spoiler'],
+                    calificacion_id = calificacion.id
+                )
+                comentario.save()
+            calificacion.save()
+            return redirect('/detalle_libro/id='+id)
+        self.contexto['formulario'] = formulario
+        return render(request,'reseñar_libro.html',self.contexto)
+
 class Vista_Registro(View):
     def __init__(self,*args,**kwargs):
         self.contexto = dict()
@@ -159,15 +193,22 @@ class Vista_Eliminar(View):
         self.modelo.objects.get(id = id).delete()
 
     def get(self,request,id = None):
-        print(id)
         self.eliminar_tupla(id)
+        self.cerrar_sesion(request)
         return redirect(self.ruta_redireccion)
+
+    def cerrar_sesion(self,request):
+        "Hook"
+        pass
 
 class Vista_Eliminar_Perfil(Vista_Eliminar):
     def __init__(self):
         self.modelo = Perfil
         self.ruta_redireccion = '/'
 
+    def cerrar_sesion(self,request):
+        request.session['perfil'] = None
+        request.session['nombre_perfil'] = None
 
 class Vista_Iniciar_Sesion(View):
     def __init__(self,*args,**kwargs):
@@ -381,13 +422,12 @@ def paginar(request,tuplas,cantidad_maxima_paginado=1):
 class Vista_Detalle(View):
     def __init__(self,*args, **kwargs):
         self.request=None
-        self.contexto = {'modelo': self.modelo_string}
+        self.contexto['modelo'] = self.modelo_string
 
     def get(self,request,id = None):
         self.request=request
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        print(request.GET)
         try:
             #Se pagina porque si en la tabla las fk son ids, es porque el paginador asocia el id con la fila que le corresponde
             tuplas = self.modelo.objects.filter(id = id)
@@ -418,13 +458,15 @@ class Vista_Listado(View):
     def get(self,request):
         if not request.user.is_authenticated:
             return redirect('/iniciar_sesion/')
-        tuplas = self.retornar_tuplas(request.user.is_staff)
+        tuplas = self.retornar_tuplas(request)
         #self.contexto = {'objeto_pagina': paginar(request,tuplas,10),'modelo': self.modelo_string}
         self.contexto['objeto_pagina']=paginar(request,tuplas,10)
         self.contexto['modelo']=self.modelo_string
         #EL contexto_extra existe ya que hay tablas que tienen ids de las claves foraneas. En este dic se setean los valores de esos ids foraneos
         return render(request,self.url,self.contexto)
-    def retornar_tuplas(self,es_staff=None):
+
+    def retornar_tuplas(self,request):
+        "Este mensaje se puede aprovechar para carrgas cosas extras en el contxto"
         return self.modelo.objects.all()
 
 class Vista_Listado_Libro(Vista_Listado):
@@ -434,9 +476,9 @@ class Vista_Listado_Libro(Vista_Listado):
         self.modelo_string = 'libro'
         super(Vista_Listado_Libro,self).__init__(*args,**kwargs)
 
-    def retornar_tuplas(self,es_staff):
-        if es_staff:
-            return super(Vista_Listado_Libro,self).retornar_tuplas()
+    def retornar_tuplas(self,request):
+        if request.user.is_staff:
+            return super(Vista_Listado_Libro,self).retornar_tuplas(request)
         return listado_libros_activos()
 
 class Vista_Listado_Novedad(Vista_Listado):
@@ -448,6 +490,7 @@ class Vista_Listado_Novedad(Vista_Listado):
 
 class Vista_Detalle_Novedad(Vista_Detalle):
     def __init__(self,*args,**kwargs):
+        self.contexto = dict()
         self.url = 'detalle_novedad.html'
         self.modelo = Novedad
         self.modelo_string = 'novedad'
@@ -483,6 +526,7 @@ class Vista_Listado_Perfiles(View):
 
 class Vista_Detalle_Trailer(Vista_Detalle):
     def __init__(self,*args,**kwargs):
+            self.contexto = dict()
             self.url = 'detalle_trailer.html'
             self.modelo = Trailer
             self.modelo_string = 'trailer'
@@ -784,11 +828,12 @@ def cambiar_tipo_suscripcion(request):
 
 class Vista_Detalle_libro(Vista_Detalle):
     def __init__(self,*args,**kwargs):
+        self.contexto=dict()
+        self.contexto['formulario_reseña'] = FormularioReseña()
         self.modelo_string = 'libro'
         self.url = 'detalle_libro.html'
         self.modelo = Libro
         super(Vista_Detalle_libro, self).__init__(*args, **kwargs)
-
 
     def cargar_diccionario_1 (self,id): #TODO eliminar este mensaje antes de la demo
         trailers = Trailer.objects.filter(libro_asociado_id = id).values('titulo','id')
@@ -809,18 +854,49 @@ class Vista_Detalle_libro(Vista_Detalle):
     def cargar_diccionario(self, id):
         trailers = Trailer.objects.filter(libro_asociado_id=id)
         libro = Libro.objects.filter(id=id)[0]
-        if libro.esta_completo:
-            # libro_completo =  Libro_Completo.objects.values().filter(libro_id = libro.id)
-            libro_completo = Libro_Completo.objects.get(libro_id=libro.id)
-            print('VALORES COMPLETO ', libro_completo)
-            self.contexto['completo'] = libro_completo
+
+        "Si esta completo o si fue cargado por capitulos y tiene fecha de lanzamiento"
+        #if libro.esta_completo or libro.fecha_lanzamiento is not None:
+            #libro_completo = Libro_Completo.objects.get(libro_id=libro.id)
+            #self.contexto['completo'] = libro_completo
+
+        "Este fragmento de codigo carga, para el libro actual, si el perfil lo termino"
+        try:
+            "Si esta en la tabla lee_libro, carga el estado de terminado"
+            self.contexto['terminado'] = Lee_libro.objects.get(libro_id=libro.id,perfil_id=(self.request.session['perfil'])).terminado
+        except:
+            "Si no esta, lo setea en false"
+            self.contexto['terminado'] = False
+        print('QUE ONDA ',self.contexto['terminado'])
+
+        "Este fragmento de codigo carga para ese libro si el perfil logueado ya lo resenio"
+
+        "Devuelve las resenias del libro"
+        resenas_libro = libro.reseñas()
+        try:
+            "Se rompe si sos admin"
+            resena_perfil = resenas_libro.filter(perfil_id=(self.request.session['perfil']))
+            self.contexto['fue_resenado'] = resena_perfil.exists()
+
+            "Si resenio, este fragmento carga la resenia y ademas carga todas las calificaciones"
+            if self.contexto['fue_resenado']:
+                self.contexto['resena_perfil'] = list(resena_perfil)[0]
+                "Saco la resenia del perfil, ya que va a estar al principio"
+                resenas_libro = resenas_libro.exclude(perfil_id=(self.request.session['perfil']))
+            else:
+                self.contexto['resena_perfil'] = None
+        except:
+            pass
+        self.contexto['resenas'] = paginar(self.request,resenas_libro,4) #Paginarlas
         self.contexto['trailers'] = paginar(self.request,trailers,10)
-        print('pagine bien')
+
+        "Cargamos los libros similares"
         decoradorGenero = DecoradorGenero(libro, libro.genero_id)
         decoradorAutor = DecoradorAutor(decoradorGenero, libro.autor_id)
         decoradorEditorial = DecoradorEditorial(decoradorAutor, libro.editorial_id)
         listado_de_libros_similares = set(list(itertools.chain.from_iterable(decoradorEditorial.buscar_similares())))
         listado_de_libros_similares = list(filter(lambda libro2: libro2.id != int(id),listado_de_libros_similares))  # saca el libro de donde estoy parado.
+
         self.contexto['libros_similares'] = listado_de_libros_similares
 
     def verificar_estado_para_terminar(self,id_libro,id_perfil):
@@ -1032,7 +1108,7 @@ class Vista_Alta_Capitulo(View):
                 libro = Libro.objects.get(id=id)
                 libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
                 libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
-                #capitulo.ultimo = True
+                capitulo.ultimo = True
                 libro.save()
                 incompleto.esta_completo = True
                 incompleto.save()
@@ -1042,6 +1118,75 @@ class Vista_Alta_Capitulo(View):
             return redirect('/listado_libro/')
         self.contexto['formulario'] = formulario
         return render(request,'carga_atributos_libro.html',self.contexto)
+
+class Vista_Modificar_Capitulo(View):
+    def get (self,request,id=None):
+        capitulo= Capitulo.objects.get(id=id)
+        libro_incompleto_asociado= Libro_Incompleto.objects.get(id=capitulo.titulo_id)
+        contexto={'formulario':Formulario_Modificar_Capitulo(capitulo,libro_incompleto_asociado)}
+        contexto['libro_asociado'] = Libro.objects.get(id=libro_incompleto_asociado.libro_id)
+        return render(request, 'carga_atributos_libro.html',contexto)
+
+    def sacar_libro_como_completo(self,libro_incompleto):
+        libro_incompleto.esta_completo=False
+        libro_incompleto.save()
+        libro=Libro.objects.get(id=libro_incompleto.libro_id)
+        libro.fecha_lanzamiento=None
+        libro.fecha_vencimiento=None
+        libro.save()
+
+    def cambiamos_fechas_capitulos(self,id,fecha_lanzamiento,fecha_vencimiento):
+        "Cambia las fechas de los capitulos del libro para mantener la consistencia"
+        try:
+            capitulos = Capitulo.objects.filter(titulo_id = id)
+            for capitulo in capitulos:
+                capitulo.fecha_lanzamiento = fecha_lanzamiento
+                capitulo.fecha_vencimiento = fecha_vencimiento
+                capitulo.save()
+
+        except:
+            return None
+    def registrar_libro_como_completo(self,libro_incompleto,formulario):
+        libro_incompleto.esta_completo=True
+        libro_incompleto.save()
+        libro = Libro.objects.get(id=libro_incompleto.libro_id)
+        libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
+        libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+        libro.save()
+        self.cambiamos_fechas_capitulos(libro_incompleto.id,formulario.cleaned_data['fecha_de_lanzamiento'],formulario.cleaned_data['fecha_de_vencimiento'])
+
+    def modificacion_del_capitulo(self,capitulo,libro_incompleto_asociado,formulario):
+        if(capitulo.ultimo):
+            "Si es el ultimo y en el formulario desmarcaste el checkbox Ultimo Capitulo, lo eliminar como libro_incompleto"
+            if(not formulario.cleaned_data['ultimo_capitulo']):
+                self.sacar_libro_como_completo(libro_incompleto_asociado)
+                capitulo.ultimo=False
+        else:
+            "Si no es el ultimo capitulo, y el libro no tiene marcado un ultimo capitulo"
+            if(not libro_incompleto_asociado.esta_completo):
+                "Si en el formulario marcaste el ultimo capitulo"
+                if (formulario.cleaned_data['ultimo_capitulo']):
+                    self.registrar_libro_como_completo(libro_incompleto_asociado,formulario)
+                    capitulo.ultimo=True
+                capitulo.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
+                capitulo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
+        capitulo.capitulo=formulario.cleaned_data['numero_capitulo']
+        if(formulario.cleaned_data['archivo_pdf'] is not None):
+            capitulo.archivo_pdf=formulario.cleaned_data['archivo_pdf']
+        capitulo.save()
+
+    def post(self,request,id = None):
+        capitulo = Capitulo.objects.get(id=id)
+        libro_incompleto_asociado = Libro_Incompleto.objects.get(id=capitulo.titulo_id)
+        formulario = Formulario_Modificar_Capitulo(data = request.POST,files = request.FILES,capitulo=capitulo,libro_asociado=libro_incompleto_asociado)
+        if formulario.is_valid():
+            self.modificacion_del_capitulo(capitulo,libro_incompleto_asociado,formulario)
+            path=('/listado_capitulo/id='+ str(libro_incompleto_asociado.libro_id))
+            return redirect(path)
+        contexto={'errores': formulario.errors}
+        contexto['libro_asociado']=Libro.objects.get(id=libro_incompleto_asociado.libro_id)
+        contexto['formulario'] = Formulario_Modificar_Capitulo(capitulo,libro_incompleto_asociado)
+        return render(request,'carga_atributos_libro.html',contexto)
 
 class Vista_Lectura_Libro(View):   #TODO validar que el libro este activo
     def __init__(self,*args,**kwargs):

@@ -21,6 +21,9 @@
             {% else %}
                 <a href="#" class="list-group-item list-group-item-action disabled">capitulo: {{capitulo.capitulo}} sera lanzado el {{capitulo.fecha_lanzamiento|date:"D d M Y"}}</a>
             {% endif %}
+            {% if request.user.is_staff %}
+                <a href="/modificar_capitulo/id={{capitulo.id}}">Modificar</a>
+            {% endif %}
         {% endfor %}
 
     </div>

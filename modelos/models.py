@@ -4,7 +4,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models import Max
+from django import template
 import datetime
+from django.db.models import Avg, Count, Min, Sum
+
+register = template.Library()
 
 class Tarjeta(models.Model):
     nro_tarjeta = models.CharField(max_length = 16)
@@ -143,9 +147,29 @@ class Libro(models.Model):
         "Devuelve de un libro si tiene capítulos"
         try:
             "Intenta ver si está como libro completo"
-            return Libro_Incompleto.objetcs.get(libro_id=self.id)
+            return Libro_Incompleto.objects.get(libro_id=self.id)
         except:
             return False
+
+    def lectores(self):
+        return Lee_libro.objects.filter(libro_id=self.id)
+
+    def lectores_que_terminaron(self):
+        return self.lectores().filter(terminado=True)
+
+
+    def promedio_puntaje(self):
+        calificaciones = self.reseñas()
+        print('Promedio ',calificaciones.aggregate(total=Avg('valoracion')) )
+        #try:
+        #    return calificaciones.aggregate(total=Sum('valoracion')) / calificaciones.count()
+        #except:
+            #return 0
+        return calificaciones.aggregate(total=Avg('valoracion'))
+
+    def reseñas(self):
+        return Calificacion.objects.filter(libro_id=self.id).order_by('-fecha_calificacion')
+
 
 class Perfil(models.Model):
     class Meta:
@@ -164,6 +188,13 @@ class Calificacion(models.Model):
     valoracion=models.IntegerField(default=0,null=False)
     fecha_calificacion = models.DateTimeField(null=False)
 
+    def perfil_califico(self):
+        "Devuelve el perfil que hizo la calificacion"
+        return Perfil.objects.get(id = self.perfil_id)
+
+    def comentario(self):
+        return Comentario.objects.get(calificacion_id = self.id)
+
 class Comentario(models.Model):
         #class Meta:
     #    unique_together = (('fecha_hora','calificacion'),)
@@ -179,6 +210,7 @@ class Lee_libro(models.Model):
     terminado=models.NullBooleanField(null=True)
     ultimo_acceso= models.DateTimeField(null = True)
 
+
 class Libro_Completo(models.Model):
     libro = models.OneToOneField(Libro,default=None, on_delete=models.CASCADE)
     archivo_pdf = models.FileField(null = False)
@@ -186,7 +218,6 @@ class Libro_Completo(models.Model):
 class Libro_Incompleto(models.Model):
     libro = models.OneToOneField(Libro,unique = True, on_delete=models.CASCADE)
     esta_completo=models.BooleanField(default = 0,null = True)
-
 
     def numero_maximo_capitulo(self):
         numero_maximo=Capitulo.objects.filter(titulo=self.id).aggregate(Max('capitulo'))
