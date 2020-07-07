@@ -77,6 +77,7 @@ urlpatterns = [
 
     url(r'^reporte_libros/', views.Vista_Reporte_Libros.as_view()),
     url(r'^reporte_suscriptores/', views.Vista_Reporte_Suscriptores.as_view()),
+    url(r'^eliminar_libro_completo/id=(?P<id>\w+)/$',views.eliminar_libro_completo),
 ]
 
 if settings.DEBUG:

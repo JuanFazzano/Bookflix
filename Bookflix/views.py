@@ -555,6 +555,21 @@ class Vista_Listado_Libro(Vista_Listado):
             return super(Vista_Listado_Libro,self).retornar_tuplas(request)
         return listado_libros_activos()
 
+def eliminar_libro_completo(request,id):
+    for lectura_libro in Lee_libro.objects.filter(libro_id=id):
+        #lectura_libro.terminado=False
+        #lectura_libro.save()
+        lectura_libro.delete()
+
+    Libro_Completo.objects.get(libro_id=id).delete()
+    libro = Libro.objects.get(id=id)
+    libro.esta_completo=False
+    libro.fecha_lanzamiento=None
+    libro.fecha_vencimiento=None
+    libro.save()
+
+    return redirect('/listado_libro/')
+
 class Vista_Listado_Novedad(Vista_Listado):
     def __init__(self,*args,**kwargs):
         self.url = 'listado_novedad.html'
@@ -1265,6 +1280,7 @@ class Vista_Modificar_Capitulo(View):
 
         except:
             return None
+
     def registrar_libro_como_completo(self,libro_incompleto,formulario):
         libro_incompleto.esta_completo=True
         libro_incompleto.save()
@@ -1274,7 +1290,7 @@ class Vista_Modificar_Capitulo(View):
         libro.save()
         self.cambiamos_fechas_capitulos(libro_incompleto.id,formulario.cleaned_data['fecha_de_lanzamiento'],formulario.cleaned_data['fecha_de_vencimiento'])
 
-    def modificacion_del_capitulo(self,capitulo,libro_incompleto_asociado,formulario):
+    def modificacion_del_capitulo(self,request,capitulo,libro_incompleto_asociado,formulario):
         if(capitulo.ultimo):
             "Si es el ultimo y en el formulario desmarcaste el checkbox Ultimo Capitulo, lo eliminar como libro_incompleto"
             if(not formulario.cleaned_data['ultimo_capitulo']):
@@ -1291,7 +1307,22 @@ class Vista_Modificar_Capitulo(View):
                 capitulo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
         capitulo.capitulo=formulario.cleaned_data['numero_capitulo']
         if(formulario.cleaned_data['archivo_pdf'] is not None):
+            "Si se modifica el archivo"
             capitulo.archivo_pdf=formulario.cleaned_data['archivo_pdf']
+            libro_leido = Lee_libro.objects.get(libro_id = libro_incompleto_asociado.libro_id)
+            for perfil in Perfil.objects.all():
+                capitulo_leido=Lee_Capitulo.objects.filter(capitulo_id = capitulo.id,perfil_id=perfil.id)
+                if capitulo_leido.exists():
+                    "Si el perfil leyo el capitulo, lo sacamos de sus capitulos leidos"
+                    capitulo_leido.delete()
+                    #if Lee_libro.objects.filter(perfil_id = perfil.id,libro_id = libro_leido.id).exists():
+                    "Si no existe tupla que cumpla que el perfil leyo un capitulo perteneciente al libro asociado, es decir, se modifica el unico capitulo leido por el perfil"
+                    if not Lee_Capitulo.objects.filter(perfil_id = perfil.id,capitulo_id__in = libro_incompleto_asociado.capitulos().values('id')).exists():
+                        libro_leido.delete()
+                    else:
+                        "Si exsite tupla, solo marca en false"
+                        libro_leido.terminado = False
+                        libro_leido.save()
         capitulo.save()
 
     def post(self,request,id = None):
@@ -1299,7 +1330,7 @@ class Vista_Modificar_Capitulo(View):
         libro_incompleto_asociado = Libro_Incompleto.objects.get(id=capitulo.titulo_id)
         formulario = Formulario_Modificar_Capitulo(data = request.POST,files = request.FILES,capitulo=capitulo,libro_asociado=libro_incompleto_asociado)
         if formulario.is_valid():
-            self.modificacion_del_capitulo(capitulo,libro_incompleto_asociado,formulario)
+            self.modificacion_del_capitulo(request,capitulo,libro_incompleto_asociado,formulario)
             path=('/listado_capitulo/id='+ str(libro_incompleto_asociado.libro_id))
             return redirect(path)
         contexto={'errores': formulario.errors}
@@ -1339,7 +1370,6 @@ class Vista_Lectura_Libro(View):   #TODO validar que el libro este activo
     def actualizar_contexto(self):
         "Hook"
         pass
-
 
     def marcar_como_leido(self,id_perfil):
         try:
@@ -1411,6 +1441,7 @@ class Vista_Lectura_Libro_Completo(Vista_Lectura_Libro):
             ultimo_acceso = datetime.datetime.now()
         )
         libro_leido.save()
+
     def actualizar_contexto(self):
         self.contexto = {'pdf': Libro_Completo.objects.get(libro_id = self.id).archivo_pdf}
 
@@ -1426,10 +1457,13 @@ class Vista_Historial(View):
     def obtener_capitulos_de_libro(self,request,libro,perfil):
         libro_actual=Libro.objects.get(id=libro.libro_id)
         if(not libro_actual.esta_completo):
-            libro_incompleto=Libro_Incompleto.objects.get(libro_id=libro.libro_id)
-            capitulos_del_libro = Capitulo.objects.filter(titulo_id = libro_incompleto.id)
-            capitulos_leidos=Lee_Capitulo.objects.filter(perfil_id=perfil,capitulo_id__in = capitulos_del_libro.values('id')).order_by('-ultimo_acceso')
-            return paginar(request,capitulos_leidos,capitulos_leidos.count())
+            try:
+                libro_incompleto=Libro_Incompleto.objects.get(libro_id=libro.libro_id)
+                capitulos_del_libro = Capitulo.objects.filter(titulo_id = libro_incompleto.id)
+                capitulos_leidos=Lee_Capitulo.objects.filter(perfil_id=perfil,capitulo_id__in = capitulos_del_libro.values('id')).order_by('-ultimo_acceso')
+                return paginar(request,capitulos_leidos,capitulos_leidos.count())
+            except:
+                return None
         return None
 
     def obtener_libro(self,libro):
@@ -1442,9 +1476,9 @@ class Vista_Historial(View):
             libro1 = Libro.objects.get(id=libro.libro_id)
             contexto['libros'].append({
                                 'libro':  libro1,
-                                'lee_libro': Lee_libro.objects.get(libro_id = libro1.id,perfil_id=id_perfil),
-                                'capitulos': self.obtener_capitulos_de_libro(request,libro,id_perfil)
-                                })
+                                 'lee_libro': Lee_libro.objects.get(libro_id = libro1.id,perfil_id=id_perfil),
+                                 'capitulos': self.obtener_capitulos_de_libro(request,libro,id_perfil)
+                             })
 
         cantidad_libro = 3
 

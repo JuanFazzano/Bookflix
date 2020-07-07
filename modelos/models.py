@@ -222,6 +222,9 @@ class Libro_Incompleto(models.Model):
     libro = models.OneToOneField(Libro,unique = True, on_delete=models.CASCADE)
     esta_completo=models.BooleanField(default = 0,null = True)
 
+    def capitulos(self):
+        return Capitulo.objects.filter(titulo_id = self.id)
+
     def numero_maximo_capitulo(self):
         numero_maximo=Capitulo.objects.filter(titulo=self.id).aggregate(Max('capitulo'))
         return numero_maximo['capitulo__max']

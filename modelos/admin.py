@@ -78,7 +78,6 @@ class LibroAdmin(admin.ModelAdmin):
         self.exclude = ('esta_completo',) #Saca el checkbox
         return form
 
-
 class EditorialAdmin(admin.ModelAdmin):
     list_per_page = 2
     view_only=True

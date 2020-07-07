@@ -47,8 +47,9 @@
         {% else %}
           <a href="/modificar_fechas_libro/id={{libro.id}}/" class="badge badge-warning">Cambiar Fechas</a>
         {% endif %}
-        {% else %}
+      {% else %}
         <a href="/modificar_fechas_libro/id={{libro.id}}/" class="badge badge-warning">Cambiar Fechas</a>
+        <a onclick="return confirm('Desea eliminar el PDF')" href="/eliminar_libro_completo/id={{libro.id}}" class="badge badge-danger"> Eliminar libro completo </a>
       {% endif %}
       <!-- Si no está completo, muestra los botones de subir completo o por capitulo -->
       </td>
