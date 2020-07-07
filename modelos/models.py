@@ -8,7 +8,7 @@ from django import template
 import datetime
 from django.db.models import Avg, Count, Min, Sum
 
-register = template.Library()
+#register = template.Library()
 
 class Tarjeta(models.Model):
     nro_tarjeta = models.CharField(max_length = 16)
@@ -157,6 +157,11 @@ class Libro(models.Model):
     def lectores_que_terminaron(self):
         return self.lectores().filter(terminado=True)
 
+    def cantidad_lectores_que_terminaron(self):
+        return self.lectores_que_terminaron().count()
+
+    def cantidad_lectores_totales(self):
+        return self.lectores().count()
 
     def promedio_puntaje(self):
         calificaciones = self.reseñas()
@@ -170,7 +175,6 @@ class Libro(models.Model):
     def reseñas(self):
         return Calificacion.objects.filter(libro_id=self.id).order_by('-fecha_calificacion')
 
-
 class Perfil(models.Model):
     class Meta:
         unique_together = (('nombre_perfil','auth'),)
@@ -178,7 +182,6 @@ class Perfil(models.Model):
     nombre_perfil = models.CharField(max_length = 25)
     foto = models.FileField(blank=True, null=True)
     listado_favoritos = models.ManyToManyField(Libro)
-
 
 class Calificacion(models.Model):
     class Meta:
@@ -201,6 +204,7 @@ class Comentario(models.Model):
     calificacion = models.ForeignKey(Calificacion,unique = True,on_delete=models.CASCADE)
     texto = models.TextField(blank = False, null = False)
     spoiler = models.BooleanField(default=0)
+    spoiler_admin = models.BooleanField(default=0)
 
 class Lee_libro(models.Model):
     class Meta:
@@ -209,7 +213,6 @@ class Lee_libro(models.Model):
     libro=models.ForeignKey(Libro, on_delete=models.CASCADE)
     terminado=models.NullBooleanField(null=True)
     ultimo_acceso= models.DateTimeField(null = True)
-
 
 class Libro_Completo(models.Model):
     libro = models.OneToOneField(Libro,default=None, on_delete=models.CASCADE)

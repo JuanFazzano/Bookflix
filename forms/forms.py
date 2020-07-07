@@ -1,8 +1,6 @@
 import datetime
 from django import forms
-from django.contrib.auth.models import User
 from modelos.models import *
-from django.db.models import Max
 
 def clean_campo(clase,atributo,longitud):
     campo = clase.cleaned_data[atributo] #Si no es un numero, esto levanta excepcion.
@@ -435,7 +433,6 @@ class FormularioCapitulo(forms.Form):
                 raise forms.ValidationError('El numero de capitulo debe ser el mas grande que: ' + str(Libro_Incompleto.objects.get(libro_id=self.id_libro).numero_maximo_capitulo()) )
         return self.cleaned_data['ultimo_capitulo']
 
-
 class Formulario_Modificar_Capitulo(forms.Form):
     def __init__(self,capitulo=None,libro_asociado=None,*args, **kwargs):
         super(Formulario_Modificar_Capitulo,self).__init__(*args,**kwargs)
@@ -496,9 +493,6 @@ class Formulario_Modificar_Capitulo(forms.Form):
                 raise forms.ValidationError('La fecha de lanzamiento no puede ser posterior a la fecha de vencimiento')
         return fecha_de_vencimiento1
 
-
-
-
 class FormularioCambiarContraseña(forms.Form):
     def __init__(self,id_usuario, *args, **kwargs):
         self.id = id_usuario
@@ -512,7 +506,7 @@ class FormularioCambiarContraseña(forms.Form):
             raise forms.ValidationError('Contraseña actual incorrecta')
         else:
             return self.cleaned_data['Contraseña_actual']
-
+#pass
 class FormularioCrearPerfil(forms.Form):
     def __init__(self,id_suscriptor=None,*args,**kwargs):
         super(FormularioCrearPerfil,self).__init__(*args,**kwargs)
@@ -528,7 +522,7 @@ class FormularioCrearPerfil(forms.Form):
         return self.cleaned_data['nombre']
 
 class FormularioReseña(forms.Form):
-    def __init__(self,*args,**kwargs):
+    def __init__(self,comentario=None,*args,**kwargs):
         super(FormularioReseña, self).__init__(*args, **kwargs)
         self.fields['puntuacion'] = forms.CharField(widget = forms.Select(choices=(
             (1,1),
@@ -538,10 +532,17 @@ class FormularioReseña(forms.Form):
             (5,5)
         )))
         self.fields['comentario'] = forms.CharField(widget=forms.Textarea, required=False,show_hidden_initial=True)
-        self.fields['spoiler'] = forms.BooleanField(required=False, widget=forms.CheckboxInput,show_hidden_initial=True)
-
+        if ((comentario is not None) and (comentario.spoiler_admin)):
+            "Si hay comentario y fue marcado por el admin"
+            self.fields['spoiler'] = forms.BooleanField(required=False, widget=forms.CheckboxInput,
+                                                        show_hidden_initial=True, disabled=True)
+        elif ((comentario is None) or ((comentario is not None) and (not comentario.spoiler_admin))):
+            "Si no hay comentario o hay comentario y no fue marcado por el admin"
+            self.fields['spoiler'] = forms.BooleanField(required=False, widget=forms.CheckboxInput,
+                                                        show_hidden_initial=True)
     def clean_spoiler(self):
-        print('Holaa 1')
         if self.cleaned_data['spoiler'] and self.cleaned_data['comentario'] == '':
             raise forms.ValidationError('Si marca como spoiler, el comentario no puede estar vacio')
         return self.cleaned_data['spoiler']
+
+

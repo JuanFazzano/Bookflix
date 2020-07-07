@@ -60,7 +60,7 @@ class Vista_Resenar_libro(View):
         return render(request,'reseñar_libro.html',self.contexto)
 
     def post(self,request,id=None):
-        formulario = FormularioReseña(request.POST)
+        formulario = FormularioReseña(data=request.POST)
         if formulario.is_valid():
             calificacion = Calificacion(
                 valoracion = formulario.cleaned_data['puntuacion'],
@@ -103,13 +103,12 @@ class Vista_Modificar_Resena_libro(View):
         return valores_iniciales
 
     def get(self,request,id):
-        self.contexto['formulario'] = FormularioReseña(initial = self.__valores_iniciales(id))
+        self.contexto['formulario'] = FormularioReseña(initial = self.__valores_iniciales(id),comentario=Comentario.objects.get(calificacion_id = id))
         return render(request,'reseñar_libro.html',self.contexto)
 
     def post(self,request,id):
-        formulario = FormularioReseña(data=request.POST,initial=self.__valores_iniciales(id))
+        formulario = FormularioReseña(data=request.POST,initial=self.__valores_iniciales(id),comentario=Comentario.objects.get(calificacion_id = id))
         if formulario.is_valid():
-
             calificacion = Calificacion.objects.get(id=id)
             calificacion.valoracion = formulario.cleaned_data['puntuacion']
             calificacion.save()
@@ -530,7 +529,6 @@ class Vista_Listado(View):
         "Este mensaje se puede aprovechar para carrgas cosas extras en el contxto"
         return self.modelo.objects.all()
 
-
 class Vista_Listado_Favoritos(Vista_Listado):
     def __init__(self,*args,**kwargs):
         self.url = 'listado_de_favoritos.html'
@@ -544,7 +542,6 @@ class Vista_Listado_Favoritos(Vista_Listado):
         print("abababababba")
         listado_de_favoritos_activos=perfil.listado_favoritos.filter(id__in=libros_activos.values('id'))
         return listado_de_favoritos_activos
-
 
 class Vista_Listado_Libro(Vista_Listado):
     def __init__(self,*args,**kwargs):
@@ -903,7 +900,6 @@ def cambiar_tipo_suscripcion(request):
 
     return redirect('/datos_suscriptor/')
 
-
 class Agregar_a_favoritos(View):
     def __init__(self,*args,**kwargs):
        self.path=None
@@ -920,14 +916,12 @@ class Agregar_a_favoritos(View):
         perfil.listado_favoritos.add(libro)
         perfil.save()
 
-
 class Quitar_de_favoritos(Agregar_a_favoritos):
     def cambiar_favorito(self,perfil=None,libro=None):
         self.path='/detalle_libro/id='+ str(libro.id)
         perfil.listado_favoritos.remove(libro)
 
 class Quitar_de_favoritos_desde_listado(Quitar_de_favoritos):
-
     def cambiar_favorito(self, perfil=None, libro=None):
         super(Quitar_de_favoritos_desde_listado,self).cambiar_favorito(perfil,libro)
         self.path = '/listado_de_favoritos/'
@@ -935,6 +929,15 @@ class Quitar_de_favoritos_desde_listado(Quitar_de_favoritos):
 def marcar_comentario_spoiler(request,id_comentario=None,id_libro=None):
     comentario = Comentario.objects.get(id = id_comentario)
     comentario.spoiler = True
+    if request.user.is_staff:
+        comentario.spoiler_admin = True
+    comentario.save()
+    return redirect('/detalle_libro/id='+id_libro)
+
+def desmarcar_comentario_spoiler(request,id_comentario=None,id_libro=None):
+    comentario = Comentario.objects.get(id = id_comentario)
+    comentario.spoiler = False
+    comentario.spoiler_admin = False
     comentario.save()
     return redirect('/detalle_libro/id='+id_libro)
 
@@ -1346,7 +1349,7 @@ class Vista_Lectura_Libro(View):   #TODO validar que el libro este activo
 
         self.actualizar_contexto()
 
-class Vista_Lectura_Capitulo(Vista_Lectura_Libro):          #TODO validar que el libro este activo
+class Vista_Lectura_Capitulo(Vista_Lectura_Libro):
     def __init__(self,*args,**kwargs):
         super(Vista_Lectura_Capitulo,self).__init__(*args,**kwargs)
 
@@ -1455,6 +1458,36 @@ class Vista_Historial(View):
         contexto['nombre_perfil'] = Perfil.objects.get(id = id_perfil).nombre_perfil
         return contexto
 
+class Vista_Reporte_Libros(View):
+    def get (self,request,pagina=None):
+        ''' Nos queda con todos los libros ordenados segun el orden de cual fue más leido '''
+        #libros = Lee_libro.objects.values('libro_id').all().annotate(lectores_totales=Count(libro_id)).order_by('lectores_totales')
+        libros = Libro.objects.all()
+        libros = sorted(libros, key=lambda libro: libro.cantidad_lectores_totales(), reverse=True)
+        contexto = {}
+        contexto['libros'] = paginar(request, libros, 10)
+        return render(request,'reporte_libros.html',contexto)
+
+class Vista_Reporte_Suscriptores(View):
+    def get(self,request,pagina=None):
+        contexto = {}
+        try:
+            fecha_inicio = request.GET['fecha_inicio']
+            fecha_fin = request.GET['fecha_fin']
+            if fecha_inicio != '':
+                if fecha_fin == '':
+                    fecha_fin = datetime.datetime.now().date()
+                suscriptores = Suscriptor.objects.filter(fecha_suscripcion__range=(fecha_inicio, fecha_fin)).order_by('-fecha_suscripcion')
+
+                contexto['suscriptores'] = paginar(request,suscriptores,10)
+                contexto['fecha_inicio'] = fecha_inicio
+                contexto['fecha_fin'] = str(fecha_fin)
+
+        except:
+            pass
+
+        return render(request,'reporte_suscriptores.html',contexto)
+
 class Listado_decorado:
     def __init__(self,listado):
         self.listado = listado
@@ -1547,3 +1580,5 @@ class DecoradorEditorial(Decorador):
 
     def libros(self):
         return listado_libros_activos().filter(editorial_id = self.campo)
+
+

@@ -233,9 +233,15 @@
                     COMENTARIO: {{resena.comentario.texto}}
                     <br>
                     {% if resena.comentario.spoiler %}
-                        <h3 style="" id="spoiler{{forloop.counter}}"> Alerta Spoiler  </h3>
-                        <label style="display:none" id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
-                        <button onclick="revelar_spoiler({{forloop.counter}})"> Revelar Spoiler </button>
+                        {% if request.user.is_staff %}
+                            {% if resena.comentario.spoiler_admin %}
+                                <a href="/desmarcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Desmarcar como spoiler </a>
+                            {% endif %}
+                        {% else %}
+                            <h3 style="" id="spoiler{{forloop.counter}}"> Alerta Spoiler  </h3>
+                            <label style="display:none" id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
+                            <button onclick="revelar_spoiler({{forloop.counter}})"> Revelar Spoiler </button>
+                        {% endif %}
                     {% else %}
                         <label id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
                         {% if request.user.is_staff %}
