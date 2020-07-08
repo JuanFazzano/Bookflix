@@ -74,10 +74,10 @@ urlpatterns = [
     url(r'^modificar_reseña/id=(?P<id>\w+)/$', views.Vista_Modificar_Resena_libro.as_view()),
     url(r'^marcar_comentario_spoiler/(?P<id_comentario>\w+)/(?P<id_libro>\w+)/$', views.marcar_comentario_spoiler),
     url(r'^desmarcar_comentario_spoiler/(?P<id_comentario>\w+)/(?P<id_libro>\w+)/$', views.desmarcar_comentario_spoiler),
-
     url(r'^reporte_libros/', views.Vista_Reporte_Libros.as_view()),
     url(r'^reporte_suscriptores/', views.Vista_Reporte_Suscriptores.as_view()),
     url(r'^eliminar_libro_completo/id=(?P<id>\w+)/$',views.eliminar_libro_completo),
+    url(r'^eliminar_suscripcion/',views.eliminar_suscripcion),
 ]
 
 if settings.DEBUG:

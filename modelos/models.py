@@ -209,7 +209,7 @@ class Comentario(models.Model):
 class Lee_libro(models.Model):
     class Meta:
         unique_together = (('libro','perfil'),)
-    perfil=models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    perfil=models.ForeignKey(Perfil,null=True,blank=True,on_delete=models.SET_NULL)
     libro=models.ForeignKey(Libro, on_delete=models.CASCADE)
     terminado=models.NullBooleanField(null=True)
     ultimo_acceso= models.DateTimeField(null = True)
@@ -253,7 +253,7 @@ class Capitulo(models.Model):
 class Lee_Capitulo(models.Model):
     class Meta:
         unique_together = (('capitulo','perfil'),)
-    perfil=models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    perfil=models.ForeignKey(Perfil,null=True,blank=True,on_delete=models.SET_NULL)
     capitulo=models.ForeignKey(Capitulo, on_delete=models.CASCADE)
     ultimo_acceso= models.DateTimeField(null = True)
 
@@ -280,7 +280,7 @@ class Trailer(models.Model):
         verbose_name_plural = 'Trailers'
     titulo          = models.CharField(unique = True, max_length=255, default = None)
     descripcion     = models.TextField(null = False)
-    libro_asociado  = models.ForeignKey(Libro,null = True, blank = True,on_delete = models.CASCADE)
+    libro_asociado  = models.ForeignKey(Libro,null = True, blank = True,on_delete = models.SET_NULL)
     pdf             = models.FileField(null = True, blank = True)
     video           = models.FileField(null = True, blank = True)
 

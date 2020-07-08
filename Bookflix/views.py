@@ -328,6 +328,10 @@ class Vista_Datos_Usuario(View):
 
         return render(request,'datos_usuario.html',contexto)
 
+def eliminar_suscripcion(request):
+    User.objects.get(id=request.session['_auth_user_id']).delete()
+    return cerrar_sesion(request)
+
 class Vista_Visitante(View):
     def get(self,request):
         if request.user.is_authenticated:

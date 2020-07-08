@@ -98,7 +98,7 @@ $(document).ready(function(){
 </div>
 
 
-<!-- Seccion de perfiles -------------------------->
+<!-- Seccion de perfiles
 <div class="p-3 mb-2 bg-dark"><h4 style="color:red; black:white"> Perfiles </h4></div>
 
 <a href="#" class="badge badge-success"> Crear perfil </a>
@@ -121,6 +121,8 @@ $(document).ready(function(){
     </li>
     {%endfor %}
 </ul>
+-------------------------->
+<br>
 
-
+<a onclick="return confirm('¿Seguro que quiere eliminar su cuenta?')" href="/eliminar_suscripcion/" class="badge badge-danger"> Eliminar Suscripción </a>
 {% endblock %}
