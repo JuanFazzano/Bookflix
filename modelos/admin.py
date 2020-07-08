@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
-from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad,Trailer,Calificacion
+from .models import Genero,Autor,Editorial,Libro,Suscriptor,Novedad,Trailer,Calificacion,Capitulo,Libro_Incompleto
 
 class NovedadAdmin(admin.ModelAdmin):
     list_display=('titulo',)
@@ -117,6 +117,30 @@ class CalificacionAdmin(admin.ModelAdmin):
     def response_delete(self, request, obj_display, obj_id):
         return redirect('/detalle_libro/id='+str(self.id_libro))
 
+
+class CapituloAdmin(admin.ModelAdmin):
+    id_libro = None
+    def delete_view(self, request, object_id, extra_context=None):
+        id_libro_incompleto = Capitulo.objects.get(id=object_id).titulo_id
+        libro_incompleto=Libro_Incompleto.objects.get(id=id_libro_incompleto)
+        self.id_libro=libro_incompleto.libro_id
+        if(libro_incompleto.esta_completo):
+            ultimo_capitulo= Capitulo.objects.get(titulo_id=id_libro_incompleto,ultimo=True)
+            ultimo_capitulo.ultimo=False
+            ultimo_capitulo.save()
+            libro_incompleto.esta_completo=False
+            libro_incompleto.save()
+            libro = Libro.objects.get(id=libro_incompleto.libro_id)
+            libro.fecha_lanzamiento = None
+            libro.fecha_vencimiento = None
+            libro.save()
+        return super(CapituloAdmin, self).delete_view(request, object_id, extra_context)
+
+    def response_delete(self, request, obj_display, obj_id):
+        return redirect('/listado_capitulo/id='+str(self.id_libro))
+
+
+
 admin.site.site_header = 'Panel de Administracion Bookflix'
 
 #Saca los modelos que no queremos que se interactúen
@@ -132,3 +156,4 @@ admin.site.register(Genero,GeneroAdmin)
 admin.site.register(Editorial,EditorialAdmin)
 admin.site.register(Autor,AutorAdmin)
 admin.site.register(Trailer,TrailerAdmin)
+admin.site.register(Capitulo,CapituloAdmin)

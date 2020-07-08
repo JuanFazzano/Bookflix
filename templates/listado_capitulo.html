@@ -23,6 +23,7 @@
             {% endif %}
             {% if request.user.is_staff %}
                 <a href="/modificar_capitulo/id={{capitulo.id}}">Modificar</a>
+                <a href="/admin/modelos/capitulo/{{capitulo.id}}/delete/" class="badge badge-danger"> Eliminar </a>
             {% endif %}
         {% endfor %}
 
