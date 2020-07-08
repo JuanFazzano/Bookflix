@@ -1209,7 +1209,6 @@ class Vista_Alta_Capitulo(View):
         except:
             pass
 
-
     def cambiamos_fechas_capitulos(self,id,fecha_lanzamiento,fecha_vencimiento):
         "Cambia las fechas de los capitulos del libro para mantener la consistencia"
         try:
@@ -1233,7 +1232,6 @@ class Vista_Alta_Capitulo(View):
         if formulario.is_valid():
             #Si es valido el formulario, cargo el capitulo
             incompleto = Libro_Incompleto.objects.get(libro_id=id)
-            print('ID incompleto ',incompleto.id)
             capitulo = Capitulo(
                 capitulo=formulario.cleaned_data['numero_capitulo'],
                 archivo_pdf=formulario.cleaned_data['archivo_pdf'],
@@ -1242,7 +1240,7 @@ class Vista_Alta_Capitulo(View):
             capitulo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
             capitulo.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
             if formulario.cleaned_data['ultimo_capitulo']:
-                #Si no es el ultimo capitulo, le cargo la fecha
+                "Si no es el ultimo capitulo, le cargo la fecha"
                 libro = Libro.objects.get(id=id)
                 libro.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
                 libro.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
@@ -1250,9 +1248,15 @@ class Vista_Alta_Capitulo(View):
                 libro.save()
                 incompleto.esta_completo = True
                 incompleto.save()
-                print(self.cambiamos_fechas_capitulos(incompleto.id,formulario.cleaned_data['fecha_de_lanzamiento'], formulario.cleaned_data['fecha_de_vencimiento']))
-
             capitulo.save()
+            try:
+                "Siempre que agregue un capitulo, si se leyo el libro y alguien lo termino, lo pone en curso"
+                for libro_leido in Lee_libro.objects.filter(libro_id = incompleto.libro_id):
+                    libro_leido.terminado = False
+                    libro_leido.save()
+            except:
+                pass
+
             return redirect('/listado_libro/')
         self.contexto['formulario'] = formulario
         return render(request,'carga_atributos_libro.html',self.contexto)
