@@ -117,7 +117,6 @@ class CalificacionAdmin(admin.ModelAdmin):
     def response_delete(self, request, obj_display, obj_id):
         return redirect('/detalle_libro/id='+str(self.id_libro))
 
-
 class CapituloAdmin(admin.ModelAdmin):
     id_libro = None
     def delete_view(self, request, object_id, extra_context=None):
@@ -138,8 +137,6 @@ class CapituloAdmin(admin.ModelAdmin):
 
     def response_delete(self, request, obj_display, obj_id):
         return redirect('/listado_capitulo/id='+str(self.id_libro))
-
-
 
 admin.site.site_header = 'Panel de Administracion Bookflix'
 

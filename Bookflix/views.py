@@ -687,6 +687,10 @@ class Vista_Formulario_Libro_Completo(View):
 
             "Borramos la instancia de libro incompleto"
             libro_incompleto.delete()
+
+            libros_leidos = Lee_libro.objects.filter(libro_id = libro.id)
+            for libro_leido in libros_leidos:
+                libros_leidos.delete()
         except:
             "No estaba cargado como libro incompleto"
             pass
@@ -1314,7 +1318,7 @@ class Vista_Modificar_Capitulo(View):
                 capitulo.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
                 capitulo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
         capitulo.capitulo=formulario.cleaned_data['numero_capitulo']
-        if(formulario.cleaned_data['archivo_pdf'] is not None):
+        if(formulario.cleaned_data['archivo_pdf'] is not None and formulario.cleaned_data['archivo_pdf'] != capitulo.archivo_pdf):
             "Si se modifica el archivo"
             capitulo.archivo_pdf=formulario.cleaned_data['archivo_pdf']
             libro_leido = Lee_libro.objects.get(libro_id = libro_incompleto_asociado.libro_id)
@@ -1513,21 +1517,30 @@ class Vista_Reporte_Libros(View):
 class Vista_Reporte_Suscriptores(View):
     def get(self,request,pagina=None):
         contexto = {}
+        error = ''
         try:
             fecha_inicio = request.GET['fecha_inicio']
             fecha_fin = request.GET['fecha_fin']
             if fecha_inicio != '':
                 if fecha_fin == '':
+                    "Si no puso una fecha de fin, tomamos por defecto la actual"
                     fecha_fin = datetime.datetime.now().date()
-                suscriptores = Suscriptor.objects.filter(fecha_suscripcion__range=(fecha_inicio, fecha_fin)).order_by('-fecha_suscripcion')
 
-                contexto['suscriptores'] = paginar(request,suscriptores,10)
+                if fecha_inicio > fecha_fin:
+                    error = 'La fecha límite no puede ser inferior a la fecha de inicio'
+
+                if error == '':
+                    "Si no hubo error, agregamos al contexto los suscriptores"
+                    suscriptores = Suscriptor.objects.filter(fecha_suscripcion__range=(fecha_inicio, fecha_fin)).order_by('-fecha_suscripcion')
+                    contexto['suscriptores'] = paginar(request, suscriptores, 10)
+                else:
+                    contexto['suscriptores'] = None
+                contexto['error'] = error
                 contexto['fecha_inicio'] = fecha_inicio
                 contexto['fecha_fin'] = str(fecha_fin)
 
         except:
             pass
-
         return render(request,'reporte_suscriptores.html',contexto)
 
 class Listado_decorado:

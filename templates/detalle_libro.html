@@ -179,82 +179,93 @@
                         console.log(document.getElementById('spoiler'+id_spoiler));
                         document.getElementById('spoiler'+id_spoiler).style.display = "none";
                         document.getElementById('revelar'+id_spoiler).style.display = "block";
+                        document.getElementById('boton_revelar'+id_spoiler).style.display = "none";
+                    }
+                    function desplegar_resenas(){
+                        document.getElementById('listado_resenas').style.display = 'block';
                     }
             </script>
-
-       <div id="listado_resenas">
+    <button onclick="desplegar_resenas()"> Desplegar reseñas </button>
+       <div id="listado_resenas" style="display:none">
          <div class="list-group">
-         <div class="p-3 mb-2 bg-danger text-white"><h2>Reseñas del libro</h2></div>
-         PROMEDIO: {{libro.promedio_puntaje.total}}
-
-         {% if not request.user.is_staff %}
-            {% if resena_perfil %}
-                <ul>
-                    Tu reseña <a href="/modificar_reseña/id={{resena_perfil.id}}"> Modificar </a>
-                    <a onclick="return confirm('Desea eliminar esta reseña')" href="/eliminar_reseña/id={{resena_perfil.id}}" class="badge badge-danger"> Eliminar </a>
-
-                    <br>
-                    Valoracion: {{resena_perfil.valoracion}}
-                    {% if resena_perfil.comentario %}
-                        Comentario: {{resena_perfil.comentario.texto}}
-                    {% endif %}
-                </ul>
+             <div class="p-3 mb-2 bg-danger text-white"><h2>Reseñas del libro</h2></div>
+             {% if not libro.promedio_puntaje.total  %}
+               Aun no fue calificado
+             {% else %}
+                 PROMEDIO: {{libro.promedio_puntaje.total}}
              {% endif %}
-         {% endif %}
-         {% if resenas %}
-            <hr>
-            <ul style="list-style:none; float:left;">
-                <li>
+             {% if not request.user.is_staff %}
+                {% if resena_perfil %}
+                    <ul>
+                        Tu reseña <a href="/modificar_reseña/id={{resena_perfil.id}}"> Modificar </a>
+                        <a onclick="return confirm('Desea eliminar esta reseña')" href="/eliminar_reseña/id={{resena_perfil.id}}" class="badge badge-danger"> Eliminar </a>
 
-                </li>
-                <li>
-                {% if resenas.has_previous %}
-                    <a href="?page={{resenas.previous_page_number}}"> {{resenas.previous_page_number}}    </a>
+                        <br>
+                        Valoracion: {{resena_perfil.valoracion}}
+                        {% if resena_perfil.comentario %}
+                            Comentario: {{resena_perfil.comentario.texto}}
+                        {% endif %}
+                    </ul>
                 {% endif %}
-                <span>  {{ resenas.number }}  </span>
-                {% if resenas.has_next %}
-                   <a href="?page={{resenas.next_page_number}}">  {{resenas.next_page_number}}  </a>
-                {% endif%}
-                </li>
+             {% endif %}
+             {% if resenas %}
+                <hr>
+                <ul style="list-style:none; float:left;">
+                    <li>
 
-            </ul>
-            <ul style="list-style:none;">
-            {% for resena in resenas %}
-            <hr>
-                <br>
-                Valoracion: {{resena.valoracion}} hecha por
-                {% if resena.perfil_califico %}
-                    {{resena.perfil_califico.nombre_perfil}}
-                {% else %}
-                        Perfil borrado
-                {% endif %}
-                <br>
-                {% if resena.comentario %}
-                    COMENTARIO: {{resena.comentario.texto}}
+                    </li>
+                    <li>
+                    {% if resenas.has_previous %}
+                        <a href="?page={{resenas.previous_page_number}}"> {{resenas.previous_page_number}}    </a>
+                    {% endif %}
+                    <span>  {{ resenas.number }}  </span>
+                    {% if resenas.has_next %}
+                       <a href="?page={{resenas.next_page_number}}">  {{resenas.next_page_number}}  </a>
+                    {% endif%}
+                    </li>
+
+                </ul>
+                <ul style="list-style:none;">
+                {% for resena in resenas %}
+                <hr>
                     <br>
-                    {% if resena.comentario.spoiler %}
+                    Valoracion: {{resena.valoracion}} hecha por
+                    {% if resena.perfil_califico %}
+                        {{resena.perfil_califico.nombre_perfil}}
+                    {% else %}
+                            Perfil borrado
+                    {% endif %}
+                    <br>
+                    {% if resena.comentario %}
                         {% if request.user.is_staff %}
-                            {% if resena.comentario.spoiler_admin %}
-                                <a href="/desmarcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Desmarcar como spoiler </a>
+                            Comentario: {{resena.comentario.texto}}
+                        {% endif %}
+                        <br>
+                        {% if resena.comentario.spoiler %}
+                            {% if request.user.is_staff %}
+                                {% if resena.comentario.spoiler_admin %}
+                                    <a href="/desmarcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Desmarcar como spoiler </a>
+                                {% endif %}
+                            {% else %}
+                                <h3 style="" id="spoiler{{forloop.counter}}"> Alerta Spoiler  </h3>
+                                <label style="display:none" id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
+                                <button id="boton_revelar{{forloop.counter}}" onclick="revelar_spoiler({{forloop.counter}})"> Revelar Spoiler </button>
                             {% endif %}
                         {% else %}
-                            <h3 style="" id="spoiler{{forloop.counter}}"> Alerta Spoiler  </h3>
-                            <label style="display:none" id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
-                            <button onclick="revelar_spoiler({{forloop.counter}})"> Revelar Spoiler </button>
-                        {% endif %}
-                    {% else %}
-                        <label id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
-                        {% if request.user.is_staff %}
-                            <a href="/marcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Marcar como spoiler </a>
+                            <label id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
+                            {% if request.user.is_staff %}
+                                <a href="/marcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Marcar como spoiler </a>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
-                {% endif %}
-                {% if request.user.is_staff %}
-                   <a href="/admin/modelos/calificacion/{{resena.comentario.id}}/delete/"> Eliminar </a>
-                {% endif %}
-            {% endfor %}
-            </ul>
-        {% endif %}
+                    {% if request.user.is_staff %}
+                       <a href="/admin/modelos/calificacion/{{resena.comentario.id}}/delete/"> Eliminar </a>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+             {% else %}
+                <h1> No hay reseñas de otros perfiles</h1>
+            {% endif %}
     {% endfor %}
 {% endif %}
 {% endblock %}

@@ -31,4 +31,17 @@
             <a id=boton_personalizado  href="/listado_{{modelo}}">  Cancelar  </a>
         {% endif %}
     </form>
+
+    <script>
+        "Se hace en capitulo"
+        checkbox = document.getElementById("archivo_pdf-clear_id");
+        checkbox.style.display = "none"; //Oculta el checkbox
+        tag = document.getElementsByTagName("label");
+        for (i = 0; i < tag.length; i++){ //Oculta el label limpiar
+         if(tag[i].textContent == "Limpiar"){
+                tag[i].style.display = "none";
+           }
+        }
+
+    </script>
 {% endblock %}

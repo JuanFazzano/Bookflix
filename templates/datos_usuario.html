@@ -52,7 +52,7 @@ $(document).ready(function(){
                     </form>
                 {% else %}
                     {% if suscriptor.cantidad_perfiles > 2 %}
-                       <a tabindex="0" class="btn btn-lg btn-danger" role="button" data-toggle="popover" data-trigger="focus" title="No puede cambiar de Suscripcion" data-content="Debe tener como maximo 2(dos) perfiles">Cambiar a Normal</a>
+                       <a tabindex="0" class="btn btn-lg btn-danger" role="button" data-toggle="popover" data-trigger="focus" title="No puede cambiar de Suscripcion" data-content="Debe tener como maximo 2(dos) perfiles">Cambiar a Regular</a>
                     {% else %}
                         <form method="GET" action="/cambiar_tipo_suscripcion/">
                             <input type="submit" value="Cambiar a Regular">
