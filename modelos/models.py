@@ -162,6 +162,8 @@ class Libro(models.Model):
 
     def cantidad_lectores_totales(self):
         return self.lectores().count()
+    def cantidad_lectores_en_curso(self):
+        return self.cantidad_lectores_totales()-self.cantidad_lectores_que_terminaron()
 
     def promedio_puntaje(self):
         calificaciones = self.reseñas()
