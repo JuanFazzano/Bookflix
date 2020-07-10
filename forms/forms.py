@@ -527,13 +527,19 @@ class FormularioCrearPerfil(forms.Form):
         self.perfiles = Perfil.objects.filter(auth_id = id_suscriptor).values('nombre_perfil')
         self.perfiles = [perfil['nombre_perfil'] for perfil in list(self.perfiles)]
         self.id_suscriptor = id_suscriptor
-        self.fields['nombre'] = forms.CharField(max_length = 25)
-        self.fields['foto'] = forms.FileField(required=False)
+        self.fields['nombre'] = forms.CharField(max_length = 25,show_hidden_initial=True)
+        self.fields['foto'] = forms.FileField(required=False,show_hidden_initial=True)
 
     def clean_nombre(self):
+        if self.initial != {}:
+            "Estoy modificando el nombre porque tiene un valor inicial"
+            if self.initial['nombre'] == self.cleaned_data['nombre']:
+                return self.cleaned_data['nombre']
         if self.cleaned_data['nombre'] in self.perfiles: #( BUSCAR EN EL USUARIO SI TIENE UN USUARIO CON ESE NOMBRE ):
             raise forms.ValidationError('Ya exista un perfil con ese nombre en la cuenta')
         return self.cleaned_data['nombre']
+
+
 
 class FormularioReseña(forms.Form):
     def __init__(self,comentario=None,*args,**kwargs):
