@@ -904,6 +904,7 @@ class Vista_Modificar_Novedad(View):
 class Vista_Formulario_Modificar_Atributo(View):
     def __init__(self):
         self.nombre = None
+        self.objeto = None
         self.contexto = {'formulario': None, 'modelo': self.nombre_modelo}
 
     def __get_iniciales(self, id):
@@ -912,21 +913,21 @@ class Vista_Formulario_Modificar_Atributo(View):
         return {'nombre': self.nombre}
 
     def get(self, request, id=None):
-        self.contexto['formulario'] = FormularioModificarAtributos(initial=self.__get_iniciales(id), modelo=self.modelo,
-                                                                   nombre_modelo=self.nombre_modelo)
+        self.contexto['formulario'] = FormularioModificarAtributos(initial=self.__get_iniciales(id), modelo=self.modelo,nombre_modelo=self.nombre_modelo)
+        self.objeto = self.modelo.objects.get(id=id)
+        self.contexto['objeto']=self.objeto
         return render(request, 'carga_atributos_libro.html', self.contexto)
 
     def post(self, request, id=None):
-        formulario = FormularioModificarAtributos(data=request.POST, initial=self.__get_iniciales(id),
-                                                  modelo=self.modelo, nombre_modelo=self.nombre_modelo)
+        formulario = FormularioModificarAtributos(data=request.POST, initial=self.__get_iniciales(id),modelo=self.modelo, nombre_modelo=self.nombre_modelo)
         if formulario.is_valid():
             modelo = self.modelo.objects.get(id=id)
             modelo.nombre = formulario.cleaned_data['nombre']
             modelo.save()
             return redirect(self.url_redirect)
+
         self.contexto['errores'] = formulario.errors
-        self.contexto['formulario'] = FormularioModificarAtributos(initial=self.__get_iniciales(id), modelo=self.modelo,
-                                                                   nombre_modelo=self.nombre_modelo)
+        self.contexto['formulario'] = FormularioModificarAtributos(initial=self.__get_iniciales(id), modelo=self.modelo,nombre_modelo=self.nombre_modelo)
         return render(request, 'carga_atributos_libro.html', self.contexto)
 
 
@@ -1202,6 +1203,10 @@ class Vista_Carga_Metadatos_Libro(View):
 
 
 class Vista_Modificar_Metadatos_Libro(View):
+    def __init__(self):
+        self.objeto = None
+
+
     def __get_valores_inicials(self, id):
         libro = Libro.objects.get(id=id)
         return {
@@ -1215,9 +1220,8 @@ class Vista_Modificar_Metadatos_Libro(View):
         }
 
     def get(self, request, id=None):
-        return render(request, 'carga_atributos_libro.html',
-                      {'formulario': Formulario_modificar_metadatos_libro(initial=self.__get_valores_inicials(id)),
-                       'modelo': 'libro'})
+        self.objeto = Libro.objects.get(id=id)
+        return render(request, 'carga_atributos_libro.html', {'formulario': Formulario_modificar_metadatos_libro(initial=self.__get_valores_inicials(id)),'modelo': 'libro','objeto':self.objeto})
 
     def post(self, request, id=None):
         formulario = Formulario_modificar_metadatos_libro(request.POST, request.FILES,
@@ -1240,7 +1244,7 @@ class Vista_Modificar_Metadatos_Libro(View):
             return redirect('/listado_libro/')
         return render(request, 'carga_atributos_libro.html',
                       {'formulario': Formulario_modificar_metadatos_libro(initial=self.__get_valores_inicials(id)),
-                       'modelo': 'libro', 'errores': formulario.errors})
+                       'modelo': 'libro', 'errores': formulario.errors,'objeto':self.objeto})
 
 
 class Vista_modificar_fechas_libro(View):
@@ -1306,7 +1310,7 @@ class Vista_modificar_fechas_libro(View):
 
 class Vista_Alta_Capitulo(View):
     def __init__(self):
-        self.contexto = {'modelo': 'libro'}
+        self.contexto = {'modelo': 'libro','capitulo':'capitulo'}
 
     def get_capitulo_mas_grande(self, id):
         "id:int que representa el titulo_id (id del Libro)"
@@ -1381,11 +1385,16 @@ class Vista_Alta_Capitulo(View):
 
 
 class Vista_Modificar_Capitulo(View):
+    def __init__(self):
+        self.objeto = None
     def get(self, request, id=None):
         capitulo = Capitulo.objects.get(id=id)
         libro_incompleto_asociado = Libro_Incompleto.objects.get(id=capitulo.titulo_id)
         contexto = {'formulario': Formulario_Modificar_Capitulo(capitulo, libro_incompleto_asociado)}
         contexto['libro_asociado'] = Libro.objects.get(id=libro_incompleto_asociado.libro_id)
+        contexto['objeto'] = Capitulo.objects.get(id=id)
+        contexto['modelo']='capitulo'
+        contexto['capitulo']='capitulo'
         return render(request, 'carga_atributos_libro.html', contexto)
 
     def sacar_libro_como_completo(self, libro_incompleto):
@@ -1468,6 +1477,9 @@ class Vista_Modificar_Capitulo(View):
         contexto = {'errores': formulario.errors}
         contexto['libro_asociado'] = Libro.objects.get(id=libro_incompleto_asociado.libro_id)
         contexto['formulario'] = Formulario_Modificar_Capitulo(capitulo, libro_incompleto_asociado)
+        contexto['objeto'] = Capitulo.objects.get(id=id)
+        contexto['modelo']='capitulo'
+        contexto['capitulo']='capitulo'
         return render(request, 'carga_atributos_libro.html', contexto)
 
 

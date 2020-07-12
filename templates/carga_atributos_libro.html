@@ -26,11 +26,19 @@ hiden: True
 <h1> Capitulo asociado a libro {{libro_asociado.titulo}}</h1>
 {% endif %}
 
-
-{% if formulario.titulo.value  %}
-<h1>Modicar {{modelo}} </h1>
+{% if capitulo %}
+entra
+    {% if objeto  %}
+    <h1>Modificar capitulo </h1>
+    {% else %}
+    <h1>Dar de alta capitulo</h1>
+{% endif %}
 {% else %}
-<h1>Dar de alta {{modelo}} </h1>
+    {% if objeto  %}
+        <h1>Modificar {{modelo}} </h1>
+    {% else %}
+        <h1>Dar de alta {{modelo}}</h1>
+    {% endif %}
 {% endif %}
 
 
