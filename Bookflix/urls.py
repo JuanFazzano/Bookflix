@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^iniciar_sesion/',views.Vista_Iniciar_Sesion.as_view()),
     url(r'^datos_suscriptor/',views.Vista_Datos_Usuario.as_view()),
     url(r'^crear_perfil/',views.Vista_Crear_Perfil.as_view()),
+    url(r'^modificar_perfil/id=(?P<id>\w+)/$',views.Vista_Modificar_Perfil.as_view()),
     url(r'^eliminar_perfil/id=(?P<id>\w+)/$', views.Vista_Eliminar_Perfil.as_view()),
     url(r'^eleccion_perfil/id=(?P<id>\w+)/$',views.eleccion_perfil),
     url(r'^registro/',views.Vista_Registro.as_view()),

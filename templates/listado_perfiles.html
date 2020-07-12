@@ -57,6 +57,7 @@ display: block;
         <a onclick="alerta_error('Como minimo tiene que haber 1 perfil activo')" href="#" class="badge badge-danger">
             Eliminar </a>
         {% endif %}
+        <a href="/modificar_perfil/id={{perfil.id}}" class="badge btn btn-success"> Modificar Perfil </a>
     </li>
     {% endfor %}
 </ul>

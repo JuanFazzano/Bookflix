@@ -246,6 +246,32 @@ class Vista_Crear_Perfil(View):
         return render(request, 'crear_perfil.html', self.contexto)
 
 
+class Vista_Modificar_Perfil(View):
+    def __init__(self):
+        self.contexto = dict()
+
+    def get(self,request,id = None):
+        perfil = Perfil.objects.get(id = id)
+        self.contexto['perfil'] = perfil
+        self.contexto['formulario'] = FormularioCrearPerfil(id_suscriptor=request.session['_auth_user_id'],initial={'nombre': perfil.nombre_perfil,'foto': perfil.foto})
+        return render(request,'crear_perfil.html',self.contexto)
+
+    def post(self,request, id = None):
+        perfil = Perfil.objects.get(id=id)
+        self.contexto['perfil'] = perfil
+        formulario = FormularioCrearPerfil(id_suscriptor=request.session['_auth_user_id'],data = request.POST,files=request.FILES,initial={'nombre': perfil.nombre_perfil,'foto': perfil.foto})
+        if formulario.is_valid():
+            perfil.nombre_perfil = formulario.cleaned_data['nombre']
+            if not formulario.cleaned_data['foto']:
+                perfil.foto = 'avatar.jpeg'
+            else:
+                perfil.foto = formulario.cleaned_data['foto']
+            perfil.save()
+            return redirect('/listado_perfiles/')
+        self.contexto['errores'] = formulario.errors
+        self.contexto['formulario'] = FormularioCrearPerfil(id_suscriptor=request.session['_auth_user_id'],initial={'nombre': perfil.nombre_perfil,'foto': perfil.foto})
+        return render(request,'crear_perfil.html',self.contexto)
+
 class Vista_Eliminar(View):
     def eliminar_tupla(self, id):
         self.modelo.objects.get(id=id).delete()
