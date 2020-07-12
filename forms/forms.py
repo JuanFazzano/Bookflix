@@ -87,7 +87,6 @@ class FormularioRegistro(forms.Form):
     def clean_Codigo_de_seguridad(self):
         return clean_campo(self,'Codigo_de_seguridad',3)
 
-
     def clean_Numero_de_tarjeta(self):
         campo=clean_campo(self,'Numero_de_tarjeta',16)
         return campo
@@ -101,8 +100,9 @@ class FormularioRegistro(forms.Form):
         return self.cleaned_data['Fecha_de_vencimiento']
 
 class FormularioIniciarSesion(forms.Form):
-    email = forms.EmailField(max_length=254,widget=forms.TextInput(attrs={'class':'form-control'}))
-    clave = forms.CharField(max_length=254,widget=forms.PasswordInput(attrs={'class':'form-control'}))
+    email = forms.CharField(max_length=254,widget=forms.TextInput(attrs={'class':'form-control','placeholder':"Email",'type':"email"}))
+    clave = forms.CharField(max_length=254,widget=forms.TextInput(attrs={'class':'form-control','placeholder':"Clave",'type':"password"}))
+
 
 class FormularioModificarDatosPersonales(forms.Form):
     def __init__(self,*args,**kwargs):
@@ -227,6 +227,7 @@ class FormularioNovedad(forms.Form):
 
     def clean_titulo(self):
         pass
+
 
 class FormularioCargaNovedad(FormularioNovedad):
     limpiar_foto = forms.BooleanField(required=False,widget=forms.CheckboxInput)

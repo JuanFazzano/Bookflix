@@ -1,28 +1,57 @@
 {% extends "detalle.html" %}
 {% load static %}
+
 {% block link %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 {% endblock %}
 
-{% block estilos %}
-    .checked {
-        color: orange;
-    }
-{% endblock %}
+
 {% block detalle %}
 
-    {% if objeto_pagina %}
-    {% for libro in objeto_pagina %}
-    <div class="container">
-        <div class="row">
+<!--INFORMACION DEL LIBRO-->
+{% if objeto_pagina %}
+{% for libro in objeto_pagina %}
+<!------------------------------------------------------------------------------------------------------------------>
+<!--INFORMACION DEL LIBRO-->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 ">
+            <br>
+            <br>
+            <br>
+            <img src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}"
+                 style="width:214; height:340"/>
 
+            <div>
+                <br>
+                {% if libro.promedio_puntaje.total == None %}
+                No tiene votaciones
+                {% else %}
+                <span class="badge badge-primary badge-pill">{{libro.promedio_puntaje.total}}</span>
+                {% endif %}
 
-            <div class="col-lg-4 ">
-                    <img src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}"style="width:214; height:340"/>
             </div>
+            <!-------------- Reseña ------------------------------->
+            <div>
+                <br>
+                {% if terminado %}
+                {% if not fue_resenado %}
+                <button type="button" class="btn btn-outline-success">
+                    <a href="/resenar_libro/id={{libro.id}}" style="color:green"> Reseñar Libro </a>
+                </button>
+                {% else %}
+                <button onclick="alertar('Ya fue reseñado por usted')" class="btn btn-outline-warning">
+                    <a href="#" style="color:yellow"> Ya fue resenado </a>
+                </button>
+                {% endif %}
+                {% endif %}
+            </div>
+            <!--  ----------------------------------------- -->
 
-            <div class="col-lg-8">
+        </div>
+
+        <div class="col-lg-8">
             <ul style="list-style:none">
                 <li><h1>{{libro.titulo}}</h1></li>
                 <li><h6>{{libro.autor}}</h6></li>
@@ -30,242 +59,363 @@
                 <li><p class="font-weight-light">{{libro.descripcion}}.</p></li>
                 {% endif %}
                 <li>
-                <table class="table table-hover table-dark">
-                    <tbody>
-                    <tr>
-                        <td>ISBN:</td>
-                        <td>{{libro.ISBN}}</td>
-                    </tr>
+                    <table class="table table-hover table-dark">
+                        <tbody>
+                        <tr>
+                            <td>ISBN:</td>
+                            <td>{{libro.ISBN}}</td>
+                        </tr>
 
-                    <tr>
-                        <td>Editorial:</td>
-                        <td>{{libro.editorial}}</td>
-                    </tr>
+                        <tr>
+                            <td>Editorial:</td>
+                            <td>{{libro.editorial}}</td>
+                        </tr>
 
-                    <tr>
-                        <td>Genero:</td>
-                        <td>{{libro.genero}}</td>
-                    </tr>
-                    </tbody>
-                </table>
+                        <tr>
+                            <td>Genero:</td>
+                            <td>{{libro.genero}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </li>
             </ul>
-            </div>
         </div>
     </div>
-    <br>
-        {% if libro.tiene_capitulos %}
-            <button type="button" class="btn btn-dark">
-                        <a href="/listado_capitulo/id={{libro.id}}" style="color:white"> Ver listado de capítulos</a>
-            </button>
-        {% endif %}
-        {% if not request.user.is_staff %}
-            {% if libro.esta_completo %}
-                <button type="button" class="btn btn-dark">
-                    <a href="/lectura_completo/id={{libro.id}}" style="color:white"> Leer libro completo</a>
-                </button>
+</div>
+<br><br>
+<!------------------------------------------------------------------------------------------------------------------>
+<!--BOTONES-->
+<div class="btn-group" role="group" aria-label="Basic example">
+    {% if libro.tiene_capitulos %}
+
+    <button type="button" class="btn btn-secondary">
+        <a href="/listado_capitulo/id={{libro.id}}" style="color:white"> Ver listado de capítulos</a>
+    </button>
+    {% endif %}
+    {% if not request.user.is_staff %}
+    {% if libro.esta_completo %}
+    <button type="button" class="btn btn-secondary">
+        <a href="/lectura_completo/id={{libro.id}}" style="color:white"> Leer libro</a>
+    </button>
+    {% endif %}
+    {% if not error %}
+    <!--EL LIBRO PUEDE SER MARCADO COMO TERMINADO-->
+    <button type="button" class="btn btn-secondary">
+        <!--
+        <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
+            <input value="marcar como terminado" style="background-color:rgba(0, 0, 0, 0); color:white; border: none; outline:none; ">
+        </form>
+        -->
+
+        <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
+            <input type="submit" value="marcar como terminado"
+                   style="color:white;background-color:rgba(0, 0, 0, 0);border: none; outline:none;">
+        </form>
+    </button>
+    {%else%}
+    <!--SI NO LEYO EL LIBRO-->
+    <button type="button" class="btn btn-secondary" onclick="alerta_error()" id="terminar" value="{{error}}">
+        <a href="#" style="color:white"> Marcar como terminado</a>
+    </button>
+    {% endif %}
+    {% if not lo_tengo_como_favorito %}
+    <button type="button" class="btn btn-secondary">
+        <a href="/agregar_favorito/id={{libro.id}}" style="color:white"> Agregar a favoritos </a>
+    </button>
+    {% else %}
+    <button type="button" class="btn btn-secondary">
+        <a href="/quitar_de_favorito/id={{libro.id}}" style="color:white"> Quitar de favoritos </a>
+    </button>
+    {% endif %}
+    {% endif %}
+</div>
+<hr>
+<!------------------------------------------------------------------------------------------------------------------>
+<!--DIV-->
+</div></div> <!--ESTOS DOS DIV SON DE detalle.html PARA QUE ESTE CENTRALIZADO-->
+<br><br>
+<!------------------------------------------------------------------------------------------------------------------>
+<!--TRAILER-->
+{% if trailers %}
+<div class="list-group">
+    <div class="p-3 mb-2 bg-danger text-white"><h2>Trailers del libro</h2></div>
+    <ul style="list-style:none; margin-left:500px">
+        <li>
+            {% if trailers.has_previous %}
+            <a href="?page={{trailers.previous_page_number}}"> {{trailers.previous_page_number}} </a>
             {% endif %}
-            {% if not error %} <!-- Si por contexto no llega error, significa que se puede terminar -->
-                <form method="GET" action="/marcar_como_terminado/id={{libro.id}}">
-                    <input type="submit" value="marcar como terminado" >
-                </form>
-            {%else%}
-                <button type="button" class="btn btn-light" onclick="alerta_error()" id="terminar" value="{{error}}" >
-                    <a href="#" style="color:black"> Marcar como terminado</a>
-                </button>
-            {% endif %}
+            <span>  {{ trailers.number }}  </span>
+            {% if trailers.has_next %}
+            <a href="?page={{trailers.next_page_number}}"> {{trailers.next_page_number}} </a>
+            {% endif%}
+        </li>
+    </ul>
+    <ul style="list-style:none;">
+        {% for trailer in trailers %}
 
+        <li><a href="/detalle_trailer/id={{trailer.id}}" class="list-group-item list-group-item-action">{{trailer.titulo}}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 
-             {% if not lo_tengo_como_favorito %}
-                <a href="/agregar_favorito/id={{libro.id}}" style="color:black">
-                    agregar a favoritos
-                </a>
-            {% else %}
-                <a href="/quitar_de_favorito/id={{libro.id}}" style="color:black">
-                    quitar de favoritos
-                </a>
-            {% endif %}
+<!------------------------------------------------------------------------------------------------------------------>
+<!--LIBROS SIMILARES-->
 
-
-            <!-------------- Resena ------------------------------->
-            Esta {{terminado}}
-            {% if terminado %}
-                {% if not fue_resenado %}
-                <button>
-                    <a href="/resenar_libro/id={{libro.id}}"> Reseñar Libro </a>
-                </button>
-                {% else %}
-                <button onclick="alertar('Ya fue reseñado por usted')">
-                    <a href="#"> Ya fue resenado </a>
-                </button>
-                {% endif %}
-            {% endif %}
-            <!--  ----------------------------------------- -->
-
-             <br>
-        {% if trailers %}
-        <div class="list-group">
-            <div class="p-3 mb-2 bg-danger text-white"><h2>Trailers del libro</h2></div>
-                <ul style="list-style:none; margin-left:500px">
-                  <li>
-                    {% if trailers.has_previous %}
-                      <a href="?page={{trailers.previous_page_number}}"> {{trailers.previous_page_number}}    </a>
-                    {% endif %}
-                    <span>  {{ trailers.number }}  </span>
-                    {% if trailers.has_next %}
-                      <a href="?page={{trailers.next_page_number}}">  {{trailers.next_page_number}}  </a>
-                    {% endif%}
-                  </li>
-                </ul>
-                <ul style="list-style:none;">
-                {% for trailer in trailers %}
-
-                   <li><a href="/detalle_trailer/id={{trailer.id}}" class="list-group-item list-group-item-action">{{trailer.titulo}}</a></li>
-                {% endfor %}
-                </ul>
-             {% endif %}
-        </div>
-    </div>
-     </div>
-    <!--RESEÑAS-->
+<div>
     {% if libros_similares %}
-        <div class="p-3 mb-2 bg-danger text-white"><h2> Libros similares que podrian gustarte</h2></div>
-        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+    <div class="p-3 mb-2 bg-danger text-white"><h2> Libros similares que podrian gustarte</h2></div>
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
 
         <div class="carousel-inner">
             {% for libro in libros_similares %}
-                {% if forloop.counter == 1 %}
-                    <div class="carousel-item active"  align="center">
-                        <a href="/detalle_libro/id={{libro.id}}"style="color:white">
-                            <img class="d-block w-"  src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}" style="width:214; height:340"/>
-                            <label style="color:black">{{libro.titulo}} de {{libro.autor}}</label>
-                        </a>
-                    </div>
-                {% else %}
-                    <div class="carousel-item"  align="center">
-                        <a href="/detalle_libro/id={{libro.id}}" style="color:white">
-                            <img class="d-block w-" alt="{{libro.titulo}} de {{libro.autor}}" src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}" style="width:214; height:340"/>
-                            <label style="color:black">{{libro.titulo}} de {{libro.autor}}</label>
-                        </a>
-                    </div>
-                {% endif %}
+            {% if forloop.counter == 1 %}
+            <div class="carousel-item active" align="center">
+                <a href="/detalle_libro/id={{libro.id}}" style="color:white">
+                    <img class="d-block w-"
+                         src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}"
+                         style="width:214; height:340"/>
+                    <label style="color:black">{{libro.titulo}} de {{libro.autor}}</label>
+                </a>
+            </div>
+            {% else %}
+            <div class="carousel-item" align="center">
+                <a href="/detalle_libro/id={{libro.id}}" style="color:white">
+                    <img class="d-block w-" alt="{{libro.titulo}} de {{libro.autor}}"
+                         src="{% if libro.foto %}{{MEDIA_URL}}{{libro.foto.url}}{% else %}/static/foto_por_defecto.jpeg{% endif %}"
+                         style="width:214; height:340"/>
+                    <label style="color:black">{{libro.titulo}} de {{libro.autor}}</label>
+                </a>
+            </div>
+            {% endif %}
             {% endfor %}
         </div>
 
-       <a style=" height: 100px;  width: 100px;  outline: red;  background-size: 100%, 100%;  border-radius: 50%;  border: 1px solid red;  background-image: none; color:red" class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-            <span style="  content: '<';  font-size: 55px;  color: red;background-color:black;border-color:red;" class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span style="  content: '<';  font-size: 55px;  color: red;background-color:black;border-color:red;" class="sr-only">Previous</span>
+        <a style=" height: 100px;  width: 100px;  outline: red;  background-size: 100%, 100%;  border-radius: 50%;  border: 1px solid red;  background-image: none; color:red"
+           class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span style="  content: '<';  font-size: 55px;  color: red;background-color:black;border-color:red;"
+              class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span style="  content: '<';  font-size: 55px;  color: red;background-color:black;border-color:red;"
+                  class="sr-only">Previous</span>
         </a>
 
-        <a style=" height: 100px;  width: 100px; outline: red;  background-size: 100%, 100%;  border-radius: 50%;  border: 1px solid red;  background-image: none;color:red" class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-          <span style="  content: '>';  font-size: 55px;  color: red;background-color:black" class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span style="  content: '>';  font-size: 55px;  color: red;background-color:black" class="sr-only">Next</span>
+        <a style=" height: 100px;  width: 100px; outline: red;  background-size: 100%, 100%;  border-radius: 50%;  border: 1px solid red;  background-image: none;color:red"
+           class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+        <span style="  content: '>';  font-size: 55px;  color: red;background-color:black"
+              class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span style="  content: '>';  font-size: 55px;  color: red;background-color:black"
+                  class="sr-only">Next</span>
         </a>
 
     </div>
     {% endif %}
-    {% endif %}
+</div>
+<br><br>
+<!------------------------------------------------------------------------------------------------------------------>
+<!--RESEÑAS-->
+<script>
+    function alertar(error){
+       alert(error);
+    }
+    function alerta_error(){
+        let error = document.getElementById('terminar').value;
+        alert(error);
+    }
+    function revelar_spoiler(id_spoiler){
+        console.log('ID '+id_spoiler);
+        console.log(document.getElementById('spoiler'+id_spoiler));
+        document.getElementById('spoiler'+id_spoiler).style.display = "none";
+        document.getElementById('revelar'+id_spoiler).style.display = "block";
+        document.getElementById('boton_revelar'+id_spoiler).style.display = "none";
+    }
+    function desplegar_resenas(){
+        document.getElementById('listado_resenas').style.display = 'block';
+    }
 
-    <script>
-                    function alertar(error){
-                       alert(error);
-                    }
-                    function alerta_error(){
-                        let error = document.getElementById('terminar').value;
-                        alert(error);
-                    }
-                    function revelar_spoiler(id_spoiler){
-                        console.log('ID '+id_spoiler);
-                        console.log(document.getElementById('spoiler'+id_spoiler));
-                        document.getElementById('spoiler'+id_spoiler).style.display = "none";
-                        document.getElementById('revelar'+id_spoiler).style.display = "block";
-                        document.getElementById('boton_revelar'+id_spoiler).style.display = "none";
-                    }
-                    function desplegar_resenas(){
-                        document.getElementById('listado_resenas').style.display = 'block';
-                    }
-            </script>
-    <button onclick="desplegar_resenas()"> Desplegar reseñas </button>
-       <div id="listado_resenas" style="display:none">
-         <div class="list-group">
-             <div class="p-3 mb-2 bg-danger text-white"><h2>Reseñas del libro</h2></div>
-             {% if not libro.promedio_puntaje.total  %}
-               Aun no fue calificado
-             {% else %}
-                 PROMEDIO: {{libro.promedio_puntaje.total}}
-             {% endif %}
-             {% if not request.user.is_staff %}
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample"
+        aria-expanded="false" aria-controls="collapseExample">Ver reseñas
+</button>
+
+<div class="collapse" id="collapseExample">
+    <div class="card card-body">
+        <div align="center">
+            <div class="list-group">
+                <div class="p-3 mb-2 bg-danger text-white"><h2>Reseñas del libro</h2></div>
+            </div>
+            <br>
+
+
+            <!------------------------------------------------------------------------------------------------------------------>
+            <!--RESEÑA DEL PERFIL-->
+
+            <div align="center">
+                {% if not request.user.is_staff %}
                 {% if resena_perfil %}
-                    <ul>
-                        Tu reseña <a href="/modificar_reseña/id={{resena_perfil.id}}"> Modificar </a>
-                        <a onclick="return confirm('Desea eliminar esta reseña')" href="/eliminar_reseña/id={{resena_perfil.id}}" class="badge badge-danger"> Eliminar </a>
-
+                <div class="card border-primary mb-3" style="max-width: 40rem;">
+                    <div class="card-header">
+                        <a onclick="return confirm('Desea eliminar esta reseña')"
+                           href="/eliminar_reseña/id={{resena_perfil.id}}">
+                            <button type="button" class="close" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </a>
+                        <button type="button" class="close" aria-label="Close" disabled>
+                            <span aria-hidden="true"> | </span>
+                        </button>
+                        <a href="/modificar_reseña/id={{resena_perfil.id}}">
+                            <button type="button" class="close" aria-label="Close">
+                                <span aria-hidden="true">Modificar</span>
+                            </button>
+                        </a>
                         <br>
-                        Valoracion: {{resena_perfil.valoracion}}
-                        {% if resena_perfil.comentario %}
-                            Comentario: {{resena_perfil.comentario.texto}}
-                        {% endif %}
-                    </ul>
+                        <h3>Tu reseña</h3>
+                    </div>
+                    <div class="card-body text-primary">
+                        <h5 class="card-title">Valoración: {{resena_perfil.valoracion}} </h5>
+                        <p class="card-text" style="color:black">
+                            {% if resena_perfil.comentario %}
+                            {{resena_perfil.comentario.texto}}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
                 {% endif %}
-             {% endif %}
-             {% if resenas %}
-                <hr>
+                {% endif %}
+            </div>
+            <!------------------------------------------------------------------------------------------------------------------>
+            <!--RESEÑAS OTROS USUARIOS-->
+            {% if resenas %}
+            <!------------------------------------------------------------------------------------------------------------------>
+            <!--PAGINACION-->
+            <div align="center">
                 <ul style="list-style:none; float:left;">
+                    <li></li>
                     <li>
-
+                        {% if resenas.has_previous %}
+                        <a href="?page={{resenas.previous_page_number}}"> {{resenas.previous_page_number}} </a>
+                        {% endif %}
+                        <span>  {{ resenas.number }}  </span>
+                        {% if resenas.has_next %}
+                        <a href="?page={{resenas.next_page_number}}"> {{resenas.next_page_number}} </a>
+                        {% endif%}
                     </li>
-                    <li>
-                    {% if resenas.has_previous %}
-                        <a href="?page={{resenas.previous_page_number}}"> {{resenas.previous_page_number}}    </a>
-                    {% endif %}
-                    <span>  {{ resenas.number }}  </span>
-                    {% if resenas.has_next %}
-                       <a href="?page={{resenas.next_page_number}}">  {{resenas.next_page_number}}  </a>
-                    {% endif%}
-                    </li>
-
                 </ul>
-                <ul style="list-style:none;">
-                {% for resena in resenas %}
-                <hr>
+                <ul style="list-style:none;"></ul>
+            <br><br>
+            </div>
+            <!------------------------------------------------------------------------------------------------------------------>
+            <!--FOR-->
+            <div align="center">
+            {% for resena in resenas %}
+
+            {% if resena.comentario.spoiler %} <!--es spoiler-->
+            <div class="card border-danger mb-3" style="max-width: 40rem;">
+
+                {% if request.user.is_staff %} <!--es admin-->
+                <div class="card-header">
+                    <a onclick="return confirm('Desea eliminar esta reseña')" href="/admin/modelos/calificacion/{{resena.comentario.id}}/delete/">
+                        <button type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </a>
                     <br>
-                    Valoracion: {{resena.valoracion}} hecha por
-                    {% if resena.perfil_califico %}
+                    <h3>
+                        {% if resena.perfil_califico %}
                         {{resena.perfil_califico.nombre_perfil}}
-                    {% else %}
+                        {% else %}
+                        Perfil borrado
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body text-danger">
+                    <h5 class="card-title">Valoración: {{resena.valoracion}} </h5>
+                </div>
+                <p class="card-text">
+                    {{resena.comentario.texto}}
+                </p>
+
+                {% else %} <!--es perfil-->
+                <div>
+                    <div class="card-header">
+                        <button type="button" class="close" aria-label="Close" data-toggle="collapse"
+                                data-target="#abrirSpoiler{{resena.id}}" aria-expanded="false"
+                                aria-controls="collapseExample">
+                                        <span aria-hidden="true">
+                                            Spoiler
+                                        </span>
+                        </button>
+                        <br>
+                        <h3>
+                            {% if resena.perfil_califico %}
+                            {{resena.perfil_califico.nombre_perfil}}
+                            {% else %}
                             Perfil borrado
+                            {% endif %}
+                        </h3>
+                    </div>
+                    <div class="card-body text-danger">
+                        <h5 class="card-title">Valoración: {{resena.valoracion}} </h5>
+                    </div>
+
+                    <p class="card-text">
+                    <div class="collapse" id="abrirSpoiler{{resena.id}}">
+                        {{resena.comentario.texto}}
+                    </div>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            {% else %} <!--NO ES SPOILER-->
+            <div class="card border-secondary mb-3" style="max-width: 40rem;">
+                <div class="card-header">
+                    {% if request.user.is_staff %}
+                    <a onclick="return confirm('Desea eliminar esta reseña')" href="/admin/modelos/calificacion/{{resena.comentario.id}}/delete/">
+                        <button type="button" class="close" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </a>
                     {% endif %}
                     <br>
-                    {% if resena.comentario %}
-                        {% if request.user.is_staff %}
-                            Comentario: {{resena.comentario.texto}}
-                        {% endif %}
-                        <br>
-                        {% if resena.comentario.spoiler %}
-                            {% if request.user.is_staff %}
-                                {% if resena.comentario.spoiler_admin %}
-                                    <a href="/desmarcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Desmarcar como spoiler </a>
-                                {% endif %}
-                            {% else %}
-                                <h3 style="" id="spoiler{{forloop.counter}}"> Alerta Spoiler  </h3>
-                                <label style="display:none" id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
-                                <button id="boton_revelar{{forloop.counter}}" onclick="revelar_spoiler({{forloop.counter}})"> Revelar Spoiler </button>
-                            {% endif %}
+                    <h3>
+                        {% if resena.perfil_califico %}
+                        {{resena.perfil_califico.nombre_perfil}}
                         {% else %}
-                            <label id="revelar{{forloop.counter}}">Comentario: {{resena.comentario.texto}} </label>
-                            {% if request.user.is_staff %}
-                                <a href="/marcar_comentario_spoiler/{{resena.comentario.id}}/{{libro.id}}"> Marcar como spoiler </a>
-                            {% endif %}
+                        Perfil borrado
                         {% endif %}
-                    {% endif %}
-                    {% if request.user.is_staff %}
-                       <a href="/admin/modelos/calificacion/{{resena.comentario.id}}/delete/"> Eliminar </a>
-                    {% endif %}
-                {% endfor %}
-                </ul>
-             {% else %}
-                <h1> No hay reseñas de otros perfiles</h1>
+                    </h3>
+                </div>
+                <div class="card-body text-secondary">
+                    <h5 class="card-title">Valoración: {{resena.valoracion}}</h5>
+                    <p class="card-text">{{resena.comentario.texto}}</p>
+                </div>
+            </div>
+
             {% endif %}
-    {% endfor %}
+            {% endfor %}
+            </div>
+        </div>
+        {% else %} <!--NO HAY RESEÑAS-->
+        <h1> No hay reseñas</h1>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+{% endfor %}
 {% endif %}
 {% endblock %}

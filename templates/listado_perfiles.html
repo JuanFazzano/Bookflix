@@ -27,9 +27,15 @@ display: block;
 
 {% block contenido %}
 {% if suscriptor.tiene_maximo_permitido %}
-    <button onclick="alerta_error('La cantidad máxima de perfiles permitida son {{suscriptor.suscripcion.cantidad_maxima_perfiles}} por ser {{suscriptor.suscripcion.tipo_suscripcion|capfirst}}') "> Crear Perfil </button>
+<button class="btn btn-success" onclick="alerta_error('La cantidad máxima de perfiles permitida son {{suscriptor.suscripcion.cantidad_maxima_perfiles}} por ser {{suscriptor.suscripcion.tipo_suscripcion|capfirst}}') ">
+    Crear Perfil
+</button>
 {% else %}
-    <a href="/crear_perfil/"> Crear Perfil </a>
+
+    <a href="/crear_perfil/" style="color:white">
+        <button type="button" class="btn btn-success"> Crear perfil </button>
+    </a>
+
 {% endif %}
 
 <ul id="estilo-ul">
@@ -38,16 +44,18 @@ display: block;
     <li id="estilo-li">
         <a href="/eleccion_perfil/id={{perfil.id}}">
             {% if not perfil.foto %}
-                <img id="imagen" src="/static/avatar.jpeg" alt="">
+            <img id="imagen" src="/static/avatar.jpeg" alt="">
             {% else %}
-                <img id="imagen" style="width:200px; height:140px"src="/static/{{perfil.foto}}" alt="">
+            <img id="imagen" style="width:200px; height:140px" src="/static/{{perfil.foto}}" alt="">
             {% endif %}
             <span>{{perfil.nombre_perfil}} </span>
         </a>
-        {% if not suscriptor.cantidad_perfiles == 1  %}
-            <a onclick="return confirm('Desea eliminar el perfil {{perfil.nombre_perfil}}')" href="/eliminar_perfil/id={{perfil.id}}" class="badge badge-danger"> Eliminar </a>
+        {% if not suscriptor.cantidad_perfiles == 1 %}
+        <a onclick="return confirm('Desea eliminar el perfil {{perfil.nombre_perfil}}')"
+           href="/eliminar_perfil/id={{perfil.id}}" class="badge badge-danger"> Eliminar </a>
         {% else %}
-            <a onclick="alerta_error('Como minimo tiene que haber 1 perfil activo')" href="#" class="badge badge-danger"> Eliminar </a>
+        <a onclick="alerta_error('Como minimo tiene que haber 1 perfil activo')" href="#" class="badge badge-danger">
+            Eliminar </a>
         {% endif %}
     </li>
     {% endfor %}
@@ -57,6 +65,8 @@ display: block;
     function alerta_error(error){
         alert(error);
     }
+
+
 </script>
 
 {% endblock %}

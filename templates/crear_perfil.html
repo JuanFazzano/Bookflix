@@ -1,8 +1,10 @@
 {% extends 'header.html' %}
 {% block contenido %}
+<h1> Crear perfil </h1>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{formulario.as_p}}
         <input type="submit" value="Guardar">
     </form>
+
 {% endblock %}
