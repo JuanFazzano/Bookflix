@@ -1681,12 +1681,13 @@ class Vista_Reporte_Suscriptores(View):
                     suscriptores = Suscriptor.objects.filter(fecha_suscripcion__gte = fecha_inicio).order_by('-fecha_suscripcion')
                     contexto['suscriptores'] = paginar(request, suscriptores, 10)
                 else:
+                    fecha_inicio = str(fecha_inicio.date())
                     if fecha_inicio > fecha_fin:
-                        error = 'La fecha límite no puede sesuscriptores inferior a la fecha de inicio'
+                        error = 'La fecha límite no puede ser inferior a la fecha de inicio'
                         contexto['suscriptores'] = None
                     else:
                         suscriptores = Suscriptor.objects.filter(
-                                fecha_suscripcion__range=(fecha_inicio, fecha_fin)).order_by('-fecha_suscripcion')
+                                fecha_suscripcion__range=(str(fecha_inicio), fecha_fin)).order_by('-fecha_suscripcion')
                         contexto['suscriptores'] = paginar(request, suscriptores, 10)
             else:
                 contexto['suscriptores'] = None
