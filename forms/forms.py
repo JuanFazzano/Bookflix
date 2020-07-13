@@ -103,7 +103,6 @@ class FormularioIniciarSesion(forms.Form):
     email = forms.CharField(max_length=254,widget=forms.TextInput(attrs={'class':'form-control','placeholder':"Email",'type':"email"}))
     clave = forms.CharField(max_length=254,widget=forms.TextInput(attrs={'class':'form-control','placeholder':"Clave",'type':"password"}))
 
-
 class FormularioModificarDatosPersonales(forms.Form):
     def __init__(self,*args,**kwargs):
         self.datos_cambiados = {'Email': False, 'DNI': False, 'Numero_de_tarjeta': False}
@@ -227,7 +226,6 @@ class FormularioNovedad(forms.Form):
 
     def clean_titulo(self):
         pass
-
 
 class FormularioCargaNovedad(FormularioNovedad):
     limpiar_foto = forms.BooleanField(required=False,widget=forms.CheckboxInput)
@@ -526,7 +524,7 @@ class FormularioCrearPerfil(forms.Form):
     def __init__(self,id_suscriptor=None,*args,**kwargs):
         super(FormularioCrearPerfil,self).__init__(*args,**kwargs)
         self.perfiles = Perfil.objects.filter(auth_id = id_suscriptor).values('nombre_perfil')
-        self.perfiles = [perfil['nombre_perfil'] for perfil in list(self.perfiles)]
+        self.perfiles = [perfil['nombre_perfil'].lower() for perfil in list(self.perfiles)]
         self.id_suscriptor = id_suscriptor
         self.fields['nombre'] = forms.CharField(max_length = 25,show_hidden_initial=True)
         self.fields['foto'] = forms.FileField(required=False,show_hidden_initial=True)
@@ -536,11 +534,9 @@ class FormularioCrearPerfil(forms.Form):
             "Estoy modificando el nombre porque tiene un valor inicial"
             if self.initial['nombre'] == self.cleaned_data['nombre']:
                 return self.cleaned_data['nombre']
-        if self.cleaned_data['nombre'] in self.perfiles: #( BUSCAR EN EL USUARIO SI TIENE UN USUARIO CON ESE NOMBRE ):
+        if self.cleaned_data['nombre'].lower() in self.perfiles: #( BUSCAR EN EL USUARIO SI TIENE UN USUARIO CON ESE NOMBRE ):
             raise forms.ValidationError('Ya exista un perfil con ese nombre en la cuenta')
         return self.cleaned_data['nombre']
-
-
 
 class FormularioReseña(forms.Form):
     def __init__(self,comentario=None,*args,**kwargs):

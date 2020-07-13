@@ -272,6 +272,7 @@ class Vista_Modificar_Perfil(View):
         self.contexto['formulario'] = FormularioCrearPerfil(id_suscriptor=request.session['_auth_user_id'],initial={'nombre': perfil.nombre_perfil,'foto': perfil.foto})
         return render(request,'crear_perfil.html',self.contexto)
 
+
 class Vista_Eliminar(View):
     def eliminar_tupla(self, id):
         self.modelo.objects.get(id=id).delete()
@@ -1443,26 +1444,30 @@ class Vista_Modificar_Capitulo(View):
                 capitulo.fecha_vencimiento = formulario.cleaned_data['fecha_de_vencimiento']
                 capitulo.fecha_lanzamiento = formulario.cleaned_data['fecha_de_lanzamiento']
         capitulo.capitulo = formulario.cleaned_data['numero_capitulo']
-        if (formulario.cleaned_data['archivo_pdf'] is not None and formulario.cleaned_data[
-            'archivo_pdf'] != capitulo.archivo_pdf):
+        if (formulario.cleaned_data['archivo_pdf'] is not None and formulario.cleaned_data['archivo_pdf'] != capitulo.archivo_pdf):
             "Si se modifica el archivo"
             capitulo.archivo_pdf = formulario.cleaned_data['archivo_pdf']
-            libro_leido = Lee_libro.objects.get(libro_id=libro_incompleto_asociado.libro_id)
+            #libro_leido = Lee_libro.objects.get(libro_id=libro_incompleto_asociado.libro_id)
             for perfil in Perfil.objects.all():
-                capitulo_leido = Lee_Capitulo.objects.filter(capitulo_id=capitulo.id, perfil_id=perfil.id)
-                if capitulo_leido.exists():
-                    "Si el perfil leyo el capitulo, lo sacamos de sus capitulos leidos"
-                    capitulo_leido.delete()
-                    # if Lee_libro.objects.filter(perfil_id = perfil.id,libro_id = libro_leido.id).exists():
-                    "Si no existe tupla que cumpla que el perfil leyo un capitulo perteneciente al libro asociado, es decir, se modifica el unico capitulo leido por el perfil"
-                    if not Lee_Capitulo.objects.filter(perfil_id=perfil.id,
-                                                       capitulo_id__in=libro_incompleto_asociado.capitulos().values(
-                                                               'id')).exists():
-                        libro_leido.delete()
-                    else:
-                        "Si exsite tupla, solo marca en false"
-                        libro_leido.terminado = False
-                        libro_leido.save()
+                try:
+                    libro_leido = Lee_libro.objects.get(libro_id=libro_incompleto_asociado.libro_id,perfil_id = perfil.id)
+                    capitulo_leido = Lee_Capitulo.objects.filter(capitulo_id=capitulo.id, perfil_id=perfil.id)
+                    if capitulo_leido.exists():
+                        "Si el perfil leyo el capitulo, lo sacamos de sus capitulos leidos"
+                        capitulo_leido.delete()
+                        # if Lee_libro.objects.filter(perfil_id = perfil.id,libro_id = libro_leido.id).exists():
+                        "Si no existe tupla que cumpla que el perfil leyo un capitulo perteneciente al libro asociado, es decir, se modifica el unico capitulo leido por el perfil"
+                        if not Lee_Capitulo.objects.filter(perfil_id=perfil.id,
+                                                           capitulo_id__in=libro_incompleto_asociado.capitulos().values(
+                                                                   'id')).exists():
+                            libro_leido.delete()
+                        else:
+                            "Si exsite tupla, solo marca en false"
+                            libro_leido.terminado = False
+                            libro_leido.save()
+                except:
+                    pass
+
         capitulo.save()
 
     def post(self, request, id=None):
@@ -1665,25 +1670,29 @@ class Vista_Reporte_Suscriptores(View):
         try:
             fecha_inicio = request.GET['fecha_inicio']
             fecha_fin = request.GET['fecha_fin']
-            if fecha_inicio != '':
+
+            if fecha_inicio == '':
+                fecha_inicio = datetime.datetime.now()
+
+            if error == '':
+                "Si no hubo error, agregamos al contexto los suscriptores"
                 if fecha_fin == '':
-                    "Si no puso una fecha de fin, tomamos por defecto la actual"
-                    fecha_fin = datetime.datetime.now().date()
-
-                if fecha_inicio > fecha_fin:
-                    error = 'La fecha límite no puede ser inferior a la fecha de inicio'
-
-                if error == '':
-                    "Si no hubo error, agregamos al contexto los suscriptores"
-                    suscriptores = Suscriptor.objects.filter(
-                        fecha_suscripcion__range=(fecha_inicio, fecha_fin)).order_by('-fecha_suscripcion')
+                    "Si es vacia la fecha fin,toma todos desde la feha de inicio"
+                    suscriptores = Suscriptor.objects.filter(fecha_suscripcion__gte = fecha_inicio).order_by('-fecha_suscripcion')
                     contexto['suscriptores'] = paginar(request, suscriptores, 10)
                 else:
-                    contexto['suscriptores'] = None
-                contexto['error'] = error
-                contexto['fecha_inicio'] = fecha_inicio
-                contexto['fecha_fin'] = str(fecha_fin)
-
+                    if fecha_inicio > fecha_fin:
+                        error = 'La fecha límite no puede sesuscriptores inferior a la fecha de inicio'
+                        contexto['suscriptores'] = None
+                    else:
+                        suscriptores = Suscriptor.objects.filter(
+                                fecha_suscripcion__range=(fecha_inicio, fecha_fin)).order_by('-fecha_suscripcion')
+                        contexto['suscriptores'] = paginar(request, suscriptores, 10)
+            else:
+                contexto['suscriptores'] = None
+            contexto['error'] = error
+            contexto['fecha_inicio'] = fecha_inicio
+            contexto['fecha_fin'] = str(fecha_fin)
         except:
             pass
         return render(request, 'reporte_suscriptores.html', contexto)
